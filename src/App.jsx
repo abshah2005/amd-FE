@@ -1,12 +1,16 @@
 import { Routes, Route } from 'react-router-dom'
 import Home from './pages/Home'
 import About from './pages/About'
+import SignUpPage from './pages/Signup'
+import OnboardingScreen from './pages/Onborading'
 
 function App() {
   return (
-    <div className="min-h-screen bg-red-100">
+    <div className="">
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/signup" element={<SignUpPage />} />
+        <Route path='/onboard' element={<OnboardingScreen />} />
         <Route path="/about" element={<About />} />
       </Routes>
     </div>
