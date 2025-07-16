@@ -12,20 +12,20 @@ const OnboardingScreen = () => {
           <img src={screenshot} className="w-28" alt="AskMeDirect Logo" />
         </div>
       </nav>
-
-      {/* Main Content */}
-      <div className="flex-1 w-full flex justify-center px-4 py-8 overflow-y-auto">
-        <div className="w-full max-w-4xl bg-white rounded-2xl shadow-lg p-6 md:p-10">
-          {/* Progress bar */}
-          <div className="w-full mb-8">
-            <div className="w-full bg-gray-200 rounded-full h-2">
+{/* Progress bar */}
+      <div className="w-[80%] md:w-[50%] lg:[w-50%] sm:[w-50%] mb-2 mx-auto">
+            <div className="w-full bg-gray-200 rounded-full h-3">
               <div
-                className="bg-blue-600 h-2 rounded-full"
+                className="bg-blue-600 h-3 rounded-full"
                 style={{ width: "50%" }}
-              ></div>
+                ></div>
             </div>
           </div>
 
+    {/* Main Content */}
+      <div className="flex-1 w-full flex justify-center px-4 py-8 overflow-y-auto">
+        <div className="w-full max-w-4xl bg-white rounded-2xl shadow-lg p-6 md:p-10">
+          
           {/* Header */}
           <div className="w-full text-center mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">

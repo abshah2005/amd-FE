@@ -3,6 +3,9 @@ import Home from './pages/Home'
 import About from './pages/About'
 import SignUpPage from './pages/Signup'
 import OnboardingScreen from './pages/Onborading'
+import AccountSetup from './pages/AccountSetup'
+import WaitingScreen from './pages/WaitingScreen'
+import SignupFi from './pages/SignupSuccessful'
 
 function App() {
   return (
@@ -11,7 +14,11 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/signup" element={<SignUpPage />} />
         <Route path='/onboard' element={<OnboardingScreen />} />
+        <Route path='/setup' element={<AccountSetup />} />
         <Route path="/about" element={<About />} />
+        <Route path='/waiting' element={<WaitingScreen />} />
+        <Route path='/signupfi' element={<SignupFi />} />
+
       </Routes>
     </div>
   )
