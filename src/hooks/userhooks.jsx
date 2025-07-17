@@ -3,9 +3,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-// ==========================
-// 🔹 Step 1 - Email/LinkedIn Signup
-// ==========================
+
 export const useRegisterStep1 = () => {
   return useMutation({
     mutationFn: async ({ email, password, authProvider }) => {
@@ -34,18 +32,6 @@ export const useRegisterStep2 = () => {
   });
 };
 
-// export const useRegisterStep3 = () => {
-//   return useMutation({
-//     mutationFn: async (formData) => {
-//       const { data } = await axios.put(`${API_BASE_URL}/users/register/step3`, formData, {
-//         headers: {
-//           'Content-Type': 'multipart/form-data'
-//         }
-//       });
-//       return data;
-//     }
-//   });
-// };
 
 export const useRegisterStep3 = () => {
   return useMutation({
@@ -61,10 +47,7 @@ export const useRegisterStep3 = () => {
       );
       return data;
     },
-    // onSuccess: (data) => {
-    // },
-    // onError: (error) => {
-    // },
+
   });
 };
 
@@ -82,24 +65,22 @@ export const useRegistrationState = (email) => {
   });
 };
 
-// ==========================
-// 🔹 LinkedIn Callback - POST from frontend after OAuth
-// ==========================
-export const useLinkedInCallback = () => {
-  return useMutation({
-    mutationFn: async (linkedinData) => {
-      const { data } = await axios.post(
-        `${API_BASE_URL}/users/auth/linkedin/callback`,
-        linkedinData
+
+
+
+
+export const useLinkedInCallback = () =>
+  useMutation({
+    mutationFn: async ({ code, state }) => {
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/users/auth/linkedin/callback`,
+        { code, state }
       );
-      return data;
+      return res.data;
     },
   });
-};
 
-// ==========================
-// 🔹 Get LinkedIn Profile Info (after step 1 or on rehydration)
-// ==========================
+
 export const useLinkedInProfile = (email) => {
   return useQuery({
     queryKey: ["linkedinProfile", email],

@@ -1,6 +1,6 @@
 import React from "react";
-import logo from "../assets/Screenshot 2025-07-16 154906.png";
-import logo2 from "../assets/waiting.png";
+import logo from "../assets/logo.svg";
+import logo2 from "../assets/icon.svg";
 
 const SignupFi = () => {
   return (
@@ -13,7 +13,7 @@ const SignupFi = () => {
       </nav>
 
       {/* Main Content - Grows to fill space */}
-      <div className="w-full min-h-screen flex flex-col mt-10  items-center bg-[#F0F1F3] text-center px-4">
+      <div className="w-full  flex flex-col mt-10  items-center bg-[#F0F1F3] text-center px-4">
         {/* Logo */}
         <img src={logo2} alt="AskMeDirect Logo" className="w-16 h-16 mb-6" />
 

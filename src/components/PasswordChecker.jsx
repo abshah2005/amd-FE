@@ -24,7 +24,7 @@ const PasswordStrengthChecker = ({ password }) => {
   return (
     <div className="mt-3">
       {/* Bars */}
-      <div className="flex items-center mb-1">
+      <div className="flex items-center mb-4">
         <div className="flex-1 flex">
           <div
             className={`h-1 flex-1 mr-1 rounded-l ${

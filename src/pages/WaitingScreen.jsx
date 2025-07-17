@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { replace, useLocation, useNavigate } from "react-router-dom";
-import logo from "../assets/Screenshot 2025-07-16 154906.png";
-import logo2 from "../assets/waiting.png";
+import logo from "../assets/logo.svg";
+import logo2 from "../assets/icon.svg";
 import { useRegistrationState } from "../hooks/userhooks";
 // import { useNavigationBlocker } from "../hooks/NavigationBlocker";
 
@@ -61,13 +61,13 @@ const WaitingScreen = () => {
           <img
             src={logo2}
             alt="Setup Illustration"
-            className="w-[60%] h-auto object-contain mx-auto"
+            className="w-[40%] h-auto object-contain mx-auto"
           />
         </div>
       </div>
 
       {/* Footer */}
-      <footer className="bg-[#F0F1F3] py-4 text-center text-xs text-gray-500">
+      {/* <footer className="bg-[#F0F1F3] py-4 text-center text-xs text-gray-500">
         <p>
           © 2025 AskMeDirect, All rights reserved. •{" "}
           <a href="#" className="hover:underline text-sm">
@@ -78,7 +78,7 @@ const WaitingScreen = () => {
             Privacy Policy
           </a>
         </p>
-      </footer>
+      </footer> */}
     </div>
   );
 };

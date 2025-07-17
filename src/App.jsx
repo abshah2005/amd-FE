@@ -6,6 +6,7 @@ import OnboardingScreen from './pages/Onborading'
 import AccountSetup from './pages/AccountSetup'
 import WaitingScreen from './pages/WaitingScreen'
 import SignupFi from './pages/SignupSuccessful'
+import {LinkedInCallback} from './pages/LinkedInCallback'
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path='/waiting' element={<WaitingScreen />} />
         <Route path='/signupfi' element={<SignupFi />} />
+        <Route path="/auth/linkedin/callback" element={<LinkedInCallback />} />
 
       </Routes>
     </div>

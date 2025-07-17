@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import screenshot from "../assets/Screenshot 2025-07-16 154906.png";
 import { replace, useLocation, useNavigate } from "react-router-dom";
 import { useRegisterStep2 } from "../hooks/userhooks";
+import question from "../assets/question.svg";
+import person from "../assets/person.svg";
 
 const OnboardingScreen = () => {
   const location = useLocation();
@@ -17,12 +19,16 @@ const OnboardingScreen = () => {
       { email, role: selectedRole },
       {
         onSuccess: () => {
-          navigate("/setup", {
-            state: {
-              email,
-              role: selectedRole,
+          navigate(
+            "/setup",
+            {
+              state: {
+                email,
+                role: selectedRole,
+              },
             },
-          },{replace:true});
+            { replace: true }
+          );
         },
         onError: (error) => {
           console.error("Registration error:", error);
@@ -31,8 +37,10 @@ const OnboardingScreen = () => {
     );
   };
 
+  
+
   return (
-    <div className="min-h-screen bg-[#F0F1F3] flex flex-col">
+    <div className="min-h-screen bg-[#F0F1F3] flex flex-col ">
       {/* Navbar */}
       <nav className="bg-[#F0F1F3] py-4 px-6 flex-shrink-0">
         <div className="max-w-6xl">
@@ -50,8 +58,8 @@ const OnboardingScreen = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 w-full flex justify-center px-4 py-8 overflow-y-auto">
-        <div className="w-full max-w-4xl bg-white rounded-2xl shadow-lg p-6 md:p-10">
+      <div className="flex-1 w-full flex justify-center px-4 py-8 ">
+        <div className="w-full  max-w-4xl bg-white rounded-2xl shadow-lg p-6 md:p-10">
           {/* Header */}
           <div className="w-full text-center mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -65,7 +73,7 @@ const OnboardingScreen = () => {
           </div>
 
           {/* Options */}
-          <div className="w-full flex flex-col md:flex-row gap-6 mb-8">
+          <div className="w-full flex flex-col  justify-around md:flex-row gap-6 mb-8">
             {/* Professional Option */}
             <div
               onClick={() => setSelectedRole("professional")}
@@ -102,21 +110,9 @@ const OnboardingScreen = () => {
                 </div>
               </div>
 
-              <div className="flex items-start ">
-                <div className="bg-blue-100 p-3 rounded-lg mr-4 group-hover:bg-blue-200 transition">
-                  <svg
-                    className="w-8 h-8 text-blue-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                    />
-                  </svg>
+              <div className="flex flex-col justify-center items-center ">
+                <div className=" p-3 rounded-lg mr-4 group-hover:border-blue-500 transition">
+                  <img src={person} className="" alt="" />
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold text-gray-900 mb-1">
@@ -166,22 +162,11 @@ const OnboardingScreen = () => {
               </div>
 
               {/* Content */}
-              <div className="flex items-start">
-                <div className="bg-blue-100 p-3 rounded-lg mr-4 group-hover:bg-blue-200 transition">
-                  <svg
-                    className="w-8 h-8 text-blue-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                    />
-                  </svg>
+              <div className="flex flex-col justify-center items-center">
+                <div className="bg-white  p-3 rounded-lg mr-4 group-hover:border-blue-500 transition">
+                  <img src={question} alt="" />
                 </div>
+
                 <div>
                   <h2 className="text-xl font-semibold text-gray-900 mb-1">
                     I'm an Asker
@@ -199,7 +184,7 @@ const OnboardingScreen = () => {
             <button
               onClick={handleSubmit}
               disabled={!selectedRole || isLoading}
-              className="w-full relative md:top-20  md:w-[20%] bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full relative md:top-2 md:right-4  md:w-[20%] bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 md:px-4 md:py-2 rounded-[24px] transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? "Processing..." : "Next"}
             </button>
