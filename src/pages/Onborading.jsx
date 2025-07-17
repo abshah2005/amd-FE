@@ -1,8 +1,35 @@
 import React, { useState } from "react";
 import screenshot from "../assets/Screenshot 2025-07-16 154906.png";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useRegisterStep2 } from "../hooks/userhooks";
 
 const OnboardingScreen = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { email } = location.state || {};
   const [selectedRole, setSelectedRole] = useState("");
+  const { mutate: registerStep2, isLoading } = useRegisterStep2();
+
+  const handleSubmit = () => {
+    if (!selectedRole || !email) return;
+
+    registerStep2(
+      { email, role: selectedRole },
+      {
+        onSuccess: () => {
+          navigate("/setup", {
+            state: {
+              email,
+              role: selectedRole,
+            },
+          });
+        },
+        onError: (error) => {
+          console.error("Registration error:", error);
+        },
+      }
+    );
+  };
 
   return (
     <div className="min-h-screen bg-[#F0F1F3] flex flex-col">
@@ -12,20 +39,19 @@ const OnboardingScreen = () => {
           <img src={screenshot} className="w-28" alt="AskMeDirect Logo" />
         </div>
       </nav>
-{/* Progress bar */}
+      {/* Progress bar */}
       <div className="w-[80%] md:w-[50%] lg:[w-50%] sm:[w-50%] mb-2 mx-auto">
-            <div className="w-full bg-gray-200 rounded-full h-3">
-              <div
-                className="bg-blue-600 h-3 rounded-full"
-                style={{ width: "50%" }}
-                ></div>
-            </div>
-          </div>
+        <div className="w-full bg-gray-200 rounded-full h-3">
+          <div
+            className="bg-blue-600 h-3 rounded-full"
+            style={{ width: "50%" }}
+          ></div>
+        </div>
+      </div>
 
-    {/* Main Content */}
+      {/* Main Content */}
       <div className="flex-1 w-full flex justify-center px-4 py-8 overflow-y-auto">
         <div className="w-full max-w-4xl bg-white rounded-2xl shadow-lg p-6 md:p-10">
-          
           {/* Header */}
           <div className="w-full text-center mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -76,8 +102,7 @@ const OnboardingScreen = () => {
                 </div>
               </div>
 
-              {/* Content */}
-              <div className="flex items-start">
+              <div className="flex items-start ">
                 <div className="bg-blue-100 p-3 rounded-lg mr-4 group-hover:bg-blue-200 transition">
                   <svg
                     className="w-8 h-8 text-blue-600"
@@ -170,14 +195,13 @@ const OnboardingScreen = () => {
           </div>
 
           {/* Next Button */}
-          <div className="w-full flex justify-center">
+          <div className="w-full flex justify-center md:justify-end">
             <button
-              disabled={!selectedRole}
-              className={`w-full max-w-md bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition ${
-                !selectedRole ? "opacity-50 cursor-not-allowed" : ""
-              }`}
+              onClick={handleSubmit}
+              disabled={!selectedRole || isLoading}
+              className="w-full relative md:top-20  md:w-[20%] bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Next
+              {isLoading ? "Processing..." : "Next"}
             </button>
           </div>
         </div>
