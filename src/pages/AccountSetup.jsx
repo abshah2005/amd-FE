@@ -39,10 +39,11 @@ const AccountSetup = () => {
 
     registerStep3(formData, {
       onSuccess: (data) => {
-        // Redirect to dashboard or home page after successful registration
+        console.log("Navigation data:", data);
         navigate('/waiting', { 
           state: { 
-            user: data.user,
+            email:data.data.user.email,
+            user: data.data.user,
             accessToken: data.accessToken,
             refreshToken: data.refreshToken
           } 

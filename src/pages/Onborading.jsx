@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import screenshot from "../assets/Screenshot 2025-07-16 154906.png";
-import { useLocation, useNavigate } from "react-router-dom";
+import { replace, useLocation, useNavigate } from "react-router-dom";
 import { useRegisterStep2 } from "../hooks/userhooks";
 
 const OnboardingScreen = () => {
@@ -22,7 +22,7 @@ const OnboardingScreen = () => {
               email,
               role: selectedRole,
             },
-          });
+          },{replace:true});
         },
         onError: (error) => {
           console.error("Registration error:", error);

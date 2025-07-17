@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import screenshot from "../assets/Screenshot 2025-07-16 154906.png";
 import { useRegisterStep1 } from "../hooks/userhooks";
 import { useNavigate } from "react-router-dom";
+import PasswordStrengthChecker from "../components/PasswordChecker";
 
 const SignUpPage = () => {
   const [email, setEmail] = useState("");
@@ -11,12 +12,12 @@ const SignUpPage = () => {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  
+
   const registerStep1Mutation = useRegisterStep1();
 
   const hasMinLength = password.length >= 8;
   const hasNoSpaces = password.length > 0 && !/\s/.test(password);
-  
+
   const getPasswordStrength = (pw) => {
     if (pw.length === 0) return { strength: 0, label: "" };
     if (!hasNoSpaces) return { strength: 1, label: "Weak" };
@@ -32,17 +33,18 @@ const SignUpPage = () => {
     return { strength: 3, label: "Strong" };
   };
 
-  const { strength: pwStrength, label: pwStrengthLabel } = getPasswordStrength(password);
+  const { strength: pwStrength, label: pwStrengthLabel } =
+    getPasswordStrength(password);
 
   const handleEmailSignup = async (e) => {
     e.preventDefault();
     setError("");
-    
+
     if (!email || !password) {
       setError("Email and password are required");
       return;
     }
-    
+
     if (!hasMinLength || !hasNoSpaces) {
       setError("Password doesn't meet requirements");
       return;
@@ -53,18 +55,20 @@ const SignUpPage = () => {
       const result = await registerStep1Mutation.mutateAsync({
         email,
         password,
-        authProvider: 'email'
+        authProvider: "email",
       });
-      
+
       if (result.data) {
         if (result.data.isRegistrationComplete) {
-          navigate('/dashboard');
+          navigate("/dashboard");
         } else {
-          navigate('/onboard', { state: { email } });
+          navigate("/onboard", { state: { email } });
         }
       }
     } catch (err) {
-      setError(err.response?.data?.message || "Registration failed. Please try again.");
+      setError(
+        err.response?.data?.message || "Registration failed. Please try again."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -76,21 +80,25 @@ const SignUpPage = () => {
       // In a real implementation, this would trigger LinkedIn OAuth flow
       // For now, we'll simulate it with the API call
       const result = await registerStep1Mutation.mutateAsync({
-        email: email || `${Math.random().toString(36).substring(7)}@linkedin.com`, 
-        password: '', 
-        authProvider: 'linkedin'
+        email:
+          email || `${Math.random().toString(36).substring(7)}@linkedin.com`,
+        password: "",
+        authProvider: "linkedin",
       });
-      
+
       if (result.data) {
         // Redirect to next step based on registration state
         if (result.data.isRegistrationComplete) {
-          navigate('/dashboard');
+          navigate("/dashboard");
         } else {
-          navigate('/register/step2', { state: { email: result.data.email } });
+          navigate("/register/step2", { state: { email: result.data.email } });
         }
       }
     } catch (err) {
-      setError(err.response?.data?.message || "LinkedIn signup failed. Please try again.");
+      setError(
+        err.response?.data?.message ||
+          "LinkedIn signup failed. Please try again."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -124,11 +132,11 @@ const SignUpPage = () => {
             {/* Signup Form */}
             <div className="w-full md:w-1/2 flex items-center justify-center">
               <div className="bg-white w-full max-w-sm rounded-lg shadow-sm p-8 ">
-                <button 
+                <button
                   onClick={handleLinkedInSignup}
                   disabled={isLoading}
                   className={`w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md flex items-center justify-center mb-6 ${
-                    isLoading ? 'opacity-70 cursor-not-allowed' : ''
+                    isLoading ? "opacity-70 cursor-not-allowed" : ""
                   }`}
                 >
                   <svg
@@ -139,7 +147,7 @@ const SignUpPage = () => {
                   >
                     <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
                   </svg>
-                  {isLoading ? 'Processing...' : 'Sign up with LinkedIn'}
+                  {isLoading ? "Processing..." : "Sign up with LinkedIn"}
                 </button>
 
                 <div className="relative mb-6">
@@ -235,148 +243,9 @@ const SignUpPage = () => {
                         )}
                       </button>
                     </div>
-
-                    {/* Password strength indicator */}
-                    <div className="mt-3 flex items-center">
-                      <div className="flex-1 flex">
-                        <div
-                          className={`h-1 flex-1 mr-1 rounded-l ${
-                            pwStrength >= 1
-                              ? pwStrengthLabel === "Weak"
-                                ? "bg-red-500"
-                                : "bg-gray-300"
-                              : "bg-gray-200"
-                          }`}
-                        ></div>
-                        <div
-                          className={`h-1 flex-1 mr-1 ${
-                            pwStrength >= 2
-                              ? pwStrengthLabel === "Medium"
-                                ? "bg-yellow-400"
-                                : "bg-gray-300"
-                              : "bg-gray-200"
-                          }`}
-                        ></div>
-                        <div
-                          className={`h-1 flex-1 rounded-r ${
-                            pwStrength >= 3 ? "bg-green-500" : "bg-gray-200"
-                          }`}
-                        ></div>
-                      </div>
-                      {pwStrengthLabel && (
-                        <span
-                          className={`ml-2 text-xs font-medium ${
-                            pwStrengthLabel === "Weak"
-                              ? "text-red-500"
-                              : pwStrengthLabel === "Medium"
-                              ? "text-yellow-500"
-                              : "text-green-600"
-                          }`}
-                        >
-                          {pwStrengthLabel}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Requirements */}
-                    <div className="mt-3 text-xs space-y-2">
-                      <div className="flex items-start">
-                        {hasMinLength ? (
-                          <svg
-                            className="w-4 h-4 mt-0.5 mr-2 text-green-600"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                          >
-                            <circle
-                              cx="12"
-                              cy="12"
-                              r="10"
-                              stroke="currentColor"
-                              fill="none"
-                            />
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M5 13l4 4L19 7"
-                            />
-                          </svg>
-                        ) : (
-                          <svg
-                            className="w-4 h-4 mt-0.5 mr-2 text-gray-400"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                          >
-                            <circle
-                              cx="12"
-                              cy="12"
-                              r="10"
-                              stroke="currentColor"
-                              fill="none"
-                            />
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M5 13l4 4L19 7"
-                            />
-                          </svg>
-                        )}
-                        <span
-                          className={
-                            hasMinLength ? "text-green-600" : "text-gray-600"
-                          }
-                        >
-                          Must have at least 8 characters
-                        </span>
-                      </div>
-                      <div className="flex items-start">
-                        {hasNoSpaces ? (
-                          <svg
-                            className="w-4 h-4 mt-0.5 mr-2 text-green-600"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                          >
-                            <circle
-                              cx="12"
-                              cy="12"
-                              r="10"
-                              stroke="currentColor"
-                              fill="none"
-                            />
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M5 13l4 4L19 7"
-                            />
-                          </svg>
-                        ) : (
-                          <svg
-                            className="w-4 h-4 mt-0.5 mr-2 text-yellow-500"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M8.257 3.099c.763-1.36 2.683-1.36 3.446 0l6.516 11.634c.75 1.34-.213 3.017-1.732 3.017H3.473c-1.52 0-2.482-1.677-1.732-3.017L8.257 3.1zM11 14a1 1 0 10-2 0 1 1 0 002 0zm-1-2a1 1 0 01-1-1V8a1 1 0 112 0v3a1 1 0 01-1 1z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                        )}
-                        <span
-                          className={
-                            hasNoSpaces ? "text-green-600" : "text-gray-600"
-                          }
-                        >
-                          Must not contain spaces
-                        </span>
-                      </div>
-                    </div>
                   </div>
+
+                  <PasswordStrengthChecker password={password} />
 
                   <div className="text-xs text-gray-600 mb-6">
                     <p>
@@ -403,11 +272,13 @@ const SignUpPage = () => {
                   <button
                     type="submit"
                     className={`w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition ${
-                      (!hasMinLength || !hasNoSpaces || isLoading) ? 'opacity-70 cursor-not-allowed' : ''
+                      !hasMinLength || !hasNoSpaces || isLoading
+                        ? "opacity-70 cursor-not-allowed"
+                        : ""
                     }`}
                     disabled={!hasMinLength || !hasNoSpaces || isLoading}
                   >
-                    {isLoading ? 'Processing...' : 'Agree & Join'}
+                    {isLoading ? "Processing..." : "Agree & Join"}
                   </button>
                 </form>
 
