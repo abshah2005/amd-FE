@@ -8,6 +8,9 @@ import WaitingScreen from './pages/WaitingScreen'
 import SignupFi from './pages/SignupSuccessful'
 import {LinkedInCallback} from './pages/LinkedInCallback'
 import SignInPage from './pages/Signin'
+import ForgotPassword from './pages/ForgotPassword'
+import ResetPassword from './pages/ResetPassword'
+import PasswordResetSuccess from './pages/ResetSuccess'
 
 function App() {
   return (
@@ -15,15 +18,16 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/signup" element={<SignUpPage />} />
+        <Route path="/resetPassword" element={<ResetPassword />} />
         <Route path="/signin" element={<SignInPage />} />
-
+        <Route path="/forgotPassword" element={<ForgotPassword />} />
         <Route path='/onboard' element={<OnboardingScreen />} />
         <Route path='/setup' element={<AccountSetup />} />
         <Route path="/about" element={<About />} />
         <Route path='/waiting' element={<WaitingScreen />} />
         <Route path='/signupfi' element={<SignupFi />} />
         <Route path="/auth/linkedin/callback" element={<LinkedInCallback />} />
-
+        <Route path="/resetSuccess" element={<PasswordResetSuccess />}/>
       </Routes>
     </div>
   )

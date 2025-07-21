@@ -91,6 +91,18 @@ export const useSignIn = () => {
 };
 
 
+
+export const useForgotPassword = () =>
+  useMutation({
+    mutationFn: async (email) => {
+      const { data } = await axios.post(
+        `${API_BASE_URL}/users/forgotPassword`,
+        { email }
+      );
+      return data;
+    },
+  });
+
 export const useLinkedInProfile = (email) => {
   return useQuery({
     queryKey: ["linkedinProfile", email],

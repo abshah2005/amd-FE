@@ -4,6 +4,8 @@ import { replace, useLocation, useNavigate } from "react-router-dom";
 import { useRegisterStep2 } from "../hooks/userhooks";
 import question from "../assets/question.svg";
 import person from "../assets/person.svg";
+import Navigation from "../components/Navigation";
+import PageWrapper from "../components/PageWrapper";
 
 const OnboardingScreen = () => {
   const location = useLocation();
@@ -48,15 +50,8 @@ const OnboardingScreen = () => {
 
 
   return (
-    <div className="min-h-screen bg-[#F0F1F3] flex flex-col ">
-      {/* Navbar */}
-      <nav className="bg-[#F0F1F3] py-4 px-6 flex-shrink-0">
-        <div className="max-w-6xl">
-          <img src={screenshot} className="w-28" alt="AskMeDirect Logo" />
-        </div>
-      </nav>
-      {/* Progress bar */}
-      <div className="w-[80%] md:w-[50%] lg:[w-50%] sm:[w-50%] mb-2 mx-auto">
+    <PageWrapper >
+      <div className="w-[80%] md:w-[50%]  lg:[w-50%] sm:[w-50%] mb-2 mx-auto">
         <div className="w-full bg-gray-200 rounded-full h-3">
           <div
             className="bg-blue-600 h-3 rounded-full"
@@ -66,8 +61,8 @@ const OnboardingScreen = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 w-full flex justify-center px-4 py-8 ">
-        <div className="w-full  max-w-4xl bg-white rounded-2xl shadow-lg p-6 md:p-10">
+      <div className="flex-1 w-full flex justify-center  h-[70vh] overflow-hidden  px-4 py-8 ">
+        <div className="w-full   max-w-4xl bg-white rounded-2xl shadow-lg p-6 md:p-10">
           {/* Header */}
           <div className="w-full text-center mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -199,7 +194,8 @@ const OnboardingScreen = () => {
           </div>
         </div>
       </div>
-    </div>
+    </PageWrapper>
+
   );
 };
 

@@ -4,6 +4,8 @@ import { useRegisterStep3 } from "../hooks/userhooks";
 import WaitingScreen from "./WaitingScreen";
 
 import logo from "../assets/Screenshot 2025-07-16 154906.png";
+import Footer from "../components/Footer";
+import PageWrapper from "../components/PageWrapper";
 
 const AccountSetup = () => {
   const location = useLocation();
@@ -56,22 +58,19 @@ const AccountSetup = () => {
   };
 
   const handleBack = () => {
-    navigate(-1); // Go back to previous page
+    navigate(-1);
   };
 
-  // Generate initial from first name or empty string
   const initial = firstName ? firstName.charAt(0).toUpperCase() : "";
 
   return (
     <div className="min-h-screen bg-[#F0F1F3] flex flex-col items-center">
-      {/* Navbar */}
       <nav className="w-full z-10">
         <div className="max-w-6xl py-4 px-6 flex justify-start">
           <img src={logo} className="w-28" alt="Logo" />
         </div>
       </nav>
 
-      {/* Progress Bar */}
       <div className="w-[80%] md:w-[50%] lg:[w-50%] sm:[w-50%] bg-gray-200 rounded-full h-3 mb-2">
         <div
           className="bg-blue-600 h-3 rounded-full"
@@ -93,7 +92,6 @@ const AccountSetup = () => {
 
           <form onSubmit={handleSubmit}>
             <div className="flex flex-col md:flex-row justify-around w-full items-center gap-8">
-              {/* Profile Image Section */}
               <div className="flex flex-col items-center">
                 <div className="w-32 h-32 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-3xl overflow-hidden">
                   {profileImage ? (
@@ -191,19 +189,7 @@ const AccountSetup = () => {
         </div>
       </div>
 
-      {/* Footer */}
-      <footer className="bg-[#F0F1F3] py-4 text-center text-xs text-gray-500 mt-auto w-full">
-        <p>
-          © 2025 AskMeDirect, All rights reserved. •{" "}
-          <a href="#" className="hover:underline text-sm">
-            Terms of use
-          </a>{" "}
-          •{" "}
-          <a href="#" className="hover:underline text-sm">
-            Privacy Policy
-          </a>
-        </p>
-      </footer>
+      <Footer />
     </div>
   );
 };
