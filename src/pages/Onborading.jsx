@@ -18,17 +18,26 @@ const OnboardingScreen = () => {
     registerStep2(
       { email, role: selectedRole },
       {
-        onSuccess: () => {
-          navigate(
-            "/setup",
-            {
-              state: {
-                email,
-                role: selectedRole,
+        onSuccess: (data) => {
+          if (
+            data?.data.authProvider === "linkedin" &&
+            data?.data.isRegistrationComplete
+          ) {
+            navigate("/waiting",{state:{
+              user: {email:data.data.email},
+            }}, { replace: true });
+          } else {
+            navigate(
+              "/setup",
+              {
+                state: {
+                  email,
+                  role: selectedRole,
+                },
               },
-            },
-            { replace: true }
-          );
+              { replace: true }
+            );
+          }
         },
         onError: (error) => {
           console.error("Registration error:", error);
@@ -37,7 +46,6 @@ const OnboardingScreen = () => {
     );
   };
 
-  
 
   return (
     <div className="min-h-screen bg-[#F0F1F3] flex flex-col ">

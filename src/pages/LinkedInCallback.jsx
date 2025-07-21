@@ -14,14 +14,15 @@ export const LinkedInCallback = () => {
   useEffect(() => {
     const finishAuth = async () => {
       try {
-        const response = await mutation.mutateAsync({ code, state });
-
-        if (response.isRegistrationComplete) {
-          navigate("/dashboard");
-        } else {
-          navigate("/signup", {
-            state: { email: response.email },
-          });
+        const response = await mutation.mutateAsync({code});
+        const email=response.data.email;
+        console.log("LinkedIn auth response:", response);
+       if(response.data.user.isRegistrationComplete){
+        console.log(response.data.accessToken);
+          navigate("/", { state: {  } });
+       }
+        else {
+          navigate("/onboard", { state: { email } });
         }
       } catch (err) {
         console.error("LinkedIn auth error:", err);

@@ -71,14 +71,24 @@ export const useRegistrationState = (email) => {
 
 export const useLinkedInCallback = () =>
   useMutation({
-    mutationFn: async ({ code, state }) => {
+    mutationFn: async ({ code }) => {
       const res = await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}/users/auth/linkedin/callback`,
-        { code, state }
+        { code }
       );
       return res.data;
     },
   });
+
+export const useSignIn = () => {
+  return useMutation(async ({ email, password }) => {
+    const response = await axios.post(
+      `${import.meta.env.VITE_API_BASE_URL}/users/login`,
+      { email, password }
+    );
+    return response.data;
+  });
+};
 
 
 export const useLinkedInProfile = (email) => {

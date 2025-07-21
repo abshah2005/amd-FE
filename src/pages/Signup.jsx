@@ -303,7 +303,7 @@ const SignUpPage = () => {
                   <p className="text-sm text-gray-600">
                     Already have an account?{" "}
                     <a
-                      href="#"
+                      href="/signin"
                       className="text-blue-600 underline hover:text-blue-800 font-medium"
                     >
                       Log in

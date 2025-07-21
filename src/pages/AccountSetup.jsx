@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useRegisterStep3 } from "../hooks/userhooks"; 
-import WaitingScreen from "./WaitingScreen"; // Adjust path if needed
+import { useRegisterStep3 } from "../hooks/userhooks";
+import WaitingScreen from "./WaitingScreen";
 
 import logo from "../assets/Screenshot 2025-07-16 154906.png";
 
@@ -26,9 +26,9 @@ const AccountSetup = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     if (!firstName || !lastName || !email) return;
-    
+
     const formData = new FormData();
     formData.append("email", email);
     formData.append("firstName", firstName);
@@ -40,19 +40,18 @@ const AccountSetup = () => {
     registerStep3(formData, {
       onSuccess: (data) => {
         console.log("Navigation data:", data);
-        navigate('/waiting', { 
-          state: { 
-            email:data.data.user.email,
+        navigate("/waiting", {
+          state: {
+            email: data.data.user.email,
             user: data.data.user,
             accessToken: data.accessToken,
-            refreshToken: data.refreshToken
-          } 
+            refreshToken: data.refreshToken,
+          },
         });
       },
       onError: (error) => {
         console.error("Registration error:", error);
-        
-      }
+      },
     });
   };
 
@@ -61,7 +60,7 @@ const AccountSetup = () => {
   };
 
   // Generate initial from first name or empty string
-  const initial = firstName ? firstName.charAt(0).toUpperCase() : '';
+  const initial = firstName ? firstName.charAt(0).toUpperCase() : "";
 
   return (
     <div className="min-h-screen bg-[#F0F1F3] flex flex-col items-center">
@@ -87,8 +86,8 @@ const AccountSetup = () => {
               Set up your account
             </h1>
             <p className="text-gray-600">
-              Your name and profile image will be visible to the professional when
-              you submit your question.
+              Your name and profile image will be visible to the professional
+              when you submit your question.
             </p>
           </div>
 
@@ -110,6 +109,7 @@ const AccountSetup = () => {
                 <label
                   htmlFor="file-upload"
                   className="flex items-center gap-2 mt-4 px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm text-gray-700 cursor-pointer hover:bg-gray-100 transition"
+                  required
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -168,7 +168,7 @@ const AccountSetup = () => {
             </div>
 
             <div className="w-full flex justify-between items-center mt-8">
-              <button 
+              <button
                 type="button"
                 onClick={handleBack}
                 className="text-blue-600 hover:text-blue-800 text-sm font-medium"
