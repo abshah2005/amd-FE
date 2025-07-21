@@ -15,8 +15,9 @@ export const LinkedInCallback = () => {
     const finishAuth = async () => {
       try {
         const response = await mutation.mutateAsync({code});
-        const email=response.data.email;
+        const email=response.data.user.email;
         console.log("LinkedIn auth response:", response);
+        console.log(email)
        if(response.data.user.isRegistrationComplete){
         console.log(response.data.accessToken);
           navigate("/", { state: {  } });
