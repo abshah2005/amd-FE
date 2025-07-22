@@ -21,7 +21,6 @@ const AskQuestionModal = ({ professional, onClose }) => {
   const [agreed, setAgreed] = useState(false);
   const fileInputRef = useRef();
 
-
   const handleClose = () => setShowDiscard(true);
 
   const handleDiscard = () => {
@@ -366,25 +365,34 @@ const AskQuestionModal = ({ professional, onClose }) => {
                 </div>
               </div>
             </div>
-            <div className="mb-4 flex items-center">
-              <input
+            <div className="mb-2 text-gray-800 text-xs bg-red-50 p-2 rounded flex items-center justify-between">
+                <div>
+<span className="mr-2 text-md">|</span>
+              Please agree to the
+              <span className="text-bold text-red-500" onClick={() => setShowTerms(true)}>
+                Terms of use
+              </span>
+              <span>before submitting</span>
+                </div>
+
+                <div className="flex justify-center items-center mt-auto">
+ <input
                 type="checkbox"
                 checked={agreed}
                 onChange={(e) => setAgreed(e.target.checked)}
                 id="agree"
               />
-              <label htmlFor="agree" className="ml-2 text-sm">
-                Please agree to the{" "}
-                <span className="text-red-500 underline" onClick={() => setShowTerms(true)}>Terms of use</span>{" "}
-                before submitting.
-              </label>
+                </div>
+              
+             
             </div>
             {!agreed && (
-              <div className="mb-2 text-red-500 text-xs bg-red-50 p-2 rounded flex items-center">
-                <span className="mr-2">|</span>
-                Please agree to the
-                <span className="underline" onClick={() => setShowTerms(true)}>Terms of use</span > before
-                submitting.
+              <div className="mb-2 text-red-500 text-xs  p-2 rounded flex items-center">
+                
+                You must agree to the Terms of Use
+
+                <span>to submit</span>
+                
               </div>
             )}
             <div className="flex justify-between mt-4">
@@ -408,7 +416,7 @@ const AskQuestionModal = ({ professional, onClose }) => {
         )}
       </div>
       <TermsModal open={showTerms} onClose={() => setShowTerms(false)} />
-        <ConfirmModal
+      <ConfirmModal
         open={showConfirm}
         onClose={() => setShowConfirm(false)}
         onConfirm={handleConfirm}
@@ -421,7 +429,6 @@ const AskQuestionModal = ({ professional, onClose }) => {
         onDiscard={handleDiscard}
       />
     </div>
-    
   );
 };
 
