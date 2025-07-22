@@ -11,6 +11,7 @@ import SignInPage from './pages/Signin'
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 import PasswordResetSuccess from './pages/ResetSuccess'
+import Test from './pages/Test'
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
         <Route path='/onboard' element={<OnboardingScreen />} />
         <Route path='/setup' element={<AccountSetup />} />
         <Route path="/about" element={<About />} />
+        <Route path="/test" element={<Test />} />
         <Route path='/waiting' element={<WaitingScreen />} />
         <Route path='/signupfi' element={<SignupFi />} />
         <Route path="/auth/linkedin/callback" element={<LinkedInCallback />} />
