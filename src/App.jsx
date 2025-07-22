@@ -17,7 +17,7 @@ function App() {
   return (
     <div className="">
       <Routes>
-        <Route path="/" element={<Home />} />
+        {/* <Route path="/" element={<Home />} /> */}
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/resetPassword" element={<ResetPassword />} />
         <Route path="/signin" element={<SignInPage />} />
@@ -25,7 +25,7 @@ function App() {
         <Route path='/onboard' element={<OnboardingScreen />} />
         <Route path='/setup' element={<AccountSetup />} />
         <Route path="/about" element={<About />} />
-        <Route path="/test" element={<Test />} />
+        <Route path="/" element={<Test />} />
         <Route path='/waiting' element={<WaitingScreen />} />
         <Route path='/signupfi' element={<SignupFi />} />
         <Route path="/auth/linkedin/callback" element={<LinkedInCallback />} />

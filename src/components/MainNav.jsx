@@ -10,7 +10,7 @@ import bellIcon from "../assets/bell.svg";
 const MainNav = () => {
   return (
     <nav className="w-full bg-white px-8 py-3 flex items-center justify-between shadow-sm">
-      <div className="flex items-center">
+      <div className="flex items-center relative left-10">
         <img src={logo} alt="AskMeDirect" className=" w-28" />
       </div>
 
@@ -40,7 +40,7 @@ const MainNav = () => {
       </div>
 
       {/* Right Section */}
-      <div className="flex items-center gap-6">
+      <div className="flex items-center gap-6 relative right-10">
         <img src={sendIcon} alt="Send" className="w-5 h-5" />
         <img src={bellIcon} alt="Bell" className="w-5 h-5" />
 
