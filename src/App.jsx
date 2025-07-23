@@ -1,18 +1,28 @@
-import { Routes, Route, Outlet } from 'react-router-dom'
-import MainNav from './components/MainNav'
-import Home from './pages/Home'
-import About from './pages/About'
-import SignUpPage from './pages/Signup'
-import OnboardingScreen from './pages/Onborading'
-import AccountSetup from './pages/AccountSetup'
-import WaitingScreen from './pages/WaitingScreen'
-import SignupFi from './pages/SignupSuccessful'
-import {LinkedInCallback} from './pages/LinkedInCallback'
-import SignInPage from './pages/Signin'
-import ForgotPassword from './pages/ForgotPassword'
-import ResetPassword from './pages/ResetPassword'
-import PasswordResetSuccess from './pages/ResetSuccess'
-import Test from './pages/Test'
+import { Routes, Route, Outlet, Navigate } from "react-router-dom";
+import MainNav from "./components/MainNav";
+import Home from "./pages/Home";
+import About from "./pages/About";
+import SignUpPage from "./pages/Signup";
+import OnboardingScreen from "./pages/Onborading";
+import AccountSetup from "./pages/AccountSetup";
+import WaitingScreen from "./pages/WaitingScreen";
+import SignupFi from "./pages/SignupSuccessful";
+import { LinkedInCallback } from "./pages/LinkedInCallback";
+import SignInPage from "./pages/Signin";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
+import PasswordResetSuccess from "./pages/ResetSuccess";
+import Test from "./pages/Test";
+import { AuthProvider } from "./contextProvider/AuthContextProvider";
+
+import { useAuth } from "./contextProvider/AuthContextProvider";
+
+// ProtectedRoute component
+function ProtectedRoute({ children }) {
+  const { user, loading } = useAuth();
+  if (loading) return <div>Loading...</div>;
+  return user ? children : <Navigate to="/signin" replace />;
+}
 
 function MainLayout() {
   return (
@@ -25,26 +35,33 @@ function MainLayout() {
 
 function App() {
   return (
+    <AuthProvider>
+      <Routes>
+        {/* Protected MainLayout */}
+        <Route
+          element={
+            <ProtectedRoute>
+              <MainLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route path="/" element={<Test />} />
+        </Route>
 
-    <Routes>
-      <Route element={<MainLayout />}>
-        <Route path="/" element={<Test />} />
-       
-      </Route>
-
-      <Route path="/signup" element={<SignUpPage />} />
-      <Route path="/resetPassword" element={<ResetPassword />} />
-      <Route path="/signin" element={<SignInPage />} />
-      <Route path="/forgotPassword" element={<ForgotPassword />} />
-      <Route path='/onboard' element={<OnboardingScreen />} />
-      <Route path='/setup' element={<AccountSetup />} />
-      <Route path='/waiting' element={<WaitingScreen />} />
-      <Route path='/signupfi' element={<SignupFi />} />
-      <Route path="/auth/linkedin/callback" element={<LinkedInCallback />} />
-      <Route path="/resetSuccess" element={<PasswordResetSuccess />}/>
-    </Routes>
-
-  )
+        {/* Public routes */}
+        <Route path="/signup" element={<SignUpPage />} />
+        <Route path="/resetPassword" element={<ResetPassword />} />
+        <Route path="/signin" element={<SignInPage />} />
+        <Route path="/forgotPassword" element={<ForgotPassword />} />
+        <Route path="/onboard" element={<OnboardingScreen />} />
+        <Route path="/setup" element={<AccountSetup />} />
+        <Route path="/waiting" element={<WaitingScreen />} />
+        <Route path="/signupfi" element={<SignupFi />} />
+        <Route path="/auth/linkedin/callback" element={<LinkedInCallback />} />
+        <Route path="/resetSuccess" element={<PasswordResetSuccess />} />
+      </Routes>
+    </AuthProvider>
+  );
 }
 
-export default App
+export default App;

@@ -3,7 +3,9 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import PageWrapper from "../components/PageWrapper";
 import logo from "../assets/logo.svg";
+import { useAuth } from "../contextProvider/AuthContextProvider";
 const SignInPage = () => {
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
@@ -17,18 +19,9 @@ const SignInPage = () => {
     e.preventDefault();
     setError("");
     if (!isFormValid) return;
-
     setIsLoading(true);
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}/users/login`,
-        { email, password }
-      );
-
-      console.log("Sign-in successful:", response.data);
-      localStorage.setItem("accessToken", response.data.data.accessToken);
-      localStorage.setItem("refreshToken", response.data.data.refreshToken);
-
+      await login(email, password);
       navigate("/");
     } catch (err) {
       setError(
@@ -38,6 +31,31 @@ const SignInPage = () => {
       setIsLoading(false);
     }
   };
+  // const handleSignIn = async (e) => {
+  //   e.preventDefault();
+  //   setError("");
+  //   if (!isFormValid) return;
+
+  //   setIsLoading(true);
+  //   try {
+  //     const response = await axios.post(
+  //       `${import.meta.env.VITE_API_BASE_URL}/users/login`,
+  //       { email, password }
+  //     );
+
+  //     console.log("Sign-in successful:", response.data);
+  //     localStorage.setItem("accessToken", response.data.data.accessToken);
+  //     localStorage.setItem("refreshToken", response.data.data.refreshToken);
+
+  //     navigate("/");
+  //   } catch (err) {
+  //     setError(
+  //       err.response?.data?.message || "Sign in failed. Please try again."
+  //     );
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
 
   const handleLinkedInSignIn = () => {
     window.location.href = `${

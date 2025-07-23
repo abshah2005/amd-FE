@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useAuth } from "../contextProvider/AuthContextProvider";
 import logo from "../assets/logo.svg";
 import searchIcon from "../assets/search.svg";
 import dropdownIcon from "../assets/dropdown.svg";
@@ -10,7 +11,9 @@ import Banner from "./Banner";
 
 const MainNav = () => {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
-  const userProfilePic = "https://your-cdn.com/user-profile.jpg";
+  const { user, logout } = useAuth();
+
+  const userProfilePic = user?.profilePic || "https://your-cdn.com/user-profile.jpg";
 
   return (
     <div>
@@ -74,7 +77,7 @@ const MainNav = () => {
                 Settings
               </a>
               <button
-                // onClick={}
+                onClick={logout}
                 className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
                 type="button"
               >

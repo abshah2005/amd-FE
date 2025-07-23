@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useLinkedInCallback } from "../hooks/userhooks";
+import { useAuth } from "../contextProvider/AuthContextProvider";
 
 export const LinkedInCallback = () => {
   const [params] = useSearchParams();
@@ -9,24 +10,20 @@ export const LinkedInCallback = () => {
   const state = params.get("state");
 
   const mutation = useLinkedInCallback();
+  const { loginWithLinkedIn } = useAuth();
 
   useEffect(() => {
     const finishAuth = async () => {
       try {
-        const response = await mutation.mutateAsync({code});
-        const email=response.data.user.email;
-        console.log("LinkedIn auth response:", response);
-        console.log(email)
-       if(response.data.user.isRegistrationComplete){
-        console.log(response.data.accessToken);
-        localStorage.setItem("accessToken", response.data.accessToken);
-          navigate("/", { state: {  } });
-       }
-        else {
+        const response = await mutation.mutateAsync({ code });
+        const email = response.data.user.email;
+        if (response.data.user.isRegistrationComplete) {
+          await loginWithLinkedIn(response.data.accessToken);
+          navigate("/", { state: {} });
+        } else {
           navigate("/onboard", { state: { email } });
         }
       } catch (err) {
-        console.error("LinkedIn auth error:", err);
         navigate("/signup", { state: { error: "LinkedIn authentication failed" } });
       }
     };
