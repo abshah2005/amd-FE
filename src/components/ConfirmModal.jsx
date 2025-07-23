@@ -10,7 +10,7 @@ export const ConfirmModal = ({
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
-      <div className="bg-white rounded-xl shadow-lg w-full max-w-md p-4 relative">
+      <div className="bg-white rounded-xl shadow-lg w-[80%] md:w-full max-w-md p-4 relative">
         <button
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-700"
           onClick={onClose}

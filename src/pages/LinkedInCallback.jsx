@@ -1,4 +1,3 @@
-// pages/LinkedInCallback.tsx
 import { useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useLinkedInCallback } from "../hooks/userhooks";
@@ -20,6 +19,7 @@ export const LinkedInCallback = () => {
         console.log(email)
        if(response.data.user.isRegistrationComplete){
         console.log(response.data.accessToken);
+        localStorage.setItem("accessToken", response.data.accessToken);
           navigate("/", { state: {  } });
        }
         else {
@@ -37,6 +37,6 @@ export const LinkedInCallback = () => {
   return (
     <div className="flex justify-center items-center h-screen">
       <p>Verifying LinkedIn authentication...</p>
-    </div>
-  );
+    </div>
+  );
 };

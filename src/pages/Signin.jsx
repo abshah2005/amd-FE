@@ -3,7 +3,6 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import PageWrapper from "../components/PageWrapper";
 import logo from "../assets/logo.svg";
-
 const SignInPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -27,8 +26,10 @@ const SignInPage = () => {
       );
 
       console.log("Sign-in successful:", response.data);
-      
-      navigate("/dashboard");
+      localStorage.setItem("accessToken", response.data.data.accessToken);
+      localStorage.setItem("refreshToken", response.data.data.refreshToken);
+
+      navigate("/");
     } catch (err) {
       setError(
         err.response?.data?.message || "Sign in failed. Please try again."
@@ -180,11 +181,11 @@ const SignInPage = () => {
                 <input type="checkbox" className="mr-2" />
                 Stay signed in
               </label>
-              <a
-                href="/forgotPassword"
-                className=" text-sm"
-              >
-                Forgot your <span className="text-blue-600  hover:text-blue-800 font-medium">password?</span>
+              <a href="/forgotPassword" className=" text-sm">
+                Forgot your{" "}
+                <span className="text-blue-600  hover:text-blue-800 font-medium">
+                  password?
+                </span>
               </a>
             </div>
             <button

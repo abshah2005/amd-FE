@@ -20,7 +20,6 @@ const Test = () => {
 
   return (
     <div>
-      <MainNav />
       <Banner />
 
       <div className="flex flex-col m-auto items-center justify-center py-4 w-[90%]">

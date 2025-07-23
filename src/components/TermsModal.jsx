@@ -4,7 +4,7 @@ const TermsModal = ({ open, onClose }) => {
   if (!open) return null;
   return (
     <div className="fixed w-full inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
-      <div className="bg-white rounded-xl shadow-lg w-full max-w-lg p-6 relative">
+      <div className="bg-white rounded-xl shadow-lg w-[90%] md:w-full max-w-lg p-6 relative">
         <button
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-700"
           onClick={onClose}
