@@ -31,31 +31,7 @@ const SignInPage = () => {
       setIsLoading(false);
     }
   };
-  // const handleSignIn = async (e) => {
-  //   e.preventDefault();
-  //   setError("");
-  //   if (!isFormValid) return;
-
-  //   setIsLoading(true);
-  //   try {
-  //     const response = await axios.post(
-  //       `${import.meta.env.VITE_API_BASE_URL}/users/login`,
-  //       { email, password }
-  //     );
-
-  //     console.log("Sign-in successful:", response.data);
-  //     localStorage.setItem("accessToken", response.data.data.accessToken);
-  //     localStorage.setItem("refreshToken", response.data.data.refreshToken);
-
-  //     navigate("/");
-  //   } catch (err) {
-  //     setError(
-  //       err.response?.data?.message || "Sign in failed. Please try again."
-  //     );
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
+  
 
   const handleLinkedInSignIn = () => {
     window.location.href = `${
@@ -211,8 +187,8 @@ const SignInPage = () => {
               disabled={!isFormValid || isLoading}
               className={`w-full font-medium py-2 px-4 rounded-[24px] transition ${
                 isFormValid && !isLoading
-                  ? "bg-[#60718B] text-white hover:bg-[#42516a] cursor-pointer"
-                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  ? "bg-[#086BFF] text-white  cursor-pointer"
+                  : "bg-[#60718B] text-white cursor-not-allowed"
               }`}
             >
               {isLoading ? "Signing in..." : "Sign in"}

@@ -16,6 +16,7 @@ import Test from "./pages/Test";
 import { AuthProvider } from "./contextProvider/AuthContextProvider";
 
 import { useAuth } from "./contextProvider/AuthContextProvider";
+import QuestionsPage from "./pages/QuestionsPage";
 
 // ProtectedRoute component
 function ProtectedRoute({ children }) {
@@ -46,6 +47,7 @@ function App() {
           }
         >
           <Route path="/" element={<Test />} />
+          <Route path="/questions" element={<QuestionsPage />} />
         </Route>
 
         {/* Public routes */}

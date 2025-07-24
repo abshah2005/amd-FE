@@ -17,7 +17,7 @@ const MainNav = () => {
 
   return (
     <div>
-      <nav className="w-full bg-white px-4 lg:px-8 py-3 flex items-center justify-between shadow-sm">
+      <nav className="w-full bg-white px-4 lg:px-8 py-3 flex items-center justify-between shadow-sm border-b border-gray-200">
         {/* Logo */}
         <div className="flex items-center relative lg:left-10">
           <img src={logo} alt="AskMeDirect" className="w-24 lg:w-28" />
