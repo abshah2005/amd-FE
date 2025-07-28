@@ -13,6 +13,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import PasswordResetSuccess from "./pages/ResetSuccess";
 import Test from "./pages/Test";
+import RichEditor from "./pages/RichEditor"
 import { AuthProvider } from "./contextProvider/AuthContextProvider";
 
 import { useAuth } from "./contextProvider/AuthContextProvider";
@@ -59,6 +60,7 @@ function App() {
         <Route path="/setup" element={<AccountSetup />} />
         <Route path="/waiting" element={<WaitingScreen />} />
         <Route path="/signupfi" element={<SignupFi />} />
+        <Route path="/editor" element={<RichEditor />} />
         <Route path="/auth/linkedin/callback" element={<LinkedInCallback />} />
         <Route path="/resetSuccess" element={<PasswordResetSuccess />} />
       </Routes>
