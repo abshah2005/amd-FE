@@ -4,6 +4,7 @@ import TermsModal from "./TermsModal";
 import { ConfirmModal } from "./ConfirmModal";
 import { DiscardModal } from "./DiscardModal";
 import ImageSelectorModal from "./ImageSelectorModal";
+import LexicalEditor from "./RichTextEditor"; // Add this import
 
 const deliveryOptions = [
   { label: "Normal", value: "Normal" },
@@ -29,6 +30,26 @@ const AskQuestionModal = ({ professional, onClose }) => {
     setShowDiscard(false);
     onClose();
   };
+
+
+  const truncateToFirstLine = (text, maxLength = 50) => {
+  if (!text) return '';
+  
+  // Split by line breaks and get first line
+  const firstLine = text.split('\n')[0];
+  
+  // If first line is longer than maxLength, truncate it
+  if (firstLine.length > maxLength) {
+    return firstLine.substring(0, maxLength).trim() + '...';
+  }
+  
+  // If original text has multiple lines, add ... to indicate more content
+  if (text.includes('\n') || text.length > firstLine.length) {
+    return firstLine + '...';
+  }
+  
+  return firstLine;
+};
 
   const handleDoneClick = () => setShowConfirm(true);
 
@@ -113,16 +134,6 @@ const AskQuestionModal = ({ professional, onClose }) => {
               {professional.name}
             </span>
             <span className="text-xs text-green-600 flex items-center gap-1">
-              {/* <svg width="16" height="16" fill="none" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="12" fill="#22C55E" />
-                <path
-                  d="M17 9l-5 5-3-3"
-                  stroke="#fff"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg> */}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="16"
@@ -133,16 +144,16 @@ const AskQuestionModal = ({ professional, onClose }) => {
                 <path
                   d="M13.3334 8.66664C13.3334 12 11.0001 13.6666 8.22675 14.6333C8.08152 14.6825 7.92377 14.6802 7.78008 14.6266C5.00008 13.6666 2.66675 12 2.66675 8.66664V3.99997C2.66675 3.82316 2.73699 3.65359 2.86201 3.52857C2.98703 3.40355 3.1566 3.33331 3.33341 3.33331C4.66675 3.33331 6.33341 2.53331 7.49341 1.51997C7.63465 1.39931 7.81432 1.33301 8.00008 1.33301C8.18585 1.33301 8.36551 1.39931 8.50675 1.51997C9.67342 2.53997 11.3334 3.33331 12.6667 3.33331C12.8436 3.33331 13.0131 3.40355 13.1382 3.52857C13.2632 3.65359 13.3334 3.82316 13.3334 3.99997V8.66664Z"
                   stroke="#36B37E"
-                  stroke-width="1.35"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
+                  strokeWidth="1.35"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 />
                 <path
                   d="M6 7.99984L7.33333 9.33317L10 6.6665"
                   stroke="#36B37E"
-                  stroke-width="1.35"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
+                  strokeWidth="1.35"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 />
               </svg>
             </span>
@@ -162,6 +173,12 @@ const AskQuestionModal = ({ professional, onClose }) => {
     </div>
   );
 
+  // Enhanced description change handler - FIX THE BUG HERE
+  const handleDescriptionChange = (data) => {
+    console.log("Description changed:", data.plainText); // Debug log
+    setDescription(data.plainText); // FIXED: was data.plainText.length
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
       <div className="bg-white rounded-xl shadow-lg w-[90%] md:w-full max-w-2xl p-0 relative">
@@ -179,18 +196,18 @@ const AskQuestionModal = ({ professional, onClose }) => {
             </h2>
             <ProfileHeader />
             <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">
-                Description
-              </label>
-              <div className="border rounded-lg bg-gray-50 p-3 mb-2">
-                <textarea
-                  className="w-full bg-transparent border-none outline-none resize-none"
-                  rows={3}
-                  placeholder="Type your question..."
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                />
-              </div>
+              <LexicalEditor
+                key={`step-1-editor`} // Add key for proper remounting
+                value={description} // Pass the actual text content
+                onChange={handleDescriptionChange} // Use the fixed handler
+                placeholder="Type your question..."
+                height={50}
+                hideSubmitButton={false}
+                // showWordCount={false}
+                autoFocus={false} // Prevent auto-focus issues
+              />
+              {/* Debug info - remove in production */}
+              
             </div>
             <div className="mb-4">
               <div className="flex items-center justify-between mb-1">
@@ -202,10 +219,10 @@ const AskQuestionModal = ({ professional, onClose }) => {
                     viewBox="0 0 16 16"
                     fill="none"
                   >
-                    <g clip-path="url(#clip0_402_1934)">
+                    <g clipPath="url(#clip0_402_1934)">
                       <path
-                        fill-rule="evenodd"
-                        clip-rule="evenodd"
+                        fillRule="evenodd"
+                        clipRule="evenodd"
                         d="M12.4733 11.7102C13.0045 11.1789 13.303 10.4583 13.303 9.70688C13.303 8.9555 13.0045 8.23489 12.4733 7.70355L8.11326 3.34355C7.98816 3.21854 7.91785 3.04896 7.91779 2.87212C7.91772 2.69527 7.98792 2.52564 8.11292 2.40055C8.23793 2.27545 8.40751 2.20514 8.58435 2.20508C8.7612 2.20502 8.93083 2.27521 9.05592 2.40021L13.4159 6.76021C14.1974 7.54154 14.6365 8.60132 14.6367 9.70641C14.6368 10.8115 14.1979 11.8714 13.4166 12.6529C12.6353 13.4344 11.5755 13.8735 10.4704 13.8736C9.3653 13.8738 8.30543 13.4349 7.52392 12.6535L2.22125 7.35021C1.65855 6.78742 1.34247 6.02415 1.34253 5.22831C1.34259 4.43247 1.6588 3.66925 2.22159 3.10655C2.78438 2.54385 3.54765 2.22776 4.34349 2.22782C5.13933 2.22788 5.90255 2.54409 6.46525 3.10688L11.7673 8.40888C12.103 8.75465 12.2892 9.21863 12.2856 9.70056C12.282 10.1825 12.0889 10.6437 11.7481 10.9844C11.4073 11.3251 10.9461 11.5181 10.4641 11.5215C9.98221 11.525 9.51827 11.3387 9.17259 11.0029L4.34192 6.17155C4.21683 6.04654 4.14652 5.87696 4.14645 5.70012C4.14639 5.52327 4.21658 5.35364 4.34159 5.22855C4.46659 5.10345 4.63617 5.03314 4.81302 5.03308C4.98987 5.03302 5.15949 5.10321 5.28459 5.22821L10.1159 10.0595C10.2098 10.1535 10.3372 10.2064 10.47 10.2064C10.6029 10.2065 10.7303 10.1538 10.8243 10.0599C10.9182 9.96599 10.9711 9.83862 10.9711 9.70578C10.9712 9.57294 10.9185 9.44552 10.8246 9.35155L5.52259 4.04955C5.3678 3.89467 5.18403 3.77181 4.98176 3.68796C4.77949 3.60411 4.56269 3.56092 4.34373 3.56086C4.12477 3.56079 3.90794 3.60386 3.70562 3.68759C3.5033 3.77133 3.31946 3.8941 3.16459 4.04888C2.85181 4.36148 2.67602 4.78553 2.6759 5.22774C2.67577 5.66995 2.85132 6.0941 3.16392 6.40688L8.46659 11.7095C8.99793 12.2408 9.71854 12.5393 10.4699 12.5393C11.2213 12.5393 11.9419 12.2408 12.4733 11.7095V11.7102Z"
                         fill="#4D5B70"
                       />
@@ -269,27 +286,6 @@ const AskQuestionModal = ({ professional, onClose }) => {
                         />
                       </svg>
                     </button>
-                    {/* <button
-                      className="ml-2 bg-gray-100 rounded px-2 py-1 flex items-center justify-center"
-                      onClick={() => handleRemoveImage(idx)}
-                      title="Remove"
-                    >
-                      <svg
-                        width="16"
-                        height="16"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle cx="12" cy="12" r="12" fill="#F0F1F3" />
-                        <path
-                          d="M6 6l12 12M6 18L18 6"
-                          stroke="#EF4444"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    </button> */}
                     <button
                       className="ml-2 bg-gray-100 rounded px-2 py-1 flex items-center justify-center"
                       title="More"
@@ -341,12 +337,14 @@ const AskQuestionModal = ({ professional, onClose }) => {
               <button
                 className="bg-blue-600 text-white px-6 py-2 rounded-full font-semibold text-sm hover:bg-blue-700 transition"
                 onClick={() => setStep(2)}
-                disabled={!description}
+                disabled={!description.trim()} // Check for actual content, not length
               >
                 Next <span className="ml-2">&#8594;</span>
               </button>
             </div>
           </div>
+
+          
         )}
         {/* Step 2: Summary & Budget */}
         {step === 2 && (
@@ -393,7 +391,7 @@ const AskQuestionModal = ({ professional, onClose }) => {
                   <span className="font-medium text-gray-700">
                     Description:
                   </span>
-                  <span className="ml-2 text-gray-700">{description}</span>
+                  <span className="ml-2 text-gray-700">{truncateToFirstLine(description,30)}</span> 
                 </div>
                 <div className="mb-2">
                   <span className="font-medium text-gray-700">
@@ -481,3 +479,14 @@ const AskQuestionModal = ({ professional, onClose }) => {
 };
 
 export default AskQuestionModal;
+
+
+
+
+
+
+
+
+
+
+
