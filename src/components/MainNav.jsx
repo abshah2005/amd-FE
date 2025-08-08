@@ -24,7 +24,7 @@ const MainNav = () => {
         </div>
 
         {/* Desktop Center Section */}
-        <div className="hidden lg:flex flex-1 justify-center">
+        <div className="hidden lg:flex flex-1 justify-center gap-2">
           <div className="flex items-center bg-[#F0F1F3] rounded-full px-4 py-2 w-[340px] max-w-md">
             <img src={findIcon} alt="Search" className="w-4 h-4 mr-2" />
             <input
@@ -38,11 +38,11 @@ const MainNav = () => {
             <img src={searchIcon} alt="Search" className="w-5 h-5" />
           </button>
           <div className="flex items-center justify-between space-between">
-            <span className="pl-2 pr-2 bold">|</span>
-            <button className="flex items-center gap-1 text-blue-600 font-medium text-sm hover:underline">
+            <div className="w-[1px] h-6 bg-black mx-2"></div>
+            <button className="flex items-center gap-1 text-blue-600 font-medium text-sm ">
               Find a Professional
             </button>
-            <div className="flex items-center pl-2">
+            <div className="flex items-center pl-4">
               <img src={userIcon} alt="User" className="w-6 h-6" />
             </div>
           </div>

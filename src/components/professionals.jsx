@@ -6,6 +6,7 @@ import find from "../assets/find.svg";
 import DropdownSelector from "./DropdownSelector";
 import CategoriesSlider from "./Categories";
 import AskQuestionModal from "./AskQuestionModal";
+import ProfessionalProfileModal from "./ProfessionalProfileModal";
 
 const professionals = [
   {
@@ -188,6 +189,7 @@ const PAGE_SIZE = 3;
 const Professionals = () => {
   // Filter states
   const [showModal, setShowModal] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
   const [selectedProfessional, setSelectedProfessional] = useState(null);
   const [category, setCategory] = useState("All");
   const [showTagDropdown, setShowTagDropdown] = useState(false);
@@ -336,12 +338,17 @@ const Professionals = () => {
           <img
             src={prof.avatar}
             alt={prof.name}
+            onClick={() => {
+    setSelectedProfessional(prof);
+    setShowProfileModal(true);
+  }}
+  style={{ cursor: "pointer" }}
             className={`w-44 h-52 rounded-xl object-cover ${
-              prof.featured ? "border-4 border-yellow-400" : ""
+              prof.featured ? "border-4 border-yellow-400 " : ""
             }`}
           />
           {prof.featured && (
-            <span className="absolute top-0 right-0 bg-yellow-400 text-xs font-semibold px-2 py-1 rounded text-white shadow">
+            <span className="absolute top-0 right-0 bg-yellow-400 text-xs font-semibold px-2 py-1 rounded text-black shadow">
               Featured
             </span>
           )}
@@ -419,7 +426,7 @@ const Professionals = () => {
             }`}
           />
           {prof.featured && (
-            <span className="absolute top-0 right-0 bg-yellow-400 text-[10px] font-semibold px-1 py-0.5 rounded text-white shadow">
+            <span className="absolute top-0 right-0 bg-yellow-400 text-[10px] font-semibold px-1 py-0.5 rounded text-black shadow">
               Featured
             </span>
           )}
@@ -1039,6 +1046,13 @@ const Professionals = () => {
           </div>
         )}
       </div>
+      {showProfileModal && selectedProfessional && (
+  <ProfessionalProfileModal
+    professionalId={selectedProfessional.id}
+    
+    onClose={() => setShowProfileModal(false)}
+  />
+)}
       {showModal && selectedProfessional && (
         <AskQuestionModal
           professional={selectedProfessional}

@@ -337,10 +337,26 @@ function ValueSyncPlugin({ value }) {
   return null;
 }
 
+// Add a new plugin to handle editor state restoration
+function EditorStatePlugin({ initialEditorState }) {
+  const [editor] = useLexicalComposerContext();
+  const [hasSetInitialState, setHasSetInitialState] = useState(false);
+
+  useEffect(() => {
+    if (initialEditorState && !hasSetInitialState) {
+      editor.setEditorState(initialEditorState);
+      setHasSetInitialState(true);
+    }
+  }, [initialEditorState, editor, hasSetInitialState]);
+
+  return null;
+}
+
 // Main Editor Component - ensure proper initial value handling
 export default function LexicalEditor({
   value = "",
   initialValue = "",
+  initialEditorState = null, // Add this new prop
   onChange,
   onSubmit,
   onFocus,
@@ -612,7 +628,6 @@ export default function LexicalEditor({
           display: "flex",
           alignItems: "center",
           padding: "10px 1px",
-          
           backgroundColor: "white",
         }}
       >
@@ -646,9 +661,6 @@ export default function LexicalEditor({
         }}
       >
         <LexicalComposer initialConfig={editorConfig}>
-          {/* Header */}
-
-          {/* Editor Content */}
           <Box
             className="editor-content-wrapper"
             sx={{
@@ -721,9 +733,12 @@ export default function LexicalEditor({
             {autoFocus && <AutoFocusPlugin />}
             <OnChangePlugin onChange={handleEditorChange} />
 
-            {/* Add the plugins for content synchronization */}
-            <InitialContentPlugin initialContent={value || initialValue} />
-            <ValueSyncPlugin value={value} />
+            {/* Add the new plugin for editor state restoration */}
+            <EditorStatePlugin initialEditorState={initialEditorState} />
+            
+            {/* Keep existing plugins but make them conditional */}
+            {!initialEditorState && <InitialContentPlugin initialContent={value || initialValue} />}
+            {!initialEditorState && <ValueSyncPlugin value={value} />}
           </Box>
 
           {/* Toolbar */}

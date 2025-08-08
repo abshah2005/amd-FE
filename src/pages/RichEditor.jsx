@@ -32,7 +32,7 @@ const RichEditor = () => {
   return (
     
     <div style={{ padding: '20px' }}>
-     <LexicalEditor />
+     <LexicalEditor submitButtonText='done' hideSubmitButton={false}/>
     </div>
   );
 };

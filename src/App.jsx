@@ -18,6 +18,7 @@ import { AuthProvider } from "./contextProvider/AuthContextProvider";
 
 import { useAuth } from "./contextProvider/AuthContextProvider";
 import QuestionsPage from "./pages/QuestionsPage";
+import ProfessionalOnboarding from "./pages/ProfessionalOnboarding";
 
 // ProtectedRoute component
 function ProtectedRoute({ children }) {
@@ -53,6 +54,7 @@ function App() {
 
         {/* Public routes */}
         <Route path="/signup" element={<SignUpPage />} />
+        <Route path="/pofon" element={<ProfessionalOnboarding />} />
         <Route path="/resetPassword" element={<ResetPassword />} />
         <Route path="/signin" element={<SignInPage />} />
         <Route path="/forgotPassword" element={<ForgotPassword />} />

@@ -4,7 +4,7 @@ import TermsModal from "./TermsModal";
 import { ConfirmModal } from "./ConfirmModal";
 import { DiscardModal } from "./DiscardModal";
 import ImageSelectorModal from "./ImageSelectorModal";
-import LexicalEditor from "./RichTextEditor"; // Add this import
+import LexicalEditor from "./RichTextEditor";
 
 const deliveryOptions = [
   { label: "Normal", value: "Normal" },
@@ -13,6 +13,7 @@ const deliveryOptions = [
 
 const AskQuestionModal = ({ professional, onClose }) => {
   const [description, setDescription] = useState("");
+  const [editorState, setEditorState] = useState(null); // Store the full editor state
   const [images, setImages] = useState([]);
   const [deliveryTime, setDeliveryTime] = useState("Normal");
   const [showConfirm, setShowConfirm] = useState(false);
@@ -31,25 +32,24 @@ const AskQuestionModal = ({ professional, onClose }) => {
     onClose();
   };
 
-
   const truncateToFirstLine = (text, maxLength = 50) => {
-  if (!text) return '';
-  
-  // Split by line breaks and get first line
-  const firstLine = text.split('\n')[0];
-  
-  // If first line is longer than maxLength, truncate it
-  if (firstLine.length > maxLength) {
-    return firstLine.substring(0, maxLength).trim() + '...';
-  }
-  
-  // If original text has multiple lines, add ... to indicate more content
-  if (text.includes('\n') || text.length > firstLine.length) {
-    return firstLine + '...';
-  }
-  
-  return firstLine;
-};
+    if (!text) return "";
+    
+    // Split by line breaks and get first line
+    const firstLine = text.split('\n')[0];
+    
+    // If first line is longer than maxLength, truncate it
+    if (firstLine.length > maxLength) {
+      return firstLine.substring(0, maxLength).trim() + '...';
+    }
+    
+    // If original text has multiple lines, add ... to indicate more content
+    if (text.includes('\n') || text.length > firstLine.length) {
+      return firstLine + '...';
+    }
+    
+    return firstLine;
+  };
 
   const handleDoneClick = () => setShowConfirm(true);
 
@@ -173,10 +173,11 @@ const AskQuestionModal = ({ professional, onClose }) => {
     </div>
   );
 
-  // Enhanced description change handler - FIX THE BUG HERE
+  // Enhanced description change handler - Store both plain text and editor state
   const handleDescriptionChange = (data) => {
-    console.log("Description changed:", data.plainText); // Debug log
-    setDescription(data.plainText); // FIXED: was data.plainText.length
+    console.log("Description changed:", data.editorState);
+    setDescription(data.plainText);
+    setEditorState(data.editorState); // Store the complete editor state
   };
 
   return (
@@ -197,17 +198,15 @@ const AskQuestionModal = ({ professional, onClose }) => {
             <ProfileHeader />
             <div className="mb-4">
               <LexicalEditor
-                key={`step-1-editor`} // Add key for proper remounting
-                value={description} // Pass the actual text content
-                onChange={handleDescriptionChange} // Use the fixed handler
+                key={`step-1-editor-${step}`} // Include step in key for proper remounting
+                value={description}
+                initialEditorState={editorState} // Pass the stored editor state back
+                onChange={handleDescriptionChange}
                 placeholder="Type your question..."
                 height={50}
                 hideSubmitButton={false}
-                // showWordCount={false}
-                autoFocus={false} // Prevent auto-focus issues
+                autoFocus={false}
               />
-              {/* Debug info - remove in production */}
-              
             </div>
             <div className="mb-4">
               <div className="flex items-center justify-between mb-1">
@@ -343,8 +342,6 @@ const AskQuestionModal = ({ professional, onClose }) => {
               </button>
             </div>
           </div>
-
-          
         )}
         {/* Step 2: Summary & Budget */}
         {step === 2 && (
