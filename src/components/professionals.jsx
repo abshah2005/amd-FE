@@ -26,6 +26,7 @@ const professionals = [
       "Legal Advice",
       "Career Coaching",
     ],
+    categories: ["Business Strategy", "Legal Advice"], // <-- added
     delivery: 7,
     verified: true,
     featured: true,
@@ -45,6 +46,7 @@ const professionals = [
     rating: 4.8,
     ratingCount: 18,
     tags: ["Marketing", "Branding", "Social Media"],
+    categories: ["Marketing"], // <-- added
     delivery: 1,
     verified: true,
     featured: false,
@@ -64,6 +66,7 @@ const professionals = [
     rating: 4.5,
     ratingCount: 9,
     tags: ["Finance", "Investment", "Tax"],
+    categories: ["Finance"], // <-- added
     delivery: 10,
     verified: false,
     featured: false,
@@ -83,6 +86,7 @@ const professionals = [
     rating: 4.7,
     ratingCount: 15,
     tags: ["HR & Recruitment", "Career Coaching"],
+    categories: ["HR & Recruitment"], // <-- added
     delivery: 7,
     verified: true,
     featured: false,
@@ -102,6 +106,7 @@ const professionals = [
     rating: 4.1,
     ratingCount: 7,
     tags: ["Legal Advice", "Business"],
+    categories: ["Legal Advice", "Business Strategy"], // <-- added
     delivery: 10,
     verified: false,
     featured: false,
@@ -121,6 +126,7 @@ const professionals = [
     rating: 4.9,
     ratingCount: 22,
     tags: ["Design", "Branding"],
+    categories: ["Design"], // <-- added
     delivery: 1,
     verified: true,
     featured: false,
@@ -158,6 +164,7 @@ const allLanguages = [
 ];
 
 const categories = [
+  { id: "All", name: "All" },
   { id: 1, name: "IT Consultation" },
   { id: 2, name: "Business Strategy" },
   { id: 3, name: "Marketing" },
@@ -188,6 +195,7 @@ const PAGE_SIZE = 3;
 
 const Professionals = () => {
   // Filter states
+  const [selectedCategory, setSelectedCategory] = useState("All");
   const [showModal, setShowModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [selectedProfessional, setSelectedProfessional] = useState(null);
@@ -222,6 +230,9 @@ const Professionals = () => {
   const filteredProfessionals = useMemo(() => {
     return professionals.filter((prof) => {
       if (category !== "All" && !prof.tags.includes(category)) return false;
+      const selectedCategoryObj = categories.find(c => c.id === selectedCategory);
+    const selectedCategoryName = selectedCategoryObj ? selectedCategoryObj.name : "All";
+    if (selectedCategoryName !== "All" && !prof.categories.includes(selectedCategoryName)) return false;
       if (tags.length && !tags.every((tag) => prof.tags.includes(tag)))
         return false;
       if (budget && (prof.priceStart > budget[1] || prof.priceEnd < budget[0]))
@@ -239,7 +250,7 @@ const Professionals = () => {
       if (location.length && !location.includes(prof.location)) return false;
       return true;
     });
-  }, [category, tags, budget, delivery, rating, verified, language, location]);
+  }, [category, tags, budget, delivery, rating, verified, language, location,selectedCategory]);
 
   const totalPages = Math.ceil(filteredProfessionals.length / PAGE_SIZE);
   const paginatedProfessionals = filteredProfessionals.slice(
@@ -287,6 +298,7 @@ const Professionals = () => {
   // Reset filters
   const clearFilters = () => {
     setCategory("All");
+    setSelectedCategory("All");
     setTags([]);
     setBudget([10, 100]);
     setDelivery([]);
@@ -339,10 +351,10 @@ const Professionals = () => {
             src={prof.avatar}
             alt={prof.name}
             onClick={() => {
-    setSelectedProfessional(prof);
-    setShowProfileModal(true);
-  }}
-  style={{ cursor: "pointer" }}
+              setSelectedProfessional(prof);
+              setShowProfileModal(true);
+            }}
+            style={{ cursor: "pointer" }}
             className={`w-44 h-52 rounded-xl object-cover ${
               prof.featured ? "border-4 border-yellow-400 " : ""
             }`}
@@ -506,559 +518,577 @@ const Professionals = () => {
   );
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8 w-full mt-8">
-      {/* Mobile Filters Button */}
-      <div className="lg:hidden w-full mb-4">
-        <button
-          className="w-full bg-blue-600 text-white py-2 rounded-xl font-semibold text-base"
-          onClick={() => setShowMobileFilters(true)}
-        >
-          Filters
-        </button>
-      </div>
-
-      {/* Filters for large screens */}
-      <div className="lg:w-1/4 w-full bg-white rounded-xl shadow p-6 mb-4 lg:mb-0 hidden lg:block">
-        <div className="flex items-center justify-between mb-4">
-          <span className="font-semibold text-lg">Filters</span>
+    <div>
+      <div className="w-full mb-6">
+          <CategoriesSlider
+            categories={categories}
+            selectedCategory={selectedCategory}
+            onSelect={setSelectedCategory}
+          />
+        </div>
+      <div className="flex flex-col lg:flex-row gap-8 w-full mt-8">
+        {/* Mobile Filters Button */}
+        <div className="lg:hidden w-full mb-4">
           <button
-            className="text-blue-600 text-sm hover:underline"
-            onClick={clearFilters}
+            className="w-full bg-blue-600 text-white py-2 rounded-xl font-semibold text-base"
+            onClick={() => setShowMobileFilters(true)}
           >
-            Clear
+            Filters
           </button>
         </div>
 
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">Category</label>
-          <DropdownSelector
-            options={["AI, Business, etc", ...allTags]}
-            value={category}
-            onChange={(val) => {
-              setCategory(val);
-              setPage(1);
-            }}
-            placeholder="Select category"
-          />
-        </div>
+        {/* Filters for large screens */}
+        <div className="lg:w-1/4 w-full bg-white rounded-xl shadow p-6 mb-4 lg:mb-0 hidden lg:block">
+          <div className="flex items-center justify-between mb-4">
+            <span className="font-semibold text-lg">Filters</span>
+            <button
+              className="text-blue-600 text-sm hover:underline"
+              onClick={clearFilters}
+            >
+              Clear
+            </button>
+          </div>
 
-        {/* Tags */}
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">
-            Tags (max - 2)
-          </label>
-          <div className="relative">
-            <div className="flex items-center border rounded-full px-4 py-2 bg-white w-full">
-              <span className="mr-2 text-gray-400">
-                <img src={find} alt="" />
-              </span>
-              <div className="flex gap-2 flex-wrap">
-                {tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="flex items-center bg-blue-50 border border-blue-400 text-blue-700 px-3 py-1 rounded-full text-xs font-medium"
-                  >
-                    {tag}
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1">Category</label>
+            <DropdownSelector
+              options={[...categories.map((c) => c.name)]}
+              value={category}
+              onChange={(val) => {
+                setCategory(val);
+                setPage(1);
+              }}
+              placeholder="Select category"
+            />
+          </div>
+
+          {/* Tags */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1">
+              Tags (max - 2)
+            </label>
+            <div className="relative">
+              <div className="flex items-center border rounded-full px-4 py-2 bg-white w-full">
+                <span className="mr-2 text-gray-400">
+                  <img src={find} alt="" />
+                </span>
+                <div className="flex gap-2 flex-wrap">
+                  {tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="flex items-center bg-blue-50 border border-blue-400 text-blue-700 px-3 py-1 rounded-full text-xs font-medium"
+                    >
+                      {tag}
+                      <button
+                        type="button"
+                        className="ml-1 text-blue-500 font-bold focus:outline-none"
+                        onClick={() => handleTagChange(tag)}
+                      >
+                        &times;
+                      </button>
+                    </span>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  className="ml-auto text-gray-400"
+                  onClick={() => setShowTagDropdown((v) => !v)}
+                  tabIndex={-1}
+                >
+                  <svg width="20" height="20" fill="none">
+                    <path
+                      d="M6 8l4 4 4-4"
+                      stroke="#94A3B8"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </button>
+              </div>
+              {/* Dropdown */}
+              {showTagDropdown && (
+                <div className="absolute left-0 top-full mt-2 w-full bg-white border rounded-xl shadow-lg z-10 max-h-48 overflow-auto">
+                  {allTags.map((tag) => (
+                    <button
+                      key={tag}
+                      className={`w-full text-left px-4 py-2 text-sm hover:bg-blue-50 ${
+                        tags.includes(tag)
+                          ? "bg-blue-100 text-blue-700 font-semibold"
+                          : "text-gray-700"
+                      }`}
+                      onClick={() => {
+                        if (tags.includes(tag)) {
+                          handleTagChange(tag);
+                        } else if (tags.length < 2) {
+                          handleTagChange(tag);
+                        }
+                        setShowTagDropdown(false);
+                      }}
+                      disabled={!tags.includes(tag) && tags.length >= 2}
+                    >
+                      {tag}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Budget Range */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1">
+              Budget Range
+            </label>
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-gray-500">${budget[0]}</span>
+                <span className="text-xs text-gray-500">${budget[1]}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="range"
+                  min={10}
+                  max={100}
+                  value={budget[0]}
+                  onChange={(e) => handleBudgetChange(e, 0)}
+                  className="flex-1 accent-blue-600"
+                />
+                <input
+                  type="range"
+                  min={10}
+                  max={100}
+                  value={budget[1]}
+                  onChange={(e) => handleBudgetChange(e, 1)}
+                  className="flex-1 accent-blue-600"
+                />
+              </div>
+            </div>
+          </div>
+          {/* Delivery Time */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1">
+              Delivery Time
+            </label>
+            <div className="flex flex-col gap-2">
+              {deliveryOptions.map((opt) => (
+                <label
+                  key={opt.value}
+                  className="flex items-center gap-2 text-sm"
+                >
+                  <input
+                    type="checkbox"
+                    checked={delivery.includes(opt.value)}
+                    onChange={() => handleDeliveryChange(opt.value)}
+                    className="accent-blue-600"
+                  />
+                  {opt.label}
+                </label>
+              ))}
+            </div>
+          </div>
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1">Rating</label>
+            <div className="flex flex-col gap-2">
+              {ratingOptions.map((opt) => (
+                <label
+                  key={opt.value}
+                  className="flex items-center gap-2 text-sm"
+                >
+                  <input
+                    type="checkbox"
+                    checked={rating.includes(opt.value)}
+                    onChange={() => handleRatingChange(opt.value)}
+                    className="accent-blue-600"
+                  />
+                  {opt.label}
+                </label>
+              ))}
+            </div>
+          </div>
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1">Verified</label>
+            <div className="flex gap-4">
+              <label className="flex items-center gap-1 text-sm">
+                <input
+                  type="radio"
+                  checked={verified === true}
+                  onChange={() => handleVerifiedChange(true)}
+                  className="accent-blue-600"
+                />
+                Yes
+              </label>
+              <label className="flex items-center gap-1 text-sm">
+                <input
+                  type="radio"
+                  checked={verified === false}
+                  onChange={() => handleVerifiedChange(false)}
+                  className="accent-blue-600"
+                />
+                No
+              </label>
+            </div>
+          </div>
+
+          {/* Language */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1">Language</label>
+            <DropdownSelector
+              options={allLanguages}
+              value={language}
+              onChange={(val) => {
+                setLanguage(val);
+                setPage(1);
+              }}
+              multi={true}
+              max={2}
+              placeholder="Select language"
+            />
+          </div>
+
+          {/* Location */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1">Location</label>
+            <DropdownSelector
+              options={allLocations}
+              value={location}
+              onChange={(val) => {
+                setLocation(val);
+                setPage(1);
+              }}
+              multi={true}
+              max={2}
+              placeholder="Select location"
+            />
+          </div>
+        </div>
+        {/* Mobile Filters Modal */}
+        {showMobileFilters && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 lg:hidden">
+            <div className="bg-white rounded-xl shadow-lg w-full max-w-sm p-6 relative overflow-y-auto max-h-[90vh]">
+              <button
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-xl"
+                onClick={() => setShowMobileFilters(false)}
+                aria-label="Close"
+              >
+                &times;
+              </button>
+              <h2 className="text-lg font-semibold mb-4">Filters</h2>
+              {/* Category */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">
+                  Category
+                </label>
+                <DropdownSelector
+                  options={["AI, Business, etc", ...allTags]}
+                  value={category}
+                  onChange={(val) => {
+                    setCategory(val);
+                    setPage(1);
+                  }}
+                  placeholder="Select category"
+                />
+              </div>
+              {/* Tags */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">
+                  Tags (max - 2)
+                </label>
+                <div className="relative">
+                  <div className="flex items-center border rounded-full px-4 py-2 bg-white w-full">
+                    <span className="mr-2 text-gray-400">
+                      <img src={find} alt="" />
+                    </span>
+                    <div className="flex gap-2 flex-wrap">
+                      {tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="flex items-center bg-blue-50 border border-blue-400 text-blue-700 px-3 py-1 rounded-full text-xs font-medium"
+                        >
+                          {tag}
+                          <button
+                            type="button"
+                            className="ml-1 text-blue-500 font-bold focus:outline-none"
+                            onClick={() => handleTagChange(tag)}
+                          >
+                            &times;
+                          </button>
+                        </span>
+                      ))}
+                    </div>
                     <button
                       type="button"
-                      className="ml-1 text-blue-500 font-bold focus:outline-none"
-                      onClick={() => handleTagChange(tag)}
+                      className="ml-auto text-gray-400"
+                      onClick={() => setShowTagDropdown((v) => !v)}
+                      tabIndex={-1}
                     >
-                      &times;
+                      <svg width="20" height="20" fill="none">
+                        <path
+                          d="M6 8l4 4 4-4"
+                          stroke="#94A3B8"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
                     </button>
-                  </span>
-                ))}
+                  </div>
+                  {/* Dropdown */}
+                  {showTagDropdown && (
+                    <div className="absolute left-0 top-full mt-2 w-full bg-white border rounded-xl shadow-lg z-10 max-h-48 overflow-auto">
+                      {allTags.map((tag) => (
+                        <button
+                          key={tag}
+                          className={`w-full text-left px-4 py-2 text-sm hover:bg-blue-50 ${
+                            tags.includes(tag)
+                              ? "bg-blue-100 text-blue-700 font-semibold"
+                              : "text-gray-700"
+                          }`}
+                          onClick={() => {
+                            if (tags.includes(tag)) {
+                              handleTagChange(tag);
+                            } else if (tags.length < 2) {
+                              handleTagChange(tag);
+                            }
+                            setShowTagDropdown(false);
+                          }}
+                          disabled={!tags.includes(tag) && tags.length >= 2}
+                        >
+                          {tag}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
+
+              {/* Budget Range */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">
+                  Budget Range
+                </label>
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-500">${budget[0]}</span>
+                    <span className="text-xs text-gray-500">${budget[1]}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="range"
+                      min={10}
+                      max={100}
+                      value={budget[0]}
+                      onChange={(e) => handleBudgetChange(e, 0)}
+                      className="flex-1 accent-blue-600"
+                    />
+                    <input
+                      type="range"
+                      min={10}
+                      max={100}
+                      value={budget[1]}
+                      onChange={(e) => handleBudgetChange(e, 1)}
+                      className="flex-1 accent-blue-600"
+                    />
+                  </div>
+                </div>
+              </div>
+              {/* Delivery Time */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">
+                  Delivery Time
+                </label>
+                <div className="flex flex-col gap-2">
+                  {deliveryOptions.map((opt) => (
+                    <label
+                      key={opt.value}
+                      className="flex items-center gap-2 text-sm"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={delivery.includes(opt.value)}
+                        onChange={() => handleDeliveryChange(opt.value)}
+                        className="accent-blue-600"
+                      />
+                      {opt.label}
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">Rating</label>
+                <div className="flex flex-col gap-2">
+                  {ratingOptions.map((opt) => (
+                    <label
+                      key={opt.value}
+                      className="flex items-center gap-2 text-sm"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={rating.includes(opt.value)}
+                        onChange={() => handleRatingChange(opt.value)}
+                        className="accent-blue-600"
+                      />
+                      {opt.label}
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">
+                  Verified
+                </label>
+                <div className="flex gap-4">
+                  <label className="flex items-center gap-1 text-sm">
+                    <input
+                      type="radio"
+                      checked={verified === true}
+                      onChange={() => handleVerifiedChange(true)}
+                      className="accent-blue-600"
+                    />
+                    Yes
+                  </label>
+                  <label className="flex items-center gap-1 text-sm">
+                    <input
+                      type="radio"
+                      checked={verified === false}
+                      onChange={() => handleVerifiedChange(false)}
+                      className="accent-blue-600"
+                    />
+                    No
+                  </label>
+                </div>
+              </div>
+
+              {/* Language */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">
+                  Language
+                </label>
+                <DropdownSelector
+                  options={allLanguages}
+                  value={language}
+                  onChange={(val) => {
+                    setLanguage(val);
+                    setPage(1);
+                  }}
+                  multi={true}
+                  max={2}
+                  placeholder="Select language"
+                />
+              </div>
+
+              {/* Location */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">
+                  Location
+                </label>
+                <DropdownSelector
+                  options={allLocations}
+                  value={location}
+                  onChange={(val) => {
+                    setLocation(val);
+                    setPage(1);
+                  }}
+                  multi={true}
+                  max={2}
+                  placeholder="Select location"
+                />
+              </div>
+
+              {/* Clear Filters Button */}
               <button
-                type="button"
-                className="ml-auto text-gray-400"
-                onClick={() => setShowTagDropdown((v) => !v)}
-                tabIndex={-1}
+                className="w-full bg-gray-100 text-gray-700 py-2 rounded-xl font-semibold text-base mt-4"
+                onClick={() => {
+                  clearFilters();
+                  setShowMobileFilters(false);
+                }}
               >
-                <svg width="20" height="20" fill="none">
-                  <path
-                    d="M6 8l4 4 4-4"
-                    stroke="#94A3B8"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                Clear Filters
+              </button>
+              <button
+                className="w-full bg-blue-600 text-white py-2 rounded-xl font-semibold text-base mt-2"
+                onClick={() => setShowMobileFilters(false)}
+              >
+                Apply Filters
               </button>
             </div>
-            {/* Dropdown */}
-            {showTagDropdown && (
-              <div className="absolute left-0 top-full mt-2 w-full bg-white border rounded-xl shadow-lg z-10 max-h-48 overflow-auto">
-                {allTags.map((tag) => (
-                  <button
-                    key={tag}
-                    className={`w-full text-left px-4 py-2 text-sm hover:bg-blue-50 ${
-                      tags.includes(tag)
-                        ? "bg-blue-100 text-blue-700 font-semibold"
-                        : "text-gray-700"
-                    }`}
-                    onClick={() => {
-                      if (tags.includes(tag)) {
-                        handleTagChange(tag);
-                      } else if (tags.length < 2) {
-                        handleTagChange(tag);
-                      }
-                      setShowTagDropdown(false);
-                    }}
-                    disabled={!tags.includes(tag) && tags.length >= 2}
-                  >
-                    {tag}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Budget Range */}
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">Budget Range</label>
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-gray-500">${budget[0]}</span>
-              <span className="text-xs text-gray-500">${budget[1]}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <input
-                type="range"
-                min={10}
-                max={100}
-                value={budget[0]}
-                onChange={(e) => handleBudgetChange(e, 0)}
-                className="flex-1 accent-blue-600"
-              />
-              <input
-                type="range"
-                min={10}
-                max={100}
-                value={budget[1]}
-                onChange={(e) => handleBudgetChange(e, 1)}
-                className="flex-1 accent-blue-600"
-              />
-            </div>
-          </div>
-        </div>
-        {/* Delivery Time */}
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">
-            Delivery Time
-          </label>
-          <div className="flex flex-col gap-2">
-            {deliveryOptions.map((opt) => (
-              <label
-                key={opt.value}
-                className="flex items-center gap-2 text-sm"
-              >
-                <input
-                  type="checkbox"
-                  checked={delivery.includes(opt.value)}
-                  onChange={() => handleDeliveryChange(opt.value)}
-                  className="accent-blue-600"
-                />
-                {opt.label}
-              </label>
-            ))}
-          </div>
-        </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">Rating</label>
-          <div className="flex flex-col gap-2">
-            {ratingOptions.map((opt) => (
-              <label
-                key={opt.value}
-                className="flex items-center gap-2 text-sm"
-              >
-                <input
-                  type="checkbox"
-                  checked={rating.includes(opt.value)}
-                  onChange={() => handleRatingChange(opt.value)}
-                  className="accent-blue-600"
-                />
-                {opt.label}
-              </label>
-            ))}
-          </div>
-        </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">Verified</label>
-          <div className="flex gap-4">
-            <label className="flex items-center gap-1 text-sm">
-              <input
-                type="radio"
-                checked={verified === true}
-                onChange={() => handleVerifiedChange(true)}
-                className="accent-blue-600"
-              />
-              Yes
-            </label>
-            <label className="flex items-center gap-1 text-sm">
-              <input
-                type="radio"
-                checked={verified === false}
-                onChange={() => handleVerifiedChange(false)}
-                className="accent-blue-600"
-              />
-              No
-            </label>
-          </div>
-        </div>
-
-        {/* Language */}
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">Language</label>
-          <DropdownSelector
-            options={allLanguages}
-            value={language}
-            onChange={(val) => {
-              setLanguage(val);
-              setPage(1);
-            }}
-            multi={true}
-            max={2}
-            placeholder="Select language"
-          />
-        </div>
-
-        {/* Location */}
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">Location</label>
-          <DropdownSelector
-            options={allLocations}
-            value={location}
-            onChange={(val) => {
-              setLocation(val);
-              setPage(1);
-            }}
-            multi={true}
-            max={2}
-            placeholder="Select location"
-          />
-        </div>
-      </div>
-      {/* Mobile Filters Modal */}
-      {showMobileFilters && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 lg:hidden">
-          <div className="bg-white rounded-xl shadow-lg w-full max-w-sm p-6 relative overflow-y-auto max-h-[90vh]">
-            <button
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-xl"
-              onClick={() => setShowMobileFilters(false)}
-              aria-label="Close"
-            >
-              &times;
-            </button>
-            <h2 className="text-lg font-semibold mb-4">Filters</h2>
-            {/* Category */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">Category</label>
-              <DropdownSelector
-                options={["AI, Business, etc", ...allTags]}
-                value={category}
-                onChange={(val) => {
-                  setCategory(val);
-                  setPage(1);
-                }}
-                placeholder="Select category"
-              />
-            </div>
-            {/* Tags */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">
-                Tags (max - 2)
-              </label>
-              <div className="relative">
-                <div className="flex items-center border rounded-full px-4 py-2 bg-white w-full">
-                  <span className="mr-2 text-gray-400">
-                    <img src={find} alt="" />
-                  </span>
-                  <div className="flex gap-2 flex-wrap">
-                    {tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="flex items-center bg-blue-50 border border-blue-400 text-blue-700 px-3 py-1 rounded-full text-xs font-medium"
-                      >
-                        {tag}
-                        <button
-                          type="button"
-                          className="ml-1 text-blue-500 font-bold focus:outline-none"
-                          onClick={() => handleTagChange(tag)}
-                        >
-                          &times;
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                  <button
-                    type="button"
-                    className="ml-auto text-gray-400"
-                    onClick={() => setShowTagDropdown((v) => !v)}
-                    tabIndex={-1}
-                  >
-                    <svg width="20" height="20" fill="none">
-                      <path
-                        d="M6 8l4 4 4-4"
-                        stroke="#94A3B8"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </button>
-                </div>
-                {/* Dropdown */}
-                {showTagDropdown && (
-                  <div className="absolute left-0 top-full mt-2 w-full bg-white border rounded-xl shadow-lg z-10 max-h-48 overflow-auto">
-                    {allTags.map((tag) => (
-                      <button
-                        key={tag}
-                        className={`w-full text-left px-4 py-2 text-sm hover:bg-blue-50 ${
-                          tags.includes(tag)
-                            ? "bg-blue-100 text-blue-700 font-semibold"
-                            : "text-gray-700"
-                        }`}
-                        onClick={() => {
-                          if (tags.includes(tag)) {
-                            handleTagChange(tag);
-                          } else if (tags.length < 2) {
-                            handleTagChange(tag);
-                          }
-                          setShowTagDropdown(false);
-                        }}
-                        disabled={!tags.includes(tag) && tags.length >= 2}
-                      >
-                        {tag}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Budget Range */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">
-                Budget Range
-              </label>
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-500">${budget[0]}</span>
-                  <span className="text-xs text-gray-500">${budget[1]}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="range"
-                    min={10}
-                    max={100}
-                    value={budget[0]}
-                    onChange={(e) => handleBudgetChange(e, 0)}
-                    className="flex-1 accent-blue-600"
-                  />
-                  <input
-                    type="range"
-                    min={10}
-                    max={100}
-                    value={budget[1]}
-                    onChange={(e) => handleBudgetChange(e, 1)}
-                    className="flex-1 accent-blue-600"
-                  />
-                </div>
-              </div>
-            </div>
-            {/* Delivery Time */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">
-                Delivery Time
-              </label>
-              <div className="flex flex-col gap-2">
-                {deliveryOptions.map((opt) => (
-                  <label
-                    key={opt.value}
-                    className="flex items-center gap-2 text-sm"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={delivery.includes(opt.value)}
-                      onChange={() => handleDeliveryChange(opt.value)}
-                      className="accent-blue-600"
-                    />
-                    {opt.label}
-                  </label>
-                ))}
-              </div>
-            </div>
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">Rating</label>
-              <div className="flex flex-col gap-2">
-                {ratingOptions.map((opt) => (
-                  <label
-                    key={opt.value}
-                    className="flex items-center gap-2 text-sm"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={rating.includes(opt.value)}
-                      onChange={() => handleRatingChange(opt.value)}
-                      className="accent-blue-600"
-                    />
-                    {opt.label}
-                  </label>
-                ))}
-              </div>
-            </div>
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">Verified</label>
-              <div className="flex gap-4">
-                <label className="flex items-center gap-1 text-sm">
-                  <input
-                    type="radio"
-                    checked={verified === true}
-                    onChange={() => handleVerifiedChange(true)}
-                    className="accent-blue-600"
-                  />
-                  Yes
-                </label>
-                <label className="flex items-center gap-1 text-sm">
-                  <input
-                    type="radio"
-                    checked={verified === false}
-                    onChange={() => handleVerifiedChange(false)}
-                    className="accent-blue-600"
-                  />
-                  No
-                </label>
-              </div>
-            </div>
-
-            {/* Language */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">Language</label>
-              <DropdownSelector
-                options={allLanguages}
-                value={language}
-                onChange={(val) => {
-                  setLanguage(val);
-                  setPage(1);
-                }}
-                multi={true}
-                max={2}
-                placeholder="Select language"
-              />
-            </div>
-
-            {/* Location */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">Location</label>
-              <DropdownSelector
-                options={allLocations}
-                value={location}
-                onChange={(val) => {
-                  setLocation(val);
-                  setPage(1);
-                }}
-                multi={true}
-                max={2}
-                placeholder="Select location"
-              />
-            </div>
-
-            {/* Clear Filters Button */}
-            <button
-              className="w-full bg-gray-100 text-gray-700 py-2 rounded-xl font-semibold text-base mt-4"
-              onClick={() => {
-                clearFilters();
-                setShowMobileFilters(false);
-              }}
-            >
-              Clear Filters
-            </button>
-            <button
-              className="w-full bg-blue-600 text-white py-2 rounded-xl font-semibold text-base mt-2"
-              onClick={() => setShowMobileFilters(false)}
-            >
-              Apply Filters
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Professionals */}
-      <div className="flex-1">
-        <h2 className="text-xl font-semibold mb-2">
-          Choose a professional.{" "}
-          <span className="font-normal">Write your question. Get Answer</span>
-        </h2>
-        <p className="mb-6 text-gray-600">
-          Getting trusted advice is a smart way to move faster, solve problems,
-          or grow your ideas.
-        </p>
-        {paginatedProfessionals.length === 0 ? (
-          <div className="text-gray-500 mt-8">
-            No professionals found for selected filters.
-          </div>
-        ) : (
-          <>
-            {/* Desktop cards */}
-            <div className="hidden lg:block">
-              {paginatedProfessionals.map((prof) => (
-                <ProfessionalCardDesktop key={prof.id} prof={prof} />
-              ))}
-            </div>
-            {/* Mobile cards */}
-            <div className="block lg:hidden">
-              {paginatedProfessionals.map((prof) => (
-                <ProfessionalCardMobile key={prof.id} prof={prof} />
-              ))}
-            </div>
-          </>
-        )}
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-center gap-4 mt-6">
-            <button
-              className={`px-3 py-1 rounded border ${
-                page === 1
-                  ? "bg-gray-100 text-gray-400"
-                  : "bg-white text-blue-600 border-blue-400 hover:bg-blue-50"
-              }`}
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page === 1}
-            >
-              <FiChevronLeft size={18} />
-            </button>
-            <span className="font-semibold text-sm">
-              Page {page} of {totalPages}
-            </span>
-            <button
-              className={`px-3 py-1 rounded border ${
-                page === totalPages
-                  ? "bg-gray-100 text-gray-400"
-                  : "bg-white text-blue-600 border-blue-400 hover:bg-blue-50"
-              }`}
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              disabled={page === totalPages}
-            >
-              <FiChevronRight size={18} />
-            </button>
           </div>
         )}
+
+        {/* Professionals */}
+        <div className="flex-1">
+          <h2 className="text-xl font-semibold mb-2">
+            Choose a professional.{" "}
+            <span className="font-normal">Write your question. Get Answer</span>
+          </h2>
+          <p className="mb-6 text-gray-600">
+            Getting trusted advice is a smart way to move faster, solve
+            problems, or grow your ideas.
+          </p>
+          {paginatedProfessionals.length === 0 ? (
+            <div className="text-gray-500 mt-8">
+              No professionals found for selected filters.
+            </div>
+          ) : (
+            <>
+              {/* Desktop cards */}
+              <div className="hidden lg:block">
+                {paginatedProfessionals.map((prof) => (
+                  <ProfessionalCardDesktop key={prof.id} prof={prof} />
+                ))}
+              </div>
+              {/* Mobile cards */}
+              <div className="block lg:hidden">
+                {paginatedProfessionals.map((prof) => (
+                  <ProfessionalCardMobile key={prof.id} prof={prof} />
+                ))}
+              </div>
+            </>
+          )}
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-4 mt-6">
+              <button
+                className={`px-3 py-1 rounded border ${
+                  page === 1
+                    ? "bg-gray-100 text-gray-400"
+                    : "bg-white text-blue-600 border-blue-400 hover:bg-blue-50"
+                }`}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1}
+              >
+                <FiChevronLeft size={18} />
+              </button>
+              <span className="font-semibold text-sm">
+                Page {page} of {totalPages}
+              </span>
+              <button
+                className={`px-3 py-1 rounded border ${
+                  page === totalPages
+                    ? "bg-gray-100 text-gray-400"
+                    : "bg-white text-blue-600 border-blue-400 hover:bg-blue-50"
+                }`}
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+              >
+                <FiChevronRight size={18} />
+              </button>
+            </div>
+          )}
+        </div>
+        {showProfileModal && selectedProfessional && (
+          <ProfessionalProfileModal
+            professionalId={selectedProfessional.id}
+            onClose={() => setShowProfileModal(false)}
+          />
+        )}
+        {showModal && selectedProfessional && (
+          <AskQuestionModal
+            professional={selectedProfessional}
+            onClose={() => setShowModal(false)}
+          />
+        )}
       </div>
-      {showProfileModal && selectedProfessional && (
-  <ProfessionalProfileModal
-    professionalId={selectedProfessional.id}
-    
-    onClose={() => setShowProfileModal(false)}
-  />
-)}
-      {showModal && selectedProfessional && (
-        <AskQuestionModal
-          professional={selectedProfessional}
-          onClose={() => setShowModal(false)}
-        />
-      )}
     </div>
   );
 };
