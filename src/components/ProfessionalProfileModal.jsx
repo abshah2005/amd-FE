@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import FeedbackSlider from './FeedbackSlider';
 import SkeletonProfile from './SkeletonProfile';
-import linkedin from '../icons/linkedin';
-import facebook from '../icons/facebook';
-import instagram from '../icons/instagram';
-import website from '../icons/website';
-import verified from '../icons/verified';
-import star from '../icons/star';
-import back from '../icons/back';
+import Linkedin from '../icons/linkedin';
+import Facebook from '../icons/facebook';
+import Instagram from '../icons/instagram';
+import Website from '../icons/website';
+import Verified from '../icons/verified';
+import Star from '../icons/star';
+import Back from '../icons/back';
 
 
 const dummyData = {
@@ -78,15 +78,15 @@ const dummyData = {
 
 const iconMap = {
   linkedin: 
-    <linkedin />
+    <Linkedin />
   ,
   facebook: 
-   <facebook />
+   <Facebook />
   ,
-  instagram: <instagram />,
-  website: <website />,
-  verified: <verified />,
-  star: <star />,
+  instagram: <Instagram />,
+  website: <Website />,
+  verified: <Verified />,
+  star: <Star />,
 };
 
 const ProfessionalProfileModal = ({ professionalId, onClose }) => {
@@ -112,7 +112,7 @@ const ProfessionalProfileModal = ({ professionalId, onClose }) => {
           onClick={onClose}
         >
             <div className='flex items-center text-[#4D5B70]'>
-    <back />
+    <Back />
 <span>Back</span>
             </div>
           
