@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useAuth } from "../contextProvider/AuthContextProvider";
+import { useToggleActiveRole } from "../hooks/userhooks"; // added
 import logo from "../assets/logo.svg";
 import searchIcon from "../assets/search.svg";
 import dropdownIcon from "../assets/dropdown.svg";
@@ -14,18 +15,21 @@ import Logout from "../icons/Logout";
 const MainNav = () => {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
-  const { user, logout, toggleActiveRole } = useAuth();
+  const { user, logout, refreshCurrentUser } = useAuth(); 
+  const { mutateAsync: toggleActiveRole, isLoading: togglingRole } = useToggleActiveRole();
+
+  // Show toggle only when user has both roles
+  const canToggleRole =
+    Array.isArray(user?.roles) && user.roles.includes("professional") && user.roles.includes("asker");
+
+  const switchLabel = user?.activeRole === "professional" ? "Switch to Asker" : "Switch to Professional";
+
   const modalRef = useRef(null);
 
   const userProfilePic = user?.profilePic || "https://your-cdn.com/user-profile.jpg";
   const displayName = user?.fullName
   const email = user?.email
 
-  // Show "Switch to Professional" only when user.roles includes both "professional" and "asker"
-  const canSwitchToProfessional =
-    Array.isArray(user?.roles) && user.roles.includes("professional") && user.roles.includes("asker");
-
- 
   useEffect(() => {
     function handleOutside(e) {
       if (modalRef.current && !modalRef.current.contains(e.target)) setShowProfileModal(false);
@@ -112,18 +116,24 @@ const MainNav = () => {
                     </div>
                   </div>
 
-                  {canSwitchToProfessional && (
+                  {canToggleRole && (
                     <div className="mt-4">
                       <button
                         onClick={async () => {
-                          if (typeof toggleActiveRole === "function") {
-                            await toggleActiveRole("professional");
+                          try {
+                            const target = user?.activeRole === "professional" ? "asker" : "professional";
+                            await toggleActiveRole(target); // hook handles PUT + refresh
+                            // ensure context is up-to-date (safe no-op if hook already refreshes)
+                            if (typeof refreshCurrentUser === "function") await refreshCurrentUser();
+                            setShowProfileModal(false);
+                          } catch (err) {
+                            console.error("Role toggle failed", err);
                           }
-                          setShowProfileModal(false);
                         }}
-                        className="w-full bg-white border border-blue-200 text-blue-600 rounded-full py-2 text-sm font-medium"
+                        disabled={togglingRole}
+                        className={`w-full ${togglingRole ? "opacity-60 cursor-wait" : "bg-white border border-blue-200"} text-blue-600 rounded-full py-2 text-sm font-medium`}
                       >
-                        Switch to Professional
+                        {togglingRole ? "Switching..." : switchLabel}
                       </button>
                     </div>
                   )}

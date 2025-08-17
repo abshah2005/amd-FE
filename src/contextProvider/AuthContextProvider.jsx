@@ -11,55 +11,55 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Fetch current user if token exists
-  useEffect(() => {
+  const refreshCurrentUser = async () => {
     const token = localStorage.getItem("accessToken");
-    if (token) {
-      axios.get(`${import.meta.env.VITE_API_BASE_URL}/users/getcurrent`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then(res => setUser(res.data))
-      .catch(() => {
-        setUser(null);
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
-      })
-      .finally(() => setLoading(false));
-    } else {
-      setLoading(false);
+    if (!token) {
+      setUser(null);
+      return null;
     }
+    try {
+      const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/users/getcurrent`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setUser(res.data);
+      return res.data;
+    } catch (err) {
+      setUser(null);
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      return null;
+    }
+  };
+
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      await refreshCurrentUser();
+      setLoading(false);
+    })();
   }, []);
 
   const login = async (email, password) => {
     const { data } = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/users/login`, { email, password });
     localStorage.setItem("accessToken", data.data.accessToken);
     localStorage.setItem("refreshToken", data.data.refreshToken);
-    const userRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/users/getcurrent`, {
-      headers: { Authorization: `Bearer ${data.data.accessToken}` },
-    });
-    setUser(userRes.data);
+    await refreshCurrentUser();
   };
 
-  // Login with LinkedIn callback
   const loginWithLinkedIn = async (accessToken) => {
     localStorage.setItem("accessToken", accessToken);
-    // Fetch current user after LinkedIn login
-    const userRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/users/getcurrent`, {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
-    setUser(userRes.data);
+    await refreshCurrentUser();
   };
 
-  // Logout function
   const logout = () => {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
     setUser(null);
-    navigate("/signin")
+    navigate("/signin");
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, loginWithLinkedIn, logout }}>
+    <AuthContext.Provider value={{ user, setUser, loading, login, loginWithLinkedIn, logout, refreshCurrentUser }}>
       {children}
     </AuthContext.Provider>
   );
