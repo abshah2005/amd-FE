@@ -7,6 +7,7 @@ import DropdownSelector from "./DropdownSelector";
 import CategoriesSlider from "./Categories";
 import AskQuestionModal from "./AskQuestionModal";
 import ProfessionalProfileModal from "./ProfessionalProfileModal";
+import useSpecializations from "../hooks/useSpecializations";
 
 const professionals = [
   {
@@ -138,21 +139,6 @@ const professionals = [
   // Add more professionals as needed for pagination
 ];
 
-const allTags = [
-  "Business",
-  "Fundraising",
-  "Pitch decks",
-  "Marketing",
-  "Branding",
-  "Social Media",
-  "Finance",
-  "Investment",
-  "Tax",
-  "HR & Recruitment",
-  "Career Coaching",
-  "Legal Advice",
-  "Design",
-];
 
 const allLanguages = [
   "English",
@@ -163,17 +149,7 @@ const allLanguages = [
   "Italian",
 ];
 
-const categories = [
-  { id: "All", name: "All" },
-  { id: 1, name: "IT Consultation" },
-  { id: 2, name: "Business Strategy" },
-  { id: 3, name: "Marketing" },
-  { id: 4, name: "Legal Advice" },
-  { id: 5, name: "Finance" },
-  { id: 6, name: "HR & Recruitment" },
-  { id: 7, name: "Design" },
-  { id: 8, name: "Sales" },
-];
+
 
 const allLocations = ["UK", "USA", "Singapore", "Canada", "Germany", "Italy"];
 
@@ -195,6 +171,7 @@ const PAGE_SIZE = 3;
 
 const Professionals = () => {
   // Filter states
+  const { topCategories, allSubCategories,specializations, loading } = useSpecializations();
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [showModal, setShowModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -230,8 +207,8 @@ const Professionals = () => {
   const filteredProfessionals = useMemo(() => {
     return professionals.filter((prof) => {
       if (category !== "All" && !prof.tags.includes(category)) return false;
-      const selectedCategoryObj = categories.find(c => c.id === selectedCategory);
-    const selectedCategoryName = selectedCategoryObj ? selectedCategoryObj.name : "All";
+    const selectedCategoryObj = [{_id:"All", category:"All"}, ...specializations].find(c => c._id === selectedCategory);
+    const selectedCategoryName = selectedCategoryObj ? selectedCategoryObj.category : "All";
     if (selectedCategoryName !== "All" && !prof.categories.includes(selectedCategoryName)) return false;
       if (tags.length && !tags.every((tag) => prof.tags.includes(tag)))
         return false;
@@ -521,7 +498,7 @@ const Professionals = () => {
     <div>
       <div className="w-full mb-6">
           <CategoriesSlider
-            categories={categories}
+            categories={[{_id:"All",category:"All"},...specializations]}
             selectedCategory={selectedCategory}
             onSelect={setSelectedCategory}
           />
@@ -552,7 +529,7 @@ const Professionals = () => {
           <div className="mb-4">
             <label className="block text-sm font-medium mb-1">Category</label>
             <DropdownSelector
-              options={[...categories.map((c) => c.name)]}
+              options={["All",...specializations.map((c) => c.category)]}
               value={category}
               onChange={(val) => {
                 setCategory(val);
@@ -563,77 +540,77 @@ const Professionals = () => {
           </div>
 
           {/* Tags */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">
-              Tags (max - 2)
-            </label>
-            <div className="relative">
-              <div className="flex items-center border rounded-full px-4 py-2 bg-white w-full">
-                <span className="mr-2 text-gray-400">
-                  <img src={find} alt="" />
-                </span>
-                <div className="flex gap-2 flex-wrap">
-                  {tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="flex items-center bg-blue-50 border border-blue-400 text-blue-700 px-3 py-1 rounded-full text-xs font-medium"
-                    >
-                      {tag}
-                      <button
-                        type="button"
-                        className="ml-1 text-blue-500 font-bold focus:outline-none"
-                        onClick={() => handleTagChange(tag)}
-                      >
-                        &times;
-                      </button>
-                    </span>
-                  ))}
-                </div>
-                <button
-                  type="button"
-                  className="ml-auto text-gray-400"
-                  onClick={() => setShowTagDropdown((v) => !v)}
-                  tabIndex={-1}
-                >
-                  <svg width="20" height="20" fill="none">
-                    <path
-                      d="M6 8l4 4 4-4"
-                      stroke="#94A3B8"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </button>
-              </div>
-              {/* Dropdown */}
-              {showTagDropdown && (
-                <div className="absolute left-0 top-full mt-2 w-full bg-white border rounded-xl shadow-lg z-10 max-h-48 overflow-auto">
-                  {allTags.map((tag) => (
-                    <button
-                      key={tag}
-                      className={`w-full text-left px-4 py-2 text-sm hover:bg-blue-50 ${
-                        tags.includes(tag)
-                          ? "bg-blue-100 text-blue-700 font-semibold"
-                          : "text-gray-700"
-                      }`}
-                      onClick={() => {
-                        if (tags.includes(tag)) {
-                          handleTagChange(tag);
-                        } else if (tags.length < 2) {
-                          handleTagChange(tag);
-                        }
-                        setShowTagDropdown(false);
-                      }}
-                      disabled={!tags.includes(tag) && tags.length >= 2}
-                    >
-                      {tag}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
+<div className="mb-4">
+  <label className="block text-sm font-medium mb-1">
+    Tags (max - 2)
+  </label>
+  <div className="relative">
+    <div className="flex items-center border rounded-full px-4 py-2 bg-white w-full">
+      <span className="mr-2 text-gray-400">
+        <img src={find} alt="" />
+      </span>
+      <div className="flex gap-2 flex-wrap">
+        {tags.map((tag) => (
+          <span
+            key={tag}
+            className="flex items-center bg-blue-50 border border-blue-400 text-blue-700 px-3 py-1 rounded-full text-xs font-medium"
+          >
+            {tag}
+            <button
+              type="button"
+              className="ml-1 text-blue-500 font-bold focus:outline-none"
+              onClick={() => handleTagChange(tag)}
+            >
+              &times;
+            </button>
+          </span>
+        ))}
+      </div>
+      <button
+        type="button"
+        className="ml-auto text-gray-400"
+        onClick={() => setShowTagDropdown((v) => !v)}
+        tabIndex={-1}
+      >
+        <svg width="20" height="20" fill="none">
+          <path
+            d="M6 8l4 4 4-4"
+            stroke="#94A3B8"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
+    </div>
+    {/* Dropdown */}
+    {showTagDropdown && (
+      <div className="absolute left-0 top-full mt-2 w-full bg-white border rounded-xl shadow-lg z-10 max-h-48 overflow-auto">
+        {allSubCategories.map((tag) => (
+          <button
+            key={tag}
+            className={`w-full text-left px-4 py-2 text-sm hover:bg-blue-50 ${
+              tags.includes(tag)
+                ? "bg-blue-100 text-blue-700 font-semibold"
+                : "text-gray-700"
+            }`}
+            onClick={() => {
+              if (tags.includes(tag)) {
+                handleTagChange(tag);
+              } else if (tags.length < 2) {
+                handleTagChange(tag);
+              }
+              setShowTagDropdown(false);
+            }}
+            disabled={!tags.includes(tag) && tags.length >= 2}
+          >
+            {tag}
+          </button>
+        ))}
+      </div>
+    )}
+  </div>
+</div>
 
           {/* Budget Range */}
           <div className="mb-4">

@@ -46,18 +46,20 @@ const CategoriesSlider = ({
         className="flex gap-4 overflow-hidden pb-2 px-2 scrollbar-hide"
         style={{ scrollBehavior: "smooth" }}
       >
-        {categories.map((cat) => (
+        {categories
+        .filter(cat => cat._id !== "All")
+        .map((cat) => (
           <div
-            key={cat.id}
+            key={cat._id}
             className={`min-w-[220px] flex items-center bg-white border rounded-xl px-3 py-3 shadow-sm gap-3 cursor-pointer transition ${
-              selectedCategory === cat.id
+              selectedCategory === cat._id
                 ? "border-blue-500 bg-blue-50"
                 : "border-gray-200 hover:border-blue-500"
             }`}
-            onClick={() => onSelect(cat.id)}
+            onClick={() => onSelect(cat._id)}
           >
             <MdCategory size={22} className="text-gray-400" />
-            <span className="flex-1 text-gray-800 text-base">{cat.name}</span>
+            <span className="flex-1 text-gray-800 text-base">{cat.category}</span>
             <FiArrowRight size={18} className="text-gray-400" />
           </div>
         ))}

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery,useQueryClient } from "@tanstack/react-query";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -16,6 +16,26 @@ export const useRegisterStep1 = () => {
         }
       );
       return data;
+    },
+  });
+};
+
+export const useToggleActiveRole = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (activeRole) => {
+      const url = `${API_BASE_URL}/users/role/active`;
+      await axios.put(url, { activeRole });
+      const { data: currentUser } = await axios.get(`${API_BASE_URL}/users/getcurrent`);
+      queryClient.setQueryData(["currentUser"], currentUser);
+      queryClient.invalidateQueries(["currentUser"]);
+      queryClient.invalidateQueries(["registrationState"]);
+      return currentUser;
+    },
+    onSuccess: (currentUser) => {
+      // ensure cache is fresh (already set above) and let callers handle UI
+      // you can add toast/notification here if desired
     },
   });
 };

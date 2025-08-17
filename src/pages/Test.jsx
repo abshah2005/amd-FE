@@ -23,13 +23,6 @@ const Test = () => {
       <Banner />
 
       <div className="flex flex-col m-auto items-center justify-center py-4 w-[90%]">
-        {/* <div className="w-full">
-          <CategoriesSlider
-            categories={categories}
-            selectedCategory={selectedCategory}
-            onSelect={setSelectedCategory}
-          />
-        </div> */}
         <div className="w-full">
           <Professionals />
         </div>

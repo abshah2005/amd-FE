@@ -48,7 +48,7 @@ const DropdownSelector = ({
       onClick={() => !disabled && setOpen((v) => !v)}
     >
       {renderIcon && <span className="mr-2 text-gray-400">{renderIcon}</span>}
-      <div className="flex gap-2 flex-wrap flex-1">
+      {/* <div className="flex gap-2 flex-wrap flex-1">
         {multi && value.length === 0 && (
           <span className="text-gray-400 text-sm">{placeholder}</span>
         )}
@@ -77,7 +77,39 @@ const DropdownSelector = ({
             </span>
           )
         }
-      </div>
+      </div> */}
+      <div
+  className="flex gap-2 flex-nowrap flex-1 overflow-x-auto scrollbar-hide"
+>
+  {multi && value.length === 0 && (
+    <span className="text-gray-400 text-sm">{placeholder}</span>
+  )}
+  {multi
+    ? value.map((option) => (
+        <span
+          key={option}
+          className="flex items-center bg-blue-50 border border-blue-400 text-blue-700 px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap"
+        >
+          {option}
+          <button
+            type="button"
+            className="ml-1 text-blue-500 font-bold focus:outline-none"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleRemove(option);
+            }}
+          >
+            &times;
+          </button>
+        </span>
+      ))
+    : (
+      <span className="text-sm text-gray-700">
+        {value || <span className="text-gray-400">{placeholder}</span>}
+      </span>
+    )
+  }
+</div>
       <span className="ml-auto text-gray-400">
         <svg width="20" height="20" fill="none">
           <path

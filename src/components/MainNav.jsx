@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useAuth } from "../contextProvider/AuthContextProvider";
 import logo from "../assets/logo.svg";
 import searchIcon from "../assets/search.svg";
@@ -8,12 +8,40 @@ import userIcon from "../assets/user.svg";
 import sendIcon from "../assets/send.svg";
 import bellIcon from "../assets/bell.svg";
 import Banner from "./Banner";
+import Setting from "../icons/Setting";
+import Logout from "../icons/Logout";
 
 const MainNav = () => {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
-  const { user, logout } = useAuth();
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const { user, logout, toggleActiveRole } = useAuth();
+  const modalRef = useRef(null);
 
   const userProfilePic = user?.profilePic || "https://your-cdn.com/user-profile.jpg";
+  const displayName = user?.fullName
+  const email = user?.email
+
+  // Show "Switch to Professional" only when user.roles includes both "professional" and "asker"
+  const canSwitchToProfessional =
+    Array.isArray(user?.roles) && user.roles.includes("professional") && user.roles.includes("asker");
+
+ 
+  useEffect(() => {
+    function handleOutside(e) {
+      if (modalRef.current && !modalRef.current.contains(e.target)) setShowProfileModal(false);
+    }
+    function handleEsc(e) {
+      if (e.key === "Escape") setShowProfileModal(false);
+    }
+    if (showProfileModal) {
+      document.addEventListener("mousedown", handleOutside);
+      document.addEventListener("keydown", handleEsc);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleOutside);
+      document.removeEventListener("keydown", handleEsc);
+    };
+  }, [showProfileModal]);
 
   return (
     <div>
@@ -52,38 +80,86 @@ const MainNav = () => {
         <div className="hidden lg:flex items-center gap-6 relative lg:right-10">
           <img src={sendIcon} alt="Send" className="w-5 h-5" />
           <img src={bellIcon} alt="Bell" className="w-5 h-5" />
-          {/* Profile: clickable avatar with dropdown */}
-          <div
-            className="flex items-center gap-2 group relative cursor-pointer"
-            tabIndex={0}
-            aria-label="Profile"
-          >
-            <img
-              src={userProfilePic}
-              alt="Profile"
-              className="w-10 h-10 rounded-full border-2 border-blue-600 object-cover cursor-pointer transition-shadow group-hover:shadow-lg"
-            />
-            <div className="absolute right-0 top-12 bg-white shadow-lg rounded-lg py-2 w-40 z-50 hidden group-focus-within:block group-hover:block">
-              <a
-                href="/profile"
-                className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+
+          {/* Profile: clickable avatar opens modal-style card */}
+          <div className="relative">
+            <button
+              onClick={() => setShowProfileModal((s) => !s)}
+              aria-expanded={showProfileModal}
+              aria-label="Open profile"
+              className="flex items-center gap-2 cursor-pointer focus:outline-none"
+            >
+              <img
+                src={userProfilePic}
+                alt="Profile"
+                className="w-10 h-10 rounded-full border-2 border-blue-600 object-cover cursor-pointer transition-shadow hover:shadow-lg"
+              />
+            </button>
+
+            {showProfileModal && (
+              <div
+                ref={modalRef}
+                className="absolute  right-5 mt-2 w-72 bg-white rounded-xl shadow-xl z-50 ring-1 ring-black ring-opacity-5"
               >
-                View Profile
-              </a>
-              <a
-                href="/settings"
-                className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
-              >
-                Settings
-              </a>
-              <button
-                onClick={logout}
-                className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
-                type="button"
-              >
-                Logout
-              </button>
-            </div>
+                <div className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold text-lg">
+                      {user?.firstName ? user.firstName[0] : "U"}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="font-semibold text-gray-900 text-sm truncate">{displayName}</div>
+                      <div className="text-xs text-gray-500 truncate">{email}</div>
+                    </div>
+                  </div>
+
+                  {canSwitchToProfessional && (
+                    <div className="mt-4">
+                      <button
+                        onClick={async () => {
+                          if (typeof toggleActiveRole === "function") {
+                            await toggleActiveRole("professional");
+                          }
+                          setShowProfileModal(false);
+                        }}
+                        className="w-full bg-white border border-blue-200 text-blue-600 rounded-full py-2 text-sm font-medium"
+                      >
+                        Switch to Professional
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* divider */}
+                <div className="border-t border-gray-200" />
+
+                {/* actions */}
+                <div className="p-2">
+                  <a
+                    href="/profile"
+                    className="flex items-center gap-3 px-3 py-3 rounded hover:bg-gray-50 text-gray-800 text-sm"
+                  >
+                    <span className="w-6 h-6 flex items-center justify-center text-gray-700">
+                      <Setting />
+                    </span>
+                    <span className="font-medium">Account Settings</span>
+                  </a>
+
+                  <button
+                    onClick={() => {
+                      logout();
+                      setShowProfileModal(false);
+                    }}
+                    className="flex items-center gap-3 w-full px-3 py-3 mt-1 rounded hover:bg-gray-50 text-gray-800 text-sm"
+                    type="button"
+                  >
+                    <span className="w-6 h-6 flex items-center justify-center text-gray-700">
+                      <Logout />
+                    </span>
+                    <span className="font-medium">Log out</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -171,7 +247,7 @@ const MainNav = () => {
             </div>
           </div>
         )}
-        {/* Add slide-in animation */}
+
         <style>
           {`
             @keyframes slidein {
