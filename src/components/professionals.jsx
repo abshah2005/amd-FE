@@ -35,12 +35,11 @@ const ratingOptions = [
   { label: "5 rating", value: 5 },
 ];
 
-const PAGE_SIZE = 3;
+const PAGE_SIZE = 1;
 
 const Professionals = () => {
   const { topCategories, allSubCategories, specializations, loading } =
     useSpecializations();
-  const { data: professionals = [], isLoading: professionalsLoading, isError: professionalsError } = useProfessionals();
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [showModal, setShowModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -54,7 +53,6 @@ const Professionals = () => {
   const [verified, setVerified] = useState("");
   const [language, setLanguage] = useState([]);
   const [location, setLocation] = useState([]);
-
   const [page, setPage] = useState(1);
 
   // Mobile filter modal state
@@ -71,31 +69,26 @@ const Professionals = () => {
     };
   }, [showMobileFilters]);
 
-  // Filtering logic
-  const filteredProfessionals = useMemo(() => {
-    return professionals.filter((prof) => {
-      if (category !== "All" && !prof.tags.includes(category)) return false;
-      const selectedCategoryObj = [{_id:"All", category:"All"}, ...specializations].find(c => c._id === selectedCategory);
-      const selectedCategoryName = selectedCategoryObj ? selectedCategoryObj.category : "All";
-      if (selectedCategoryName !== "All" && !prof.categories.includes(selectedCategoryName)) return false;
-      if (tags.length && !tags.every((tag) => prof.tags.includes(tag)))
-        return false;
-      if (budget && (prof.priceStart > budget[1] || prof.priceEnd < budget[0]))
-        return false;
-      if (delivery.length && !delivery.some((d) => prof.delivery <= Number(d)))
-        return false;
-      if (
-        rating.length &&
-        !rating.some((r) => Math.floor(prof.rating) >= Number(r))
-      )
-        return false;
-      if (verified !== "" && prof.verified !== verified) return false;
-      if (language.length && !language.every((l) => prof.languages.includes(l)))
-        return false;
-      if (location.length && !location.includes(prof.location)) return false;
-      return true;
-    });
-  }, [category, tags, budget, delivery, rating, verified, language, location,selectedCategory, specializations, professionals]);
+  const filters = useMemo(() => {
+    return {
+      page,
+      limit: PAGE_SIZE,
+      ...(selectedCategory && selectedCategory !== "All" ? { category: selectedCategory } : {}),
+      ...(category && category !== "All" ? { tags: [category] } : {}),
+      ...(tags.length ? { tags } : {}),
+      ...(budget?.[0] !== undefined ? { minPrice: budget[0] } : {}),
+      ...(budget?.[1] !== undefined ? { maxPrice: budget[1] } : {}),
+      ...(delivery.length ? { delivery } : {}),
+      ...(rating.length ? { rating } : {}),
+      ...(verified !== "" ? { verified } : {}),
+      ...(language.length ? { language } : {}),
+      ...(location.length ? { country: location } : {}),
+    };
+  }, [page, selectedCategory, category, tags, budget, delivery, rating, verified, language, location]);
+
+  const { data: professionalsData, isLoading: professionalsLoading, isError: professionalsError } = useProfessionals(filters, { debounceTime: 500 });
+  const professionals = professionalsData?.results || [];
+  const total = professionalsData?.total || 0;
 
   if (professionalsLoading) {
     return <div className="p-6">Loading professionals…</div>;
@@ -103,11 +96,8 @@ const Professionals = () => {
   if (professionalsError) {
     return <div className="p-6 text-red-600">Failed to load professionals</div>;
   }
-  const totalPages = Math.ceil(filteredProfessionals.length / PAGE_SIZE);
-  const paginatedProfessionals = filteredProfessionals.slice(
-    (page - 1) * PAGE_SIZE,
-    page * PAGE_SIZE
-  );
+  const totalPages = Math.ceil((total || 0) / PAGE_SIZE);
+  const paginatedProfessionals = professionals; // server returns page-sized results
 
   // Handlers
   const handleTagChange = (tag) => {
