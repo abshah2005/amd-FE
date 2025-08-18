@@ -13,7 +13,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import PasswordResetSuccess from "./pages/ResetSuccess";
 import Test from "./pages/Test";
-import RichEditor from "./pages/RichEditor"
+import RichEditor from "./pages/RichEditor";
 import { AuthProvider } from "./contextProvider/AuthContextProvider";
 
 import { useAuth } from "./contextProvider/AuthContextProvider";
@@ -21,12 +21,28 @@ import QuestionsPage from "./pages/QuestionsPage";
 import ProfessionalOnboarding from "./pages/ProfessionalOnboarding";
 import AccountSettings from "./pages/AccountSettings";
 import DashboardPage from "./pages/DashboardPage";
+import AppSkeleton from "./pages/AppSkeleton";
 
-// ProtectedRoute component
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <AppSkeleton />;
   return user ? children : <Navigate to="/signin" replace />;
+}
+
+function ProtectedAdminRoute({ children }) {
+  const { user, loading } = useAuth();
+  if (loading) return <AppSkeleton />;
+  return user.role === "asker" || user.role === "Asker" ? (
+    children
+  ) : (
+    <Navigate to="/signin" replace />
+  );
+}
+
+function ProtectedLayout(){
+  return(
+    <Outlet />
+  )
 }
 
 function MainLayout() {
@@ -52,10 +68,18 @@ function App() {
           <Route path="/" element={<Test />} />
           <Route path="/questions" element={<QuestionsPage />} />
         </Route>
+        <Route
+          element={
+            <ProtectedAdminRoute>
+              <ProtectedLayout />
+            </ProtectedAdminRoute>
+          }
+        >
+          <Route path="/dashboard" element={<DashboardPage />} />
+        </Route>
 
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/account-settings" element={<AccountSettings />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/pofon" element={<ProfessionalOnboarding />} />
         <Route path="/resetPassword" element={<ResetPassword />} />
         <Route path="/signin" element={<SignInPage />} />

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import DashboardStats from "../components/DashboardStats";
 import DashboardTabs from "../components/DashboardTabs";
 import DashboardTable from "../components/DashboardTable";
+import MainNav from "../components/MainNav";
 
 const professionalsData = [
   { name: "Alex Hales", joined: "YYYY/MM/DD", earnings: "$25", answers: 23, status: "Active" },
@@ -19,9 +20,11 @@ const DashboardPage = () => {
   const [activeTab, setActiveTab] = useState("Professionals");
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center">
-      
-      <div className="w-full flex justify-center">
+    <div className="min-h-screen bg-white flex flex-col items-center w-full">
+      <div className="w-full">
+      <MainNav isDashboard={true} />
+      </div>  
+      <div className="w-full flex mt-10 justify-center">
         <DashboardStats />
       </div>
       <div className="w-[1100px] max-w-full mx-auto mt-2">

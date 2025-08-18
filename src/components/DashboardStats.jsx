@@ -8,11 +8,11 @@ const stats = [
 ];
 
 const DashboardStats = () => (
-  <div className="flex justify-center gap-8 items-center  mb-10 w-[80%] ">
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-10 w-full max-w-[1100px] mx-auto">
     {stats.map((stat) => (
       <div
         key={stat.label}
-        className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col  shadow-sm w-[40%]"
+        className="bg-white border border-gray-200 rounded-xl p-6 flex flex-col shadow-sm"
       >
         <span className="text-base text-gray-500 mb-2 font-medium">{stat.label}</span>
         <span className="text-3xl font-bold text-gray-900">{stat.value}</span>

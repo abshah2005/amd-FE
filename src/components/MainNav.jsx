@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useAuth } from "../contextProvider/AuthContextProvider";
-import { useToggleActiveRole } from "../hooks/userhooks"; // added
+import { useToggleActiveRole } from "../hooks/userhooks"; 
 import logo from "../assets/logo.svg";
 import searchIcon from "../assets/search.svg";
 import dropdownIcon from "../assets/dropdown.svg";
@@ -12,13 +12,12 @@ import Banner from "./Banner";
 import Setting from "../icons/Setting";
 import Logout from "../icons/Logout";
 
-const MainNav = () => {
+const MainNav = ({isDashboard}) => {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const { user, logout, refreshCurrentUser } = useAuth(); 
   const { mutateAsync: toggleActiveRole, isLoading: togglingRole } = useToggleActiveRole();
 
-  // Show toggle only when user has both roles
   const canToggleRole =
     Array.isArray(user?.roles) && user.roles.includes("professional") && user.roles.includes("asker");
 
@@ -52,11 +51,16 @@ const MainNav = () => {
       <nav className="w-full bg-white px-4 lg:px-8 py-3 flex items-center justify-between shadow-sm border-b border-gray-200">
         {/* Logo */}
         <div className="flex items-center relative lg:left-10">
+          <a href="/">
           <img src={logo} alt="AskMeDirect" className="w-24 lg:w-28" />
+          </a>
         </div>
 
         {/* Desktop Center Section */}
-        <div className="hidden lg:flex flex-1 justify-center gap-2">
+
+        {
+          !isDashboard && (
+<div className="hidden lg:flex flex-1 justify-center gap-2">
           <div className="flex items-center bg-[#F0F1F3] rounded-full px-4 py-2 w-[340px] max-w-md">
             <img src={findIcon} alt="Search" className="w-4 h-4 mr-2" />
             <input
@@ -79,10 +83,13 @@ const MainNav = () => {
             </div>
           </div>
         </div>
+          )
+        }
+        
 
         {/* Desktop Right Section */}
         <div className="hidden lg:flex items-center gap-6 relative lg:right-10">
-          <img src={sendIcon} alt="Send" className="w-5 h-5" />
+          {!isDashboard? (<img src={sendIcon} alt="Send" className="w-5 h-5" />):<></> }
           <img src={bellIcon} alt="Bell" className="w-5 h-5" />
 
           {/* Profile: clickable avatar opens modal-style card */}

@@ -1,7 +1,7 @@
 import React from "react";
 
 const DashboardTabs = ({ tabs, activeTab, setActiveTab }) => (
-  <div className="flex gap-6 border-b border-gray-200 mb-2">
+  <div className="flex  gap-6 border-b border-gray-200 mb-2">
     {tabs.map((tab) => (
       <button
         key={tab}
