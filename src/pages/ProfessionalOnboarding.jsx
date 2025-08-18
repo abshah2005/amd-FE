@@ -14,13 +14,16 @@ const initialPersonal = {
   location: "",
 };
 const initialProfessional = {
-  category: "",
-  subcategory: "",
-  tags: "",
+  // new shape: array of { specialization: "<id>", subCategories: [ "sub1", "sub2" ] }
+  selectedSpecializations: [],
+  tags: [],
   priceMin: "",
   priceMax: "",
+  isFirm: false,
   firm: "",
-  exampleQuestion: "",
+  exampleQuestions: [],
+  deliveryTime: "", // number of days
+  languages: [],
 };
 const initialPayment = {
   cards: [],
@@ -38,17 +41,17 @@ const ProfessionalOnboarding = () => {
 
   // Handlers
   const handlePersonalChange = (field, value) =>
-    setPersonal(prev => ({ ...prev, [field]: value }));
+    setPersonal((prev) => ({ ...prev, [field]: value }));
   const handleProfessionalChange = (field, value) =>
-    setProfessional(prev => ({ ...prev, [field]: value }));
+    setProfessional((prev) => ({ ...prev, [field]: value }));
   const handlePaymentChange = (field, value) =>
-    setPayment(prev => ({ ...prev, [field]: value }));
+    setPayment((prev) => ({ ...prev, [field]: value }));
 
-  // Simulate image upload
-  const handleImageChange = e => {
+  // For image upload (simulate)
+  const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setPersonal(prev => ({
+      setPersonal((prev) => ({
         ...prev,
         profileImage: URL.createObjectURL(file),
       }));
@@ -57,7 +60,7 @@ const ProfessionalOnboarding = () => {
 
   // Simulate card add
   const handleAddCard = () => {
-    setPayment(prev => ({
+    setPayment((prev) => ({
       ...prev,
       cards: [
         ...prev.cards,
@@ -70,8 +73,8 @@ const ProfessionalOnboarding = () => {
     }));
   };
 
-  const handleRemoveCard = idx => {
-    setPayment(prev => ({
+  const handleRemoveCard = (idx) => {
+    setPayment((prev) => ({
       ...prev,
       cards: prev.cards.filter((_, i) => i !== idx),
     }));

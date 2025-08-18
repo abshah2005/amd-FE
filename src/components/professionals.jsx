@@ -8,137 +8,7 @@ import CategoriesSlider from "./Categories";
 import AskQuestionModal from "./AskQuestionModal";
 import ProfessionalProfileModal from "./ProfessionalProfileModal";
 import useSpecializations from "../hooks/useSpecializations";
-
-const professionals = [
-  {
-    id: 1,
-    name: "Alex Hales",
-    avatar: "https://randomuser.me/api/portraits/men/32.jpg",
-    title: "Startup Legal Advisor, Career Coach",
-    associated: "Oxford",
-    priceStart: 20,
-    priceEnd: 35,
-    rating: 4.2,
-    ratingCount: 12,
-    tags: [
-      "Business",
-      "Fundraising",
-      "Pitch decks",
-      "Legal Advice",
-      "Career Coaching",
-    ],
-    categories: ["Business Strategy", "Legal Advice"], // <-- added
-    delivery: 7,
-    verified: true,
-    featured: true,
-    languages: ["English", "French"],
-    location: "UK",
-    description:
-      "Helping early-stage founders navigate legal hurdles — from incorporation to investor agreements — with clarity and confidence. Empowering professionals to land their dream roles, switch careers, and grow with purpose — one step at a time.",
-  },
-  {
-    id: 2,
-    name: "Sara Khan",
-    avatar: "https://randomuser.me/api/portraits/women/44.jpg",
-    title: "Marketing Strategist",
-    associated: "Harvard",
-    priceStart: 40,
-    priceEnd: 60,
-    rating: 4.8,
-    ratingCount: 18,
-    tags: ["Marketing", "Branding", "Social Media"],
-    categories: ["Marketing"], // <-- added
-    delivery: 1,
-    verified: true,
-    featured: false,
-    languages: ["English", "Spanish"],
-    location: "USA",
-    description:
-      "Expert in digital marketing, branding, and social media strategy. Helping startups and established businesses grow their online presence and reach their target audience effectively.",
-  },
-  {
-    id: 3,
-    name: "John Lee",
-    avatar: "https://randomuser.me/api/portraits/men/65.jpg",
-    title: "Finance Consultant",
-    associated: "Stanford",
-    priceStart: 30,
-    priceEnd: 50,
-    rating: 4.5,
-    ratingCount: 9,
-    tags: ["Finance", "Investment", "Tax"],
-    categories: ["Finance"], // <-- added
-    delivery: 10,
-    verified: false,
-    featured: false,
-    languages: ["English", "Chinese"],
-    location: "Singapore",
-    description:
-      "Providing financial advice, investment strategies, and tax planning for individuals and businesses. Experienced in international finance and cross-border transactions.",
-  },
-  {
-    id: 4,
-    name: "Emily Carter",
-    avatar: "https://randomuser.me/api/portraits/women/68.jpg",
-    title: "HR & Recruitment Expert",
-    associated: "MIT",
-    priceStart: 25,
-    priceEnd: 40,
-    rating: 4.7,
-    ratingCount: 15,
-    tags: ["HR & Recruitment", "Career Coaching"],
-    categories: ["HR & Recruitment"], // <-- added
-    delivery: 7,
-    verified: true,
-    featured: false,
-    languages: ["English"],
-    location: "Canada",
-    description:
-      "Specialist in HR, recruitment, and career coaching. Helping companies build strong teams and professionals find their ideal roles.",
-  },
-  {
-    id: 5,
-    name: "Michael Brown",
-    avatar: "https://randomuser.me/api/portraits/men/23.jpg",
-    title: "Legal Advisor",
-    associated: "Yale",
-    priceStart: 35,
-    priceEnd: 55,
-    rating: 4.1,
-    ratingCount: 7,
-    tags: ["Legal Advice", "Business"],
-    categories: ["Legal Advice", "Business Strategy"], // <-- added
-    delivery: 10,
-    verified: false,
-    featured: false,
-    languages: ["English", "German"],
-    location: "Germany",
-    description:
-      "Experienced legal advisor for startups and SMEs. Expertise in contracts, business law, and compliance.",
-  },
-  {
-    id: 6,
-    name: "Linda Smith",
-    avatar: "https://randomuser.me/api/portraits/women/12.jpg",
-    title: "Design Consultant",
-    associated: "Parsons",
-    priceStart: 50,
-    priceEnd: 70,
-    rating: 4.9,
-    ratingCount: 22,
-    tags: ["Design", "Branding"],
-    categories: ["Design"], // <-- added
-    delivery: 1,
-    verified: true,
-    featured: false,
-    languages: ["English", "Italian"],
-    location: "Italy",
-    description:
-      "Award-winning designer helping brands stand out with creative design solutions and branding strategies.",
-  },
-  // Add more professionals as needed for pagination
-];
-
+import useProfessionals from "../hooks/useProfessionals";
 
 const allLanguages = [
   "English",
@@ -148,8 +18,6 @@ const allLanguages = [
   "German",
   "Italian",
 ];
-
-
 
 const allLocations = ["UK", "USA", "Singapore", "Canada", "Germany", "Italy"];
 
@@ -170,8 +38,9 @@ const ratingOptions = [
 const PAGE_SIZE = 3;
 
 const Professionals = () => {
-  // Filter states
-  const { topCategories, allSubCategories,specializations, loading } = useSpecializations();
+  const { topCategories, allSubCategories, specializations, loading } =
+    useSpecializations();
+  const { data: professionals = [], isLoading: professionalsLoading, isError: professionalsError } = useProfessionals();
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [showModal, setShowModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -191,7 +60,6 @@ const Professionals = () => {
   // Mobile filter modal state
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
-  // Prevent background scroll when mobile filter modal is open
   useEffect(() => {
     if (showMobileFilters) {
       document.body.style.overflow = "hidden";
@@ -207,9 +75,9 @@ const Professionals = () => {
   const filteredProfessionals = useMemo(() => {
     return professionals.filter((prof) => {
       if (category !== "All" && !prof.tags.includes(category)) return false;
-    const selectedCategoryObj = [{_id:"All", category:"All"}, ...specializations].find(c => c._id === selectedCategory);
-    const selectedCategoryName = selectedCategoryObj ? selectedCategoryObj.category : "All";
-    if (selectedCategoryName !== "All" && !prof.categories.includes(selectedCategoryName)) return false;
+      const selectedCategoryObj = [{_id:"All", category:"All"}, ...specializations].find(c => c._id === selectedCategory);
+      const selectedCategoryName = selectedCategoryObj ? selectedCategoryObj.category : "All";
+      if (selectedCategoryName !== "All" && !prof.categories.includes(selectedCategoryName)) return false;
       if (tags.length && !tags.every((tag) => prof.tags.includes(tag)))
         return false;
       if (budget && (prof.priceStart > budget[1] || prof.priceEnd < budget[0]))
@@ -227,8 +95,14 @@ const Professionals = () => {
       if (location.length && !location.includes(prof.location)) return false;
       return true;
     });
-  }, [category, tags, budget, delivery, rating, verified, language, location,selectedCategory]);
+  }, [category, tags, budget, delivery, rating, verified, language, location,selectedCategory, specializations, professionals]);
 
+  if (professionalsLoading) {
+    return <div className="p-6">Loading professionals…</div>;
+  }
+  if (professionalsError) {
+    return <div className="p-6 text-red-600">Failed to load professionals</div>;
+  }
   const totalPages = Math.ceil(filteredProfessionals.length / PAGE_SIZE);
   const paginatedProfessionals = filteredProfessionals.slice(
     (page - 1) * PAGE_SIZE,
@@ -320,13 +194,13 @@ const Professionals = () => {
   const ProfessionalCardDesktop = ({ prof }) => (
     <>
       <div
-        key={prof.id}
+        key={prof._id}
         className={`flex items-center gap-6 bg-white rounded-xl  p-4 mb-6  relative`}
       >
         <div className="relative">
           <img
-            src={prof.avatar}
-            alt={prof.name}
+            src={prof.profilePic || "https://randomuser.me/api/portraits/men/32.jpg"}
+            alt={`${prof.firstName || ""} ${prof.lastName || ""}`}
             onClick={() => {
               setSelectedProfessional(prof);
               setShowProfileModal(true);
@@ -344,7 +218,9 @@ const Professionals = () => {
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <span className="font-semibold text-lg">{prof.name}</span>
+            <span className="font-semibold text-lg">
+              {`${prof.firstName || ""} ${prof.lastName || ""}`.trim()}
+            </span>
             {prof.verified && (
               <MdVerified
                 className="text-green-500"
@@ -354,27 +230,27 @@ const Professionals = () => {
             )}
           </div>
           <div className="text-sm text-gray-600 mb-1 flex flex-wrap gap-2">
-            {prof.title}
-            {prof.associated && (
-              <span className="ml-2">· associated with {prof.associated}</span>
+            {prof.title && <span className="font-medium">{prof.title}</span>}
+            {prof.entityType === "firm" && prof.firmName && (
+              <span className="ml-2">· associated with {prof.firmName}</span>
             )}
           </div>
           <div className="flex gap-4 items-center mb-2">
             <span className="font-semibold">
-              ${prof.priceStart}-${prof.priceEnd}{" "}
+              {prof.currency}{prof.priceRangeLow ?? ""} - {prof.currency}{prof.priceRangeHigh ?? ""}{" "}
               <span className="text-gray-500 text-xs">per question</span>
             </span>
             <span className="flex items-center gap-1 text-yellow-500 font-medium">
-              <FaStar size={16} /> {prof.rating}
+              <FaStar size={16} /> {prof.rating ?? 0}
               <span className="text-gray-500 text-xs ml-1">
-                ({prof.ratingCount})
+                ({prof.ratingCount ?? 0})
               </span>
             </span>
           </div>
           <div className="flex flex-wrap gap-2 mb-2">
-            {renderTags(prof.tags)}
+            {renderTags(prof.tags || [])}
           </div>
-          <div className="text-gray-700 text-sm mb-2">{prof.description}</div>
+          <div className="text-gray-700 text-sm mb-2">{prof.about[0]}</div>
         </div>
         <div className="flex flex-col items-center gap-3 min-w-[160px] h-[28vh] justify-between">
           <div>
@@ -390,7 +266,7 @@ const Professionals = () => {
           </div>
           <div className="flex flex-col items-end gap-1 mt-auto">
             <span className="text-xs text-gray-500">
-              Delivery Time: {getDeliveryLabel(prof.delivery)}
+              Delivery Time: {getDeliveryLabel(prof.deliveryTime ?? prof.delivery ?? 0)}
             </span>
           </div>
         </div>
@@ -399,17 +275,16 @@ const Professionals = () => {
     </>
   );
 
-  // Helper: Professional Card for mobile
   const ProfessionalCardMobile = ({ prof }) => (
     <div
-      key={prof.id}
+      key={prof._id}
       className="bg-white rounded-xl shadow p-4 mb-6 border flex flex-col relative"
     >
       <div className="flex items-center gap-3 mb-2">
         <div className="relative">
           <img
-            src={prof.avatar}
-            alt={prof.name}
+            src={prof.profilePic || "/placeholder-avatar.png"}
+            alt={`${prof.firstName || ""} ${prof.lastName || ""}`}
             className={`w-16 h-16 rounded-xl object-cover ${
               prof.featured ? "border-2 border-yellow-400" : ""
             }`}
@@ -422,64 +297,41 @@ const Professionals = () => {
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1">
-            <span className="font-semibold text-base">{prof.name}</span>
+            <span className="font-semibold text-base">{`${prof.firstName || ""} ${prof.lastName || ""}`.trim()}</span>
             {prof.verified && (
-              // <MdVerified
-              //   className="text-green-500"
-              //   title="Verified"
-              //   size={14}
-              // />
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 16 16"
-                fill="none"
-              >
-                <path
-                  d="M13.3334 8.66664C13.3334 12 11.0001 13.6666 8.22675 14.6333C8.08152 14.6825 7.92377 14.6802 7.78008 14.6266C5.00008 13.6666 2.66675 12 2.66675 8.66664V3.99997C2.66675 3.82316 2.73699 3.65359 2.86201 3.52857C2.98703 3.40355 3.1566 3.33331 3.33341 3.33331C4.66675 3.33331 6.33341 2.53331 7.49341 1.51997C7.63465 1.39931 7.81432 1.33301 8.00008 1.33301C8.18585 1.33301 8.36551 1.39931 8.50675 1.51997C9.67342 2.53997 11.3334 3.33331 12.6667 3.33331C12.8436 3.33331 13.0131 3.40355 13.1382 3.52857C13.2632 3.65359 13.3334 3.82316 13.3334 3.99997V8.66664Z"
-                  stroke="#36B37E"
-                  stroke-width="1.35"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-                <path
-                  d="M6 7.99984L7.33333 9.33317L10 6.6665"
-                  stroke="#36B37E"
-                  stroke-width="1.35"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
+              <svg /* verified icon */ xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M13.3334 8.66664C13.3334 12 11.0001 13.6666 8.22675 14.6333C8.08152 14.6825 7.92377 14.6802 7.78008 14.6266C5.00008 13.6666 2.66675 12 2.66675 8.66664V3.99997C2.66675 3.82316 2.73699 3.65359 2.86201 3.52857C2.98703 3.40355 3.1566 3.33331 3.33341 3.33331C4.66675 3.33331 6.33341 2.53331 7.49341 1.51997C7.63465 1.39931 7.81432 1.33301 8.00008 1.33301C8.18585 1.33301 8.36551 1.39931 8.50675 1.51997C9.67342 2.53997 11.3334 3.33331 12.6667 3.33331C12.8436 3.33331 13.0131 3.40355 13.1382 3.52857C13.2632 3.65359 13.3334 3.82316 13.3334 3.99997V8.66664Z" stroke="#36B37E" strokeWidth="1.35" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M6 7.99984L7.33333 9.33317L10 6.6665" stroke="#36B37E" strokeWidth="1.35" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             )}
           </div>
           <div className="text-xs text-gray-600 flex flex-wrap gap-1">
             {prof.title}
-            {prof.associated && (
-              <span className="ml-1">· {prof.associated}</span>
+            {prof.entityType === "firm" && prof.firmName && (
+              <span className="ml-1">· {prof.firmName}</span>
             )}
           </div>
         </div>
       </div>
       <div className="flex gap-2 items-center mb-2">
         <span className="font-semibold text-sm">
-          ${prof.priceStart}-{prof.priceEnd}
+          ${prof.priceRangeLow ?? ""}-${prof.priceRangeHigh ?? ""}
           <span className="text-gray-500 text-xs">/question</span>
         </span>
         <span className="flex items-center gap-1 text-yellow-500 font-medium text-xs">
-          <FaStar size={12} /> {prof.rating}
+          <FaStar size={12} /> {prof.rating ?? 0}
           <span className="text-gray-500 text-xs ml-1">
-            ({prof.ratingCount})
+            ({prof.ratingCount ?? 0})
           </span>
         </span>
       </div>
-      <div className="flex flex-wrap gap-1 mb-2">{renderTags(prof.tags)}</div>
+      <div className="flex flex-wrap gap-1 mb-2">{renderTags(prof.tags || [])}</div>
       <div className="text-gray-700 text-xs mb-2 line-clamp-3">
-        {prof.description}
+        {prof.about}
       </div>
       <div className="flex justify-between items-center mt-2">
         <span className="text-xs text-gray-500">
-          Delivery: {getDeliveryLabel(prof.delivery)}
+          Delivery: {getDeliveryLabel(prof.deliveryTime ?? prof.delivery ?? 0)}
         </span>
         <button
           className="bg-blue-600 text-white px-3 py-1 rounded-full font-semibold text-xs hover:bg-blue-700 transition"
@@ -1011,13 +863,13 @@ const Professionals = () => {
               {/* Desktop cards */}
               <div className="hidden lg:block">
                 {paginatedProfessionals.map((prof) => (
-                  <ProfessionalCardDesktop key={prof.id} prof={prof} />
+                  <ProfessionalCardDesktop key={prof._id} prof={prof} />
                 ))}
               </div>
               {/* Mobile cards */}
               <div className="block lg:hidden">
                 {paginatedProfessionals.map((prof) => (
-                  <ProfessionalCardMobile key={prof.id} prof={prof} />
+                  <ProfessionalCardMobile key={prof._id} prof={prof} />
                 ))}
               </div>
             </>
@@ -1055,7 +907,7 @@ const Professionals = () => {
         </div>
         {showProfileModal && selectedProfessional && (
           <ProfessionalProfileModal
-            professionalId={selectedProfessional.id}
+            professionalId={selectedProfessional._id}
             onClose={() => setShowProfileModal(false)}
           />
         )}

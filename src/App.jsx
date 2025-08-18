@@ -55,7 +55,7 @@ function App() {
 
         {/* Public routes */}
         <Route path="/signup" element={<SignUpPage />} />
-          <Route path="/account-settings" element={<AccountSettings />} />
+        <Route path="/account-settings" element={<AccountSettings />} />
 
         <Route path="/pofon" element={<ProfessionalOnboarding />} />
         <Route path="/resetPassword" element={<ResetPassword />} />

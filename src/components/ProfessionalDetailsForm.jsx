@@ -1,808 +1,363 @@
-// import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
+import ToggleSwitch from "./ToggleSwitch";
 
-// // Simulate API call for categories/subcategories
-// const fetchCategories = () =>
-//   Promise.resolve([
-//     {
-//       id: 1,
-//       name: "Artificial Intelligence",
-//       subcategories: ["Machine Learning", "Deep Learning", "NLP"],
-//     },
-//     {
-//       id: 2,
-//       name: "Design",
-//       subcategories: ["Logo Design", "Brochure Design", "Poster Design"],
-//     },
-//     {
-//       id: 3,
-//       name: "Business",
-//       subcategories: ["Strategy", "Consulting"],
-//     },
-//     {
-//       id: 4,
-//       name: "Teaching",
-//       subcategories: ["Math", "Science"],
-//     },
-//     {
-//       id: 5,
-//       name: "Financial",
-//       subcategories: ["Accounting", "Investment"],
-//     },
-//   ]);
-
-// const ProfessionalDetailsForm = ({
-//   values,
-//   onChange,
-//   onNext,
-//   loading,
-// }) => {
-//   const [categories, setCategories] = useState([]);
-//   const [selectedCategory, setSelectedCategory] = useState(values.category || "");
-//   const [selectedSubcategories, setSelectedSubcategories] = useState(values.subcategories || []);
-//   const [tags, setTags] = useState(values.tags || []);
-//   const [tagInput, setTagInput] = useState("");
-
-//   // For UI panels
-//   const [showCategoryPanel, setShowCategoryPanel] = useState(false);
-//   const [showSubcategoryPanel, setShowSubcategoryPanel] = useState(false);
-
-//   useEffect(() => {
-//     fetchCategories().then(setCategories);
-//   }, []);
-
-//   useEffect(() => {
-//     onChange("category", selectedCategory);
-//     onChange("subcategories", selectedSubcategories);
-//   }, [selectedCategory, selectedSubcategories]);
-
-//   useEffect(() => {
-//     onChange("tags", tags);
-//   }, [tags]);
-
-//   // Get subcategories for selected category
-//   const subcategories =
-//     categories.find((c) => c.name === selectedCategory)?.subcategories || [];
-
-//   // Tag logic
-//   const addTag = () => {
-//     if (
-//       tagInput &&
-//       !tags.includes(tagInput) &&
-//       tags.length < 5 &&
-//       tagInput.length <= 30
-//     ) {
-//       setTags([...tags, tagInput]);
-//       setTagInput("");
-//     }
-//   };
-
-//   // Category panel logic
-//   const handleCategoryCheck = (catName) => {
-//     setSelectedCategory(catName);
-//     setSelectedSubcategories([]); // Reset subcategories when category changes
-//     setShowCategoryPanel(false);
-//     setShowSubcategoryPanel(true);
-//   };
-
-//   // Subcategory panel logic
-//   const handleSubcategoryCheck = (sub) => {
-//     if (selectedSubcategories.includes(sub)) {
-//       setSelectedSubcategories(selectedSubcategories.filter((s) => s !== sub));
-//     } else {
-//       setSelectedSubcategories([...selectedSubcategories, sub]);
-//     }
-//   };
-
-//   return (
-//     <form
-//       className="w-full max-w-2xl bg-white rounded-2xl border p-8"
-//       onSubmit={e => {
-//         e.preventDefault();
-//         onNext();
-//       }}
-//     >
-//       <div className="mb-6">
-//         <h2 className="text-base font-semibold">Professional Details</h2>
-//         <p className="text-xs text-gray-500 mt-1 max-w-xl">
-//           Highlight your expertise. Share your background, qualifications, and areas of knowledge so askers know why you’re the right fit.
-//         </p>
-//         <span className="text-xs text-gray-400 mt-1 float-right">* Mandatory fields</span>
-//       </div>
-//       {/* Category and Sub-Category */}
-//       <div className="mb-6 flex items-start">
-//         <label className="w-56 font-medium text-sm text-gray-700 flex-shrink-0 pt-2">
-//           Category and Sub-Category <span className="text-red-500">*</span>
-//         </label>
-//         <div className="flex-1">
-//           <div className="flex gap-2 mb-2">
-//             {/* Category Dropdown */}
-//             <button
-//               type="button"
-//               className="border border-gray-300 rounded-md px-4 py-2 w-48 text-left flex items-center justify-between"
-//               onClick={() => {
-//                 setShowCategoryPanel((v) => !v);
-//                 setShowSubcategoryPanel(false);
-//               }}
-//             >
-//               {selectedCategory || "Category"}
-//               <svg
-//                 className="ml-2 w-4 h-4 text-gray-400"
-//                 fill="none"
-//                 viewBox="0 0 24 24"
-//               >
-//                 <path
-//                   d="M7 10l5 5 5-5"
-//                   stroke="#9CA3AF"
-//                   strokeWidth="2"
-//                   strokeLinecap="round"
-//                   strokeLinejoin="round"
-//                 />
-//               </svg>
-//             </button>
-//             {/* Subcategory Dropdown */}
-//             <button
-//               type="button"
-//               className="border border-gray-300 rounded-md px-4 py-2 w-48 text-left flex items-center justify-between"
-//               onClick={() => {
-//                 if (selectedCategory) setShowSubcategoryPanel((v) => !v);
-//               }}
-//               disabled={!selectedCategory}
-//             >
-//               {selectedSubcategories.length > 0
-//                 ? selectedSubcategories.join(", ")
-//                 : "Subcategory"}
-//               <svg
-//                 className="ml-2 w-4 h-4 text-gray-400"
-//                 fill="none"
-//                 viewBox="0 0 24 24"
-//               >
-//                 <path
-//                   d="M7 10l5 5 5-5"
-//                   stroke="#9CA3AF"
-//                   strokeWidth="2"
-//                   strokeLinecap="round"
-//                   strokeLinejoin="round"
-//                 />
-//               </svg>
-//             </button>
-//             {/* Add button (disabled) */}
-//             <button
-//               type="button"
-//               className="px-5 py-1 rounded-full text-sm font-semibold bg-gray-200 text-gray-400 cursor-not-allowed"
-//               disabled
-//             >
-//               Add
-//             </button>
-//           </div>
-//           {/* Category Panel */}
-//           {showCategoryPanel && (
-//             <div className="bg-gray-50 border rounded-md p-4 mt-2 grid grid-cols-2 gap-x-8 gap-y-2 max-w-xl">
-//               <div className="col-span-2 text-xs text-gray-400 mb-2">
-//                 Select up-to one category.
-//               </div>
-//               {categories.map((cat, idx) => (
-//                 <label
-//                   key={cat.id}
-//                   className="flex items-center gap-2 cursor-pointer"
-//                 >
-//                   <input
-//                     type="checkbox"
-//                     checked={selectedCategory === cat.name}
-//                     onChange={() => handleCategoryCheck(cat.name)}
-//                     className="accent-blue-600"
-//                   />
-//                   <span>{cat.name}</span>
-//                 </label>
-//               ))}
-//             </div>
-//           )}
-//           {/* Subcategory Panel */}
-//           {showSubcategoryPanel && selectedCategory && (
-//             <div className="bg-gray-50 border rounded-md p-4 mt-2 max-w-xl">
-//               <div className="flex items-center justify-between mb-2">
-//                 <span className="font-medium text-sm">{selectedCategory}</span>
-//                 <button
-//                   type="button"
-//                   className="text-red-500 text-lg"
-//                   onClick={() => {
-//                     setSelectedCategory("");
-//                     setSelectedSubcategories([]);
-//                     setShowSubcategoryPanel(false);
-//                   }}
-//                 >
-//                   ×
-//                 </button>
-//               </div>
-//               <div className="text-xs text-gray-500 mb-1">Selected sub-categories</div>
-//               <div className="flex flex-col gap-2">
-//                 {subcategories.map((sub) => (
-//                   <label
-//                     key={sub}
-//                     className="flex items-center gap-2 cursor-pointer"
-//                   >
-//                     <input
-//                       type="checkbox"
-//                       checked={selectedSubcategories.includes(sub)}
-//                       onChange={() => handleSubcategoryCheck(sub)}
-//                       className="accent-blue-600"
-//                     />
-//                     <span>{sub}</span>
-//                   </label>
-//                 ))}
-//               </div>
-//             </div>
-//           )}
-//           {/* Selected subcategories summary */}
-//           {selectedSubcategories.length > 0 && selectedCategory && !showSubcategoryPanel && (
-//             <div className="bg-gray-50 border rounded-md p-3 mt-2 max-w-xl">
-//               <div className="flex items-center justify-between mb-2">
-//                 <span className="font-medium text-sm">{selectedCategory}</span>
-//                 <button
-//                   type="button"
-//                   className="text-red-500 text-lg"
-//                   onClick={() => {
-//                     setSelectedCategory("");
-//                     setSelectedSubcategories([]);
-//                   }}
-//                 >
-//                   ×
-//                 </button>
-//               </div>
-//               <div className="text-xs text-gray-500 mb-1">Selected sub-categories</div>
-//               <div className="flex flex-col gap-2">
-//                 {selectedSubcategories.map((sub) => (
-//                   <label
-//                     key={sub}
-//                     className="flex items-center gap-2 cursor-pointer"
-//                   >
-//                     <input
-//                       type="checkbox"
-//                       checked
-//                       readOnly
-//                       className="accent-blue-600"
-//                     />
-//                     <span>{sub}</span>
-//                     <button
-//                       type="button"
-//                       className="ml-1 text-gray-400 hover:text-red-500"
-//                       onClick={() =>
-//                         setSelectedSubcategories(
-//                           selectedSubcategories.filter((s) => s !== sub)
-//                         )
-//                       }
-//                     >
-//                       ×
-//                     </button>
-//                   </label>
-//                 ))}
-//               </div>
-//             </div>
-//           )}
-//         </div>
-//       </div>
-//       {/* Tags */}
-//       <div className="mb-6 flex items-start">
-//         <label className="w-56 font-medium text-sm text-gray-700 flex-shrink-0 pt-2">
-//           Tags <span className="text-red-500">*</span>
-//         </label>
-//         <div className="flex-1">
-//           <div className="flex items-center gap-2 mb-2">
-//             <div className="flex flex-wrap gap-2 flex-1 min-h-[40px] border border-gray-300 rounded-md px-2 py-1">
-//               {tags.map((tag, idx) => (
-//                 <span
-//                   key={tag}
-//                   className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded text-sm flex items-center"
-//                 >
-//                   {tag}
-//                   <button
-//                     type="button"
-//                     className="ml-1 text-gray-400 hover:text-red-500"
-//                     onClick={() => setTags(tags.filter((_, i) => i !== idx))}
-//                   >
-//                     ×
-//                   </button>
-//                 </span>
-//               ))}
-//               <input
-//                 className="flex-1 outline-none border-none text-sm bg-transparent min-w-[120px]"
-//                 placeholder="Add tag"
-//                 value={tagInput}
-//                 maxLength={30}
-//                 onChange={e => setTagInput(e.target.value)}
-//                 onKeyDown={e => e.key === "Enter" && addTag()}
-//                 disabled={tags.length >= 5}
-//               />
-//             </div>
-//           </div>
-//           <div className="text-xs text-gray-400 mb-2">5 tags maximum.</div>
-//         </div>
-//       </div>
-//       {/* Price Range */}
-//       <div className="mb-6">
-//         <label className="font-medium text-sm text-gray-700 block mb-2">
-//           Indicative Price Range <span className="text-red-500">*</span>
-//         </label>
-//         <div className="flex items-center gap-2">
-//           <input
-//             type="number"
-//             className="border border-gray-300 rounded-md p-2 w-24 text-sm"
-//             placeholder="$20"
-//             value={values.priceMin}
-//             onChange={e => onChange("priceMin", e.target.value)}
-//             min={0}
-//           />
-//           <span className="text-gray-400">—</span>
-//           <input
-//             type="number"
-//             className="border border-gray-300 rounded-md p-2 w-24 text-sm"
-//             placeholder="$100"
-//             value={values.priceMax}
-//             onChange={e => onChange("priceMax", e.target.value)}
-//             min={0}
-//           />
-//         </div>
-//       </div>
-//       {/* Individual / Firm */}
-//       <div className="mb-6 flex items-center gap-4">
-//         <label className="font-medium text-sm text-gray-700">
-//           Individual / Firm
-//         </label>
-//         <input
-//           type="checkbox"
-//           className="accent-blue-600"
-//           checked={values.isFirm}
-//           onChange={e => onChange("isFirm", e.target.checked)}
-//         />
-//         <input
-//           type="text"
-//           className="border border-gray-200 rounded-md p-2 text-sm bg-gray-100"
-//           placeholder="Firm, College name"
-//           value={values.firm}
-//           onChange={e => onChange("firm", e.target.value)}
-//           disabled={!values.isFirm}
-//         />
-//       </div>
-//       {/* Example Questions */}
-//       <div className="mb-6">
-//         <label className="font-medium text-sm text-gray-700 block mb-2">
-//           Example Question <span className="text-xs text-gray-400">(max 5)</span>
-//         </label>
-//         <ExampleQuestionInput
-//           questions={values.exampleQuestions || []}
-//           setQuestions={qs => onChange("exampleQuestions", qs)}
-//         />
-//       </div>
-//       <button
-//         type="submit"
-//         className="bg-blue-600 text-white px-6 py-2 rounded-full font-semibold mt-4"
-//         disabled={loading}
-//       >
-//         {loading ? "Saving..." : "Save & Continue"}
-//       </button>
-//     </form>
-//   );
-// };
-
-// // Example Question Input
-// const ExampleQuestionInput = ({ questions, setQuestions }) => {
-//   const [input, setInput] = useState("");
-//   const addQuestion = () => {
-//     if (
-//       input &&
-//       !questions.includes(input) &&
-//       questions.length < 5 &&
-//       input.length <= 200
-//     ) {
-//       setQuestions([...questions, input]);
-//       setInput("");
-//     }
-//   };
-//   return (
-//     <div>
-//       <div className="flex items-center gap-2">
-//         <input
-//           className="border border-gray-300 rounded-md p-2 flex-1 text-sm"
-//           placeholder="Start typing…"
-//           value={input}
-//           onChange={e => setInput(e.target.value)}
-//           onKeyDown={e => e.key === "Enter" && addQuestion()}
-//         />
-//         <button
-//           type="button"
-//           className={`px-4 py-1 rounded-full text-sm font-semibold transition ${
-//             input && questions.length < 5
-//               ? "bg-gray-200 text-gray-500"
-//               : "bg-gray-200 text-gray-400 cursor-not-allowed"
-//           }`}
-//           disabled={!input || questions.length >= 5}
-//           onClick={addQuestion}
-//         >
-//           Add
-//         </button>
-//       </div>
-//       <div className="mt-2">
-//         {questions.map((q, idx) => (
-//           <div key={q} className="flex items-center gap-2 mb-1">
-//             <span className="text-sm text-gray-700 flex-1">
-//               {idx + 1}. {q}
-//             </span>
-//             <button
-//               type="button"
-//               className="text-gray-400 hover:text-red-500"
-//               onClick={() =>
-//                 setQuestions(questions.filter((_, i) => i !== idx))
-//               }
-//             >
-//               ×
-//             </button>
-//           </div>
-//         ))}
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default ProfessionalDetailsForm;
-
-
-
-
-import React, { useEffect, useState } from "react";
-
-// Simulate API call for categories/subcategories
+// Simulate API call for categories/subcategories (replace with real API)
 const fetchCategories = () =>
   Promise.resolve([
     {
-      id: 1,
-      name: "Artificial Intelligence",
-      subcategories: ["Machine Learning", "Deep Learning", "NLP"],
+      _id: "689a2c4ff087f0ff5104e779",
+      category: "Design",
+      subCategories: [
+        "UI/UX",
+        "Graphic Design",
+        "Product Design",
+        "Logo Design",
+        "Presentation Design",
+      ],
     },
     {
-      id: 2,
-      name: "Design",
-      subcategories: ["Logo Design", "Brochure Design", "Poster Design"],
+      _id: "689a2bf3f087f0ff5104e76f",
+      category: "Business Strategy",
+      subCategories: [
+        "Startup Consulting",
+        "Growth Strategy",
+        "Pitch Decks",
+        "Market Analysis",
+        "Business Planning",
+      ],
     },
-    {
-      id: 3,
-      name: "Business",
-      subcategories: ["Strategy", "Consulting"],
-    },
-    {
-      id: 4,
-      name: "Teaching",
-      subcategories: ["Math", "Science"],
-    },
-    {
-      id: 5,
-      name: "Financial",
-      subcategories: ["Accounting", "Investment"],
-    },
+    // ...other categories
   ]);
 
-const ProfessionalDetailsForm = ({
-  values,
-  onChange,
-  onNext,
-  loading,
-}) => {
+const ProfessionalDetailsForm = ({ values, onChange, onNext, loading }) => {
   const [categories, setCategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState(values.category || "");
-  const [selectedSubcategories, setSelectedSubcategories] = useState(values.subcategories || []);
-  const [tags, setTags] = useState(values.tags || []);
-  const [tagInput, setTagInput] = useState("");
 
-  // For UI panels
-  const [showCategoryPanel, setShowCategoryPanel] = useState(false);
-  const [showSubcategoryPanel, setShowSubcategoryPanel] = useState(false);
+  // Initialize local representation from incoming values
+  const [added, setAdded] = useState(
+    (values.selectedSpecializations || []).map((s) =>
+      typeof s === "string" ? { specialization: s, subCategories: [] } : s
+    )
+  );
+
+  // Dropdown state
+  const [currentCategoryId, setCurrentCategoryId] = useState("");
+  const [currentSubSelected, setCurrentSubSelected] = useState([]);
+
+  // Tags: use subcategories as tags (max 5). initialize from incoming selectedSpecializations
+  const initialTagList = useMemo(() => {
+    const subs = (values.selectedSpecializations || []).flatMap((s) =>
+      Array.isArray(s.subCategories) ? s.subCategories : []
+    );
+    return Array.from(new Set(subs)).slice(0, 5);
+  }, [values.selectedSpecializations]);
+
+  const [tags, setTags] = useState(initialTagList);
+  const [tagInput, setTagInput] = useState("");
 
   useEffect(() => {
     fetchCategories().then(setCategories);
   }, []);
 
+  // sync parent when added or tags change
   useEffect(() => {
-    onChange("category", selectedCategory);
-    onChange("subcategories", selectedSubcategories);
-  }, [selectedCategory, selectedSubcategories]);
+    // map added entries to expected backend shape: { specialization: id, subCategories: [...] }
+    onChange(
+      "selectedSpecializations",
+      added.map((a) => ({ specialization: a.specialization, subCategories: a.subCategories || [] }))
+    );
+  }, [added, onChange]);
 
   useEffect(() => {
     onChange("tags", tags);
-  }, [tags]);
+  }, [tags, onChange]);
 
-  // Get subcategories for selected category
-  const subcategories =
-    categories.find((c) => c.name === selectedCategory)?.subcategories || [];
+  // helpers
+  const categoryById = (id) => categories.find((c) => c._id === id);
 
-  // Tag logic
+  const handleToggleSub = (sub) => {
+    setCurrentSubSelected((prev) => {
+      if (prev.includes(sub)) return prev.filter((s) => s !== sub);
+      return [...prev, sub];
+    });
+  };
+
+  const canAddCurrent = () => {
+    return (
+      currentCategoryId &&
+      currentSubSelected.length >= 2 &&
+      !added.some((a) => String(a.specialization) === String(currentCategoryId))
+    );
+  };
+
+  const handleAddCurrent = () => {
+    if (!canAddCurrent()) return;
+    setAdded((prev) => [
+      ...prev,
+      { specialization: currentCategoryId, subCategories: [...currentSubSelected] },
+    ]);
+
+    // merge new subcategories into tags (preserve order, unique, max 5)
+    setTags((prevTags) => {
+      const newSubs = currentSubSelected.filter((s) => !prevTags.includes(s));
+      const merged = [...prevTags, ...newSubs];
+      const uniq = Array.from(new Set(merged));
+      return uniq.slice(0, 5);
+    });
+
+    // clear current selection
+    setCurrentCategoryId("");
+    setCurrentSubSelected([]);
+  };
+
+  const handleRemoveAdded = (specId) => {
+    // remove added specialization
+    const removed = added.find((a) => String(a.specialization) === String(specId));
+    setAdded((prev) => prev.filter((a) => String(a.specialization) !== String(specId)));
+
+    // remove its subcategories from tags (if present)
+    if (removed && Array.isArray(removed.subCategories) && removed.subCategories.length) {
+      setTags((prevTags) => prevTags.filter((t) => !removed.subCategories.includes(t)));
+    }
+  };
+
+  // Validation: each added specialization must have at least 2 subcategories
+  const categoriesValid = added.every((a) => Array.isArray(a.subCategories) && a.subCategories.length >= 2);
+
+  // Tag helpers
   const addTag = () => {
+    const trimmed = tagInput.trim();
     if (
-      tagInput &&
-      !tags.includes(tagInput) &&
+      trimmed &&
+      !tags.includes(trimmed) &&
       tags.length < 5 &&
-      tagInput.length <= 30
+      trimmed.length <= 30
     ) {
-      setTags([...tags, tagInput]);
+      setTags((prev) => [...prev, trimmed]);
       setTagInput("");
     }
   };
 
-  // Category panel logic
-  const handleCategoryCheck = (catName) => {
-    setSelectedCategory(catName);
-    setSelectedSubcategories([]); // Reset subcategories when category changes
-    setShowCategoryPanel(false);
-    setShowSubcategoryPanel(true);
-  };
-
-  // Subcategory panel logic
-  const handleSubcategoryCheck = (sub) => {
-    if (selectedSubcategories.includes(sub)) {
-      setSelectedSubcategories(selectedSubcategories.filter((s) => s !== sub));
-    } else {
-      setSelectedSubcategories([...selectedSubcategories, sub]);
-    }
+  const removeTagAt = (idx) => {
+    setTags((prev) => prev.filter((_, i) => i !== idx));
   };
 
   return (
     <form
       className="w-full max-w-2xl bg-white rounded-2xl border p-8"
-      onSubmit={e => {
+      onSubmit={(e) => {
         e.preventDefault();
+        if (!categoriesValid) return;
         onNext();
       }}
     >
-      <div className="mb-6">
-        <h2 className="text-base font-semibold">Professional Details</h2>
-        <p className="text-xs text-gray-500 mt-1 max-w-xl">
-          Highlight your expertise. Share your background, qualifications, and areas of knowledge so askers know why you're the right fit.
-        </p>
-        <span className="text-xs text-gray-400 mt-1 float-right">* Mandatory fields</span>
+      {/* inject small css to hide scrollbar but allow horizontal scroll */}
+      <style>{`
+        .hide-scrollbar { overflow-x: auto; -ms-overflow-style: none; scrollbar-width: none; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+      `}</style>
+
+      <div className="mb-6 flex items-start justify-between">
+        <div>
+          <h2 className="text-base font-semibold">Professional Details</h2>
+          <p className="text-xs text-gray-500 mt-1 max-w-xl">
+            Highlight your expertise. Share your background, qualifications, and areas of knowledge so askers know why you're the right fit.
+          </p>
+        </div>
+        <div className="text-xs text-gray-400 mt-1">* Mandatory fields</div>
       </div>
-      
-      {/* Category and Sub-Category */}
+
+      {/* Dropdown approach: Category select + Subcategory checkbox list + Add */}
       <div className="mb-6 flex items-start">
         <label className="w-56 font-medium text-sm text-gray-700 flex-shrink-0 pt-2">
           Category and Sub-Category <span className="text-red-500">*</span>
         </label>
-        <div className="flex-1">
-          <div className="flex gap-2 mb-2">
-            {/* Category Dropdown */}
-            <div className="relative">
-              <button
-                type="button"
-                className="border border-gray-300 rounded-md px-4 py-2 w-32 text-left flex items-center justify-between text-sm bg-white"
-                onClick={() => {
-                  setShowCategoryPanel((v) => !v);
-                  setShowSubcategoryPanel(false);
-                }}
-              >
-                {selectedCategory || "Category"}
-                <svg
-                  className="ml-2 w-4 h-4 text-gray-400"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    d="M7 10l5 5 5-5"
-                    stroke="#9CA3AF"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </button>
+
+        <div className="flex-1 space-y-4">
+          <div className="flex gap-3 items-center">
+            <select
+              className="border border-gray-300 rounded-md p-2 text-sm flex-1"
+              value={currentCategoryId}
+              onChange={(e) => {
+                setCurrentCategoryId(e.target.value);
+                setCurrentSubSelected([]);
+              }}
+            >
+              <option value="">Select category</option>
+              {categories.map((c) => (
+                <option key={c._id} value={c._id}>
+                  {c.category}
+                </option>
+              ))}
+            </select>
+
+            <div className="flex-1">
+              {/* show subcategory picks for current category */}
+              {currentCategoryId ? (
+                <div className="border border-gray-200 rounded-md p-2 bg-gray-50">
+                  <div className="text-xs text-gray-500 mb-2">Choose subcategories (min 2)</div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {categoryById(currentCategoryId)?.subCategories.map((sub) => (
+                      <label key={sub} className="flex items-center gap-2 text-sm">
+                        <input
+                          type="checkbox"
+                          checked={currentSubSelected.includes(sub)}
+                          onChange={() => handleToggleSub(sub)}
+                          className="w-4 h-4 accent-blue-600"
+                        />
+                        <span className="text-gray-700">{sub}</span>
+                      </label>
+                    ))}
+                  </div>
+                  {currentSubSelected.length < 2 && (
+                    <div className="text-red-500 text-xs mt-2">Select at least 2 subcategories to add.</div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-xs text-gray-400">Pick a category to see subcategories.</div>
+              )}
             </div>
-            
-            {/* Subcategory Dropdown */}
-            <div className="relative">
-              <button
-                type="button"
-                className="border border-gray-300 rounded-md px-4 py-2 w-40 text-left flex items-center justify-between text-sm bg-white"
-                onClick={() => {
-                  if (selectedCategory) setShowSubcategoryPanel((v) => !v);
-                }}
-                disabled={!selectedCategory}
-              >
-                {selectedSubcategories.length > 0
-                  ? "Subcategory"
-                  : "Subcategory"}
-                <svg
-                  className="ml-2 w-4 h-4 text-gray-400"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    d="M7 10l5 5 5-5"
-                    stroke="#9CA3AF"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </button>
-            </div>
-            
-            {/* Add button */}
+
             <button
               type="button"
-              className="px-4 py-2 rounded-md text-sm bg-gray-200 text-gray-500 border border-gray-300"
-              disabled
+              onClick={handleAddCurrent}
+              disabled={!canAddCurrent()}
+              className={`px-4 py-2 rounded ${canAddCurrent() ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-400 cursor-not-allowed"}`}
             >
               Add
             </button>
           </div>
-          
-          {/* Category Panel */}
-          {showCategoryPanel && (
-            <div className="bg-gray-50 border rounded-md p-4 mt-2 max-w-xl">
-              <div className="text-xs text-gray-500 mb-3">
-                Select up-to one category.
-              </div>
-              <div className="grid grid-cols-2 gap-y-2 gap-x-6">
-                {categories.map((cat) => (
-                  <label
-                    key={cat.id}
-                    className="flex items-center gap-2 cursor-pointer text-sm"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedCategory === cat.name}
-                      onChange={() => handleCategoryCheck(cat.name)}
-                      className="w-4 h-4 accent-blue-600"
-                    />
-                    <span className="text-gray-700">{cat.name}</span>
-                  </label>
-                ))}
-              </div>
+
+          {/* Added categories list */}
+          <div className="mt-2">
+            <div className="text-xs text-gray-500 mb-2">Selected categories</div>
+            <div className="space-y-3">
+              {added.length === 0 && <div className="text-sm text-gray-500">No categories added yet.</div>}
+              {added.map((a) => {
+                const cat = categoryById(a.specialization) || { category: a.specialization };
+                return (
+                  <div key={String(a.specialization)} className="border border-gray-200 rounded-md p-3 flex items-start justify-between">
+                    <div>
+                      <div className="font-medium text-sm">{cat.category}</div>
+                      <div className="text-xs text-gray-600 mt-2">
+                        {a.subCategories && a.subCategories.length ? (
+                          <div className="flex flex-wrap gap-2">
+                            {a.subCategories.map((s) => (
+                              <span key={s} className="bg-gray-100 px-2 py-1 rounded text-xs">{s}</span>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-xs text-red-500">No subcategories selected</div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="ml-4">
+                      <button
+                        type="button"
+                        className="text-sm text-red-500"
+                        onClick={() => handleRemoveAdded(a.specialization)}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-          )}
-          
-          {/* Subcategory Panel */}
-          {showSubcategoryPanel && selectedCategory && (
-            <div className="bg-gray-50 border rounded-md p-4 mt-2 max-w-xl">
-              <div className="flex items-center justify-between mb-3">
-                <span className="font-medium text-sm text-gray-800">{selectedCategory}</span>
-                <button
-                  type="button"
-                  className="text-red-500 text-xl font-light hover:text-red-600"
-                  onClick={() => {
-                    setSelectedCategory("");
-                    setSelectedSubcategories([]);
-                    setShowSubcategoryPanel(false);
-                  }}
-                >
-                  ×
-                </button>
-              </div>
-              <div className="text-xs text-gray-500 mb-2">Selected sub-categories</div>
-              <div className="space-y-2">
-                {subcategories.map((sub) => (
-                  <label
-                    key={sub}
-                    className="flex items-center gap-2 cursor-pointer text-sm"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedSubcategories.includes(sub)}
-                      onChange={() => handleSubcategoryCheck(sub)}
-                      className="w-4 h-4 accent-blue-600"
-                    />
-                    <span className="text-gray-700">{sub}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          )}
+          </div>
         </div>
       </div>
-      
+
       {/* Tags */}
       <div className="mb-6 flex items-start">
-        <label className="w-56 font-medium text-sm text-gray-700 flex-shrink-0 pt-2">
-          Tags <span className="text-red-500">*</span>
-        </label>
-        <div className="flex-1">
-          <div className="border border-gray-300 rounded-md p-3 min-h-[50px] bg-white">
-            <div className="flex flex-wrap gap-2">
+        <label className="w-56 font-medium text-sm text-gray-700 flex-shrink-0 pt-2">Tags <span className="text-red-500">*</span></label>
+        <div className="flex-1 min-w-0"> {/* <-- add min-w-0 so the child can shrink and not overflow */}
+          <div className="border border-gray-300 rounded-md p-2 bg-white">
+            {/* scrollable container: horizontal scroll, no wrap, won't overflow parent */}
+            <div
+              className="hide-scrollbar whitespace-nowrap"
+              style={{
+                display: "flex",
+                gap: 8,
+                padding: "6px 4px",
+                alignItems: "center",
+                maxWidth: "100%",
+                overflowX: "auto",
+                WebkitOverflowScrolling: "touch",
+              }}
+            >
+              {tags.length === 0 && <div className="text-sm text-gray-500">No tags added yet.</div>}
               {tags.map((tag, idx) => (
-                <span
+                <div
                   key={tag}
-                  className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm flex items-center border"
+                  className="inline-flex items-center bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm border"
+                  style={{ flex: "0 0 auto" }}
                 >
                   {tag}
                   <button
                     type="button"
-                    className="ml-2 text-gray-400 hover:text-red-500 text-lg"
-                    onClick={() => setTags(tags.filter((_, i) => i !== idx))}
+                    className="ml-2 text-gray-400 hover:text-red-500"
+                    onClick={() => removeTagAt(idx)}
                   >
                     ×
                   </button>
-                </span>
+                </div>
               ))}
             </div>
           </div>
-          <div className="text-xs text-gray-500 mt-1">5 tags maximum.</div>
         </div>
       </div>
-      
-      {/* Price Range */}
-      <div className="mb-6">
-        <label className="font-medium text-sm text-gray-700 block mb-2">
-          Indicative Price Range <span className="text-red-500">*</span>
-        </label>
-        <div className="flex items-center gap-2">
-          <input
-            type="number"
-            className="border border-gray-300 rounded-md p-2 w-24 text-sm"
-            placeholder="$20"
-            value={values.priceMin}
-            onChange={e => onChange("priceMin", e.target.value)}
-            min={0}
-          />
-          <span className="text-gray-400">—</span>
-          <input
-            type="number"
-            className="border border-gray-300 rounded-md p-2 w-24 text-sm"
-            placeholder="$100"
-            value={values.priceMax}
-            onChange={e => onChange("priceMax", e.target.value)}
-            min={0}
-          />
+
+      {/* Price Range & deliveryTime */}
+      <div className="mb-6 grid grid-cols-1 gap-4">
+        <div className="flex items-center gap-4">
+          <label className="w-56 font-medium text-sm text-gray-700">Indicative Price Range <span className="text-red-500">*</span></label>
+          <div className="flex items-center gap-2">
+            <input type="number" className="border border-gray-300 rounded-md p-2 w-24 text-sm" placeholder="$20" value={values.priceMin} onChange={(e) => onChange("priceMin", e.target.value)} min={0} />
+            <span className="text-gray-400">—</span>
+            <input type="number" className="border border-gray-300 rounded-md p-2 w-24 text-sm" placeholder="$100" value={values.priceMax} onChange={(e) => onChange("priceMax", e.target.value)} min={0} />
+          </div>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <label className="w-56 font-medium text-sm text-gray-700">Delivery Time (days)</label>
+          <input type="number" value={values.deliveryTime} onChange={(e) => onChange("deliveryTime", e.target.value)} className="border border-gray-300 rounded-md p-2 w-28 text-sm" min={0} />
         </div>
       </div>
-      
+
       {/* Individual / Firm */}
       <div className="mb-6 flex items-center gap-4">
-        <label className="font-medium text-sm text-gray-700">
-          Individual / Firm
-        </label>
-        <input
-          type="checkbox"
-          className="accent-blue-600"
-          checked={values.isFirm}
-          onChange={e => onChange("isFirm", e.target.checked)}
-        />
+        <label className="font-medium text-sm text-gray-700 w-56">Individual / Firm</label>
+        <ToggleSwitch checked={values.isFirm} onChange={(v) => onChange("isFirm", v)} />
         <input
           type="text"
           className="border border-gray-200 rounded-md p-2 text-sm bg-gray-100"
           placeholder="Firm, College name"
           value={values.firm}
-          onChange={e => onChange("firm", e.target.value)}
+          onChange={(e) => onChange("firm", e.target.value)}
           disabled={!values.isFirm}
         />
       </div>
-      
+
       {/* Example Questions */}
       <div className="mb-6">
         <label className="font-medium text-sm text-gray-700 block mb-2">
           Example Question <span className="text-xs text-gray-400">(max 5)</span>
         </label>
-        <ExampleQuestionInput
-          questions={values.exampleQuestions || []}
-          setQuestions={qs => onChange("exampleQuestions", qs)}
-        />
+        <ExampleQuestionInput questions={values.exampleQuestions || []} setQuestions={(qs) => onChange("exampleQuestions", qs)} />
       </div>
-      
-      <button
-        type="submit"
-        className="bg-blue-600 text-white px-6 py-2 rounded-full font-semibold mt-4"
-        disabled={loading}
-      >
+
+      <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded-full font-semibold mt-4" disabled={loading || !categoriesValid}>
         {loading ? "Saving..." : "Save & Continue"}
       </button>
     </form>
   );
 };
 
-// Example Question Input component remains the same
+// Example Question Input component (unchanged)
 const ExampleQuestionInput = ({ questions, setQuestions }) => {
   const [input, setInput] = useState("");
   const addQuestion = () => {
-    if (
-      input &&
-      !questions.includes(input) &&
-      questions.length < 5 &&
-      input.length <= 200
-    ) {
+    if (input && !questions.includes(input) && questions.length < 5 && input.length <= 200) {
       setQuestions([...questions, input]);
       setInput("");
     }
@@ -810,41 +365,14 @@ const ExampleQuestionInput = ({ questions, setQuestions }) => {
   return (
     <div>
       <div className="flex items-center gap-2">
-        <input
-          className="border border-gray-300 rounded-md p-2 flex-1 text-sm"
-          placeholder="Start typing…"
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={e => e.key === "Enter" && addQuestion()}
-        />
-        <button
-          type="button"
-          className={`px-4 py-1 rounded-full text-sm font-semibold transition ${
-            input && questions.length < 5
-              ? "bg-gray-200 text-gray-500"
-              : "bg-gray-200 text-gray-400 cursor-not-allowed"
-          }`}
-          disabled={!input || questions.length >= 5}
-          onClick={addQuestion}
-        >
-          Add
-        </button>
+        <input className="border border-gray-300 rounded-md p-2 flex-1 text-sm" placeholder="Start typing…" value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addQuestion()} />
+        <button type="button" className={`px-4 py-1 rounded-full text-sm font-semibold transition ${input && questions.length < 5 ? "bg-gray-200 text-gray-500" : "bg-gray-200 text-gray-400 cursor-not-allowed"}`} disabled={!input || questions.length >= 5} onClick={addQuestion}>Add</button>
       </div>
       <div className="mt-2">
         {questions.map((q, idx) => (
           <div key={q} className="flex items-center gap-2 mb-1">
-            <span className="text-sm text-gray-700 flex-1">
-              {idx + 1}. {q}
-            </span>
-            <button
-              type="button"
-              className="text-gray-400 hover:text-red-500"
-              onClick={() =>
-                setQuestions(questions.filter((_, i) => i !== idx))
-              }
-            >
-              ×
-            </button>
+            <span className="text-sm text-gray-700 flex-1">{idx + 1}. {q}</span>
+            <button type="button" className="text-gray-400 hover:text-red-500" onClick={() => setQuestions(questions.filter((_, i) => i !== idx))}>×</button>
           </div>
         ))}
       </div>
