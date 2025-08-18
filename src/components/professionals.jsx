@@ -70,12 +70,18 @@ const Professionals = () => {
   }, [showMobileFilters]);
 
   const filters = useMemo(() => {
-    return {
+    // prefer explicit tags state when present
+    const tagParam = tags.length
+      ? tags
+      : (!selectedCategory || selectedCategory === "All") && category && category !== "All"
+      ? [category]
+      : undefined;
+
+    const out = {
       page,
       limit: PAGE_SIZE,
       ...(selectedCategory && selectedCategory !== "All" ? { category: selectedCategory } : {}),
-      ...(category && category !== "All" ? { tags: [category] } : {}),
-      ...(tags.length ? { tags } : {}),
+      ...(tagParam ? { tags: tagParam } : {}),
       ...(budget?.[0] !== undefined ? { minPrice: budget[0] } : {}),
       ...(budget?.[1] !== undefined ? { maxPrice: budget[1] } : {}),
       ...(delivery.length ? { delivery } : {}),
@@ -84,6 +90,7 @@ const Professionals = () => {
       ...(language.length ? { language } : {}),
       ...(location.length ? { country: location } : {}),
     };
+    return out;
   }, [page, selectedCategory, category, tags, budget, delivery, rating, verified, language, location]);
 
   const { data: professionalsData, isLoading: professionalsLoading, isError: professionalsError } = useProfessionals(filters, { debounceTime: 500 });
@@ -371,10 +378,13 @@ const Professionals = () => {
           <div className="mb-4">
             <label className="block text-sm font-medium mb-1">Category</label>
             <DropdownSelector
-              options={["All",...specializations.map((c) => c.category)]}
+              options={["All", ...specializations.map((c) => c.category)]}
               value={category}
               onChange={(val) => {
+                // keep human-readable label in `category` for UI, but prefer id for server filtering
                 setCategory(val);
+                const spec = specializations.find((s) => s.category === val);
+                setSelectedCategory(spec ? spec._id : "All");
                 setPage(1);
               }}
               placeholder="Select category"
