@@ -9,6 +9,8 @@ import AskQuestionModal from "./AskQuestionModal";
 import ProfessionalProfileModal from "./ProfessionalProfileModal";
 import useSpecializations from "../hooks/useSpecializations";
 import useProfessionals from "../hooks/useProfessionals";
+import { use } from "react";
+import ToggleSwitch from "./ToggleSwitch";
 
 const allLanguages = [
   "English",
@@ -51,6 +53,7 @@ const Professionals = () => {
   const [delivery, setDelivery] = useState([]);
   const [rating, setRating] = useState([]);
   const [verified, setVerified] = useState("");
+  const [featured,setFeatured]=useState(false);
   const [language, setLanguage] = useState([]);
   const [location, setLocation] = useState([]);
   const [page, setPage] = useState(1);
@@ -89,20 +92,16 @@ const Professionals = () => {
       ...(verified !== "" ? { verified } : {}),
       ...(language.length ? { language } : {}),
       ...(location.length ? { country: location } : {}),
+      ...(featured ? { featured: true } : {}), // <-- add this line
     };
     return out;
-  }, [page, selectedCategory, category, tags, budget, delivery, rating, verified, language, location]);
+  }, [page, selectedCategory, category, tags, budget, delivery, rating, verified, language, location, featured]);
 
   const { data: professionalsData, isLoading: professionalsLoading, isError: professionalsError } = useProfessionals(filters, { debounceTime: 500 });
   const professionals = professionalsData?.results || [];
   const total = professionalsData?.total || 0;
 
-  if (professionalsLoading) {
-    return <div className="p-6">Loading professionals…</div>;
-  }
-  if (professionalsError) {
-    return <div className="p-6 text-red-600">Failed to load professionals</div>;
-  }
+  // no top-level early returns here — render loader only in the professionals area
   const totalPages = Math.ceil((total || 0) / PAGE_SIZE);
   const paginatedProfessionals = professionals; // server returns page-sized results
 
@@ -537,10 +536,10 @@ const Professionals = () => {
           </div>
           <div className="mb-4">
             <label className="block text-sm font-medium mb-1">Verified</label>
-            <div className="flex gap-4">
+            <div className="flex flex-col gap-4">
               <label className="flex items-center gap-1 text-sm">
                 <input
-                  type="radio"
+                  type="checkbox"
                   checked={verified === true}
                   onChange={() => handleVerifiedChange(true)}
                   className="accent-blue-600"
@@ -549,7 +548,7 @@ const Professionals = () => {
               </label>
               <label className="flex items-center gap-1 text-sm">
                 <input
-                  type="radio"
+                  type="checkbox"
                   checked={verified === false}
                   onChange={() => handleVerifiedChange(false)}
                   className="accent-blue-600"
@@ -557,6 +556,17 @@ const Professionals = () => {
                 No
               </label>
             </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">Featured</label>            
+            <ToggleSwitch
+    checked={featured}
+    onChange={() => {
+      setFeatured((prev) => !prev);
+      setPage(1);
+    }}
+  />
           </div>
 
           {/* Language */}
@@ -854,7 +864,18 @@ const Professionals = () => {
             Getting trusted advice is a smart way to move faster, solve
             problems, or grow your ideas.
           </p>
-          {paginatedProfessionals.length === 0 ? (
+
+          {/* Listing area: show loader or error without hiding filters/categories */}
+          {professionalsLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full border-4 border-blue-600 border-t-transparent animate-spin" />
+                <span className="text-gray-600">Loading professionals…</span>
+              </div>
+            </div>
+          ) : professionalsError ? (
+            <div className="text-red-600 mt-6">Failed to load professionals</div>
+          ) : paginatedProfessionals.length === 0 ? (
             <div className="text-gray-500 mt-8">
               No professionals found for selected filters.
             </div>

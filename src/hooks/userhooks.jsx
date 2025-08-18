@@ -135,6 +135,24 @@ export const useForgotPassword = () =>
     },
   });
 
+export default function useUpdateProfile(options = {}) {
+  return useMutation({
+    mutationFn: async (formData) => {
+      const token = localStorage.getItem("accessToken");
+      if (!token) throw new Error("Not authenticated");
+
+      const res = await axios.put(`${API_BASE_URL}/users/updateinfo`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      return res.data;
+    },
+    ...options,
+  });
+}
+
 export const useLinkedInProfile = (email) => {
   return useQuery({
     queryKey: ["linkedinProfile", email],
