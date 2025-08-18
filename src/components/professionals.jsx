@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useReducer, useMemo, useEffect } from "react";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { FaStar } from "react-icons/fa";
 import { MdVerified } from "react-icons/md";
@@ -9,7 +9,6 @@ import AskQuestionModal from "./AskQuestionModal";
 import ProfessionalProfileModal from "./ProfessionalProfileModal";
 import useSpecializations from "../hooks/useSpecializations";
 import useProfessionals from "../hooks/useProfessionals";
-import { use } from "react";
 import ToggleSwitch from "./ToggleSwitch";
 
 const allLanguages = [
@@ -39,30 +38,77 @@ const ratingOptions = [
 
 const PAGE_SIZE = 1;
 
+const initialState = {
+  selectedCategory: "All",
+  showModal: false,
+  showProfileModal: false,
+  selectedProfessional: null,
+  category: "All",
+  showTagDropdown: false,
+  tags: [],
+  budget: [10, 100],
+  delivery: [],
+  rating: [],
+  verified: "",
+  featured: false,
+  language: [],
+  location: [],
+  page: 1,
+  showMobileFilters: false,
+};
+
+// 2. Reducer function
+function reducer(state, action) {
+  switch (action.type) {
+    case "SET_SELECTED_CATEGORY":
+      return { ...state, selectedCategory: action.value, page: 1 };
+    case "SET_CATEGORY":
+      return { ...state, category: action.value, page: 1 };
+    case "SET_TAGS":
+      return { ...state, tags: action.value, page: 1 };
+    case "SET_BUDGET":
+      return { ...state, budget: action.value, page: 1 };
+    case "SET_DELIVERY":
+      return { ...state, delivery: action.value, page: 1 };
+    case "SET_RATING":
+      return { ...state, rating: action.value, page: 1 };
+    case "SET_VERIFIED":
+      return { ...state, verified: action.value, page: 1 };
+    case "SET_FEATURED":
+      return { ...state, featured: action.value, page: 1 };
+    case "SET_LANGUAGE":
+      return { ...state, language: action.value, page: 1 };
+    case "SET_LOCATION":
+      return { ...state, location: action.value, page: 1 };
+    case "SET_PAGE":
+      return { ...state, page: action.value };
+    case "SET_SELECTED_PROFESSIONAL":
+      return { ...state, selectedProfessional: action.value };
+    case "SET_SHOW_MODAL":
+      return { ...state, showModal: action.value };
+    case "SET_SHOW_PROFILE_MODAL":
+      return { ...state, showProfileModal: action.value };
+    case "SET_SHOW_TAG_DROPDOWN":
+      return { ...state, showTagDropdown: action.value };
+    case "SET_SHOW_MOBILE_FILTERS":
+      return { ...state, showMobileFilters: action.value };
+    case "RESET":
+      return { ...initialState };
+    default:
+      return state;
+  }
+}
+
 const Professionals = () => {
   const { topCategories, allSubCategories, specializations, loading } =
     useSpecializations();
-  const [selectedCategory, setSelectedCategory] = useState("All");
-  const [showModal, setShowModal] = useState(false);
-  const [showProfileModal, setShowProfileModal] = useState(false);
-  const [selectedProfessional, setSelectedProfessional] = useState(null);
-  const [category, setCategory] = useState("All");
-  const [showTagDropdown, setShowTagDropdown] = useState(false);
-  const [tags, setTags] = useState([]);
-  const [budget, setBudget] = useState([10, 100]);
-  const [delivery, setDelivery] = useState([]);
-  const [rating, setRating] = useState([]);
-  const [verified, setVerified] = useState("");
-  const [featured,setFeatured]=useState(false);
-  const [language, setLanguage] = useState([]);
-  const [location, setLocation] = useState([]);
-  const [page, setPage] = useState(1);
 
-  // Mobile filter modal state
-  const [showMobileFilters, setShowMobileFilters] = useState(false);
+  // 3. Use useReducer
+  const [state, dispatch] = useReducer(reducer, initialState);
 
+  // 4. Replace all useState usages with state and dispatch
   useEffect(() => {
-    if (showMobileFilters) {
+    if (state.showMobileFilters) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
@@ -70,93 +116,80 @@ const Professionals = () => {
     return () => {
       document.body.style.overflow = "";
     };
-  }, [showMobileFilters]);
+  }, [state.showMobileFilters]);
 
   const filters = useMemo(() => {
-    // prefer explicit tags state when present
-    const tagParam = tags.length
-      ? tags
-      : (!selectedCategory || selectedCategory === "All") && category && category !== "All"
-      ? [category]
+    const tagParam = state.tags.length
+      ? state.tags
+      : (!state.selectedCategory || state.selectedCategory === "All") && state.category && state.category !== "All"
+      ? [state.category]
       : undefined;
 
     const out = {
-      page,
+      page: state.page,
       limit: PAGE_SIZE,
-      ...(selectedCategory && selectedCategory !== "All" ? { category: selectedCategory } : {}),
+      ...(state.selectedCategory && state.selectedCategory !== "All" ? { category: state.selectedCategory } : {}),
       ...(tagParam ? { tags: tagParam } : {}),
-      ...(budget?.[0] !== undefined ? { minPrice: budget[0] } : {}),
-      ...(budget?.[1] !== undefined ? { maxPrice: budget[1] } : {}),
-      ...(delivery.length ? { delivery } : {}),
-      ...(rating.length ? { rating } : {}),
-      ...(verified !== "" ? { verified } : {}),
-      ...(language.length ? { language } : {}),
-      ...(location.length ? { country: location } : {}),
-      ...(featured ? { featured: true } : {}), // <-- add this line
+      ...(state.budget?.[0] !== undefined ? { minPrice: state.budget[0] } : {}),
+      ...(state.budget?.[1] !== undefined ? { maxPrice: state.budget[1] } : {}),
+      ...(state.delivery.length ? { delivery: state.delivery } : {}),
+      ...(state.rating.length ? { rating: state.rating } : {}),
+      ...(state.verified !== "" ? { verified: state.verified } : {}),
+      ...(state.language.length ? { language: state.language } : {}),
+      ...(state.location.length ? { country: state.location } : {}),
+      ...(state.featured ? { featured: true } : {}),
     };
     return out;
-  }, [page, selectedCategory, category, tags, budget, delivery, rating, verified, language, location, featured]);
+  }, [
+    state.page, state.selectedCategory, state.category, state.tags, state.budget,
+    state.delivery, state.rating, state.verified, state.language, state.location, state.featured
+  ]);
 
   const { data: professionalsData, isLoading: professionalsLoading, isError: professionalsError } = useProfessionals(filters, { debounceTime: 500 });
   const professionals = professionalsData?.results || [];
   const total = professionalsData?.total || 0;
-
-  // no top-level early returns here — render loader only in the professionals area
   const totalPages = Math.ceil((total || 0) / PAGE_SIZE);
-  const paginatedProfessionals = professionals; // server returns page-sized results
+  const paginatedProfessionals = professionals;
 
-  // Handlers
+  // Handlers using dispatch
   const handleTagChange = (tag) => {
-    setTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
-    );
-    setPage(1);
+    const newTags = state.tags.includes(tag)
+      ? state.tags.filter((t) => t !== tag)
+      : [...state.tags, tag];
+    dispatch({ type: "SET_TAGS", value: newTags });
   };
 
   const handleBudgetChange = (e, idx) => {
     const val = Number(e.target.value);
-    setBudget((prev) =>
+    const newBudget =
       idx === 0
-        ? [val, prev[1] < val ? val : prev[1]]
-        : [prev[0] > val ? val : prev[0], val]
-    );
-    setPage(1);
+        ? [val, state.budget[1] < val ? val : state.budget[1]]
+        : [state.budget[0] > val ? val : state.budget[0], val];
+    dispatch({ type: "SET_BUDGET", value: newBudget });
   };
 
   const handleDeliveryChange = (val) => {
-    setDelivery((prev) =>
-      prev.includes(val) ? prev.filter((v) => v !== val) : [...prev, val]
-    );
-    setPage(1);
+    const newDelivery = state.delivery.includes(val)
+      ? state.delivery.filter((v) => v !== val)
+      : [...state.delivery, val];
+    dispatch({ type: "SET_DELIVERY", value: newDelivery });
   };
 
   const handleRatingChange = (val) => {
-    setRating((prev) =>
-      prev.includes(val) ? prev.filter((v) => v !== val) : [...prev, val]
-    );
-    setPage(1);
+    const newRating = state.rating.includes(val)
+      ? state.rating.filter((v) => v !== val)
+      : [...state.rating, val];
+    dispatch({ type: "SET_RATING", value: newRating });
   };
 
   const handleVerifiedChange = (val) => {
-    setVerified(val);
-    setPage(1);
+    dispatch({ type: "SET_VERIFIED", value: val });
   };
 
-  // Reset filters
   const clearFilters = () => {
-    setCategory("All");
-    setSelectedCategory("All");
-    setTags([]);
-    setBudget([10, 100]);
-    setDelivery([]);
-    setRating([]);
-    setVerified("");
-    setLanguage([]);
-    setLocation([]);
-    setPage(1);
+    dispatch({ type: "RESET" });
   };
 
-  // Tag display logic for card
   const renderTags = (tags) => {
     const mainTags = tags.slice(0, 3);
     const extraCount = tags.length - 3;
@@ -198,8 +231,8 @@ const Professionals = () => {
             src={prof.profilePic || "https://randomuser.me/api/portraits/men/32.jpg"}
             alt={`${prof.firstName || ""} ${prof.lastName || ""}`}
             onClick={() => {
-              setSelectedProfessional(prof);
-              setShowProfileModal(true);
+             dispatch({ type: "SET_SELECTED_PROFESSIONAL", value: prof });
+    dispatch({ type: "SET_SHOW_PROFILE_MODAL", value: true });
             }}
             style={{ cursor: "pointer" }}
             className={`w-44 h-52 rounded-xl object-cover ${
@@ -253,8 +286,8 @@ const Professionals = () => {
             <button
               className="bg-blue-600 text-white px-5 py-2 rounded-full font-semibold text-sm hover:bg-blue-700 transition"
               onClick={() => {
-                setSelectedProfessional(prof);
-                setShowModal(true);
+                dispatch({ type: "SET_SELECTED_PROFESSIONAL", value: prof });
+    dispatch({ type: "SET_SHOW_MODAL", value: true });
               }}
             >
               Ask a question
@@ -347,8 +380,8 @@ const Professionals = () => {
       <div className="w-full mb-6">
           <CategoriesSlider
             categories={[{_id:"All",category:"All"},...specializations]}
-            selectedCategory={selectedCategory}
-            onSelect={setSelectedCategory}
+            selectedCategory={state.selectedCategory}
+            onSelect={(val) => dispatch({ type: "SET_SELECTED_CATEGORY", value: val })}
           />
         </div>
       <div className="flex flex-col lg:flex-row gap-8 w-full mt-8">
@@ -356,7 +389,7 @@ const Professionals = () => {
         <div className="lg:hidden w-full mb-4">
           <button
             className="w-full bg-blue-600 text-white py-2 rounded-xl font-semibold text-base"
-            onClick={() => setShowMobileFilters(true)}
+            onClick={() => dispatch({ type: "SET_SHOW_MOBILE_FILTERS", value: true })}
           >
             Filters
           </button>
@@ -378,13 +411,12 @@ const Professionals = () => {
             <label className="block text-sm font-medium mb-1">Category</label>
             <DropdownSelector
               options={["All", ...specializations.map((c) => c.category)]}
-              value={category}
+              value={state.category}
               onChange={(val) => {
                 // keep human-readable label in `category` for UI, but prefer id for server filtering
-                setCategory(val);
+                dispatch({ type: "SET_CATEGORY", value: val });
                 const spec = specializations.find((s) => s.category === val);
-                setSelectedCategory(spec ? spec._id : "All");
-                setPage(1);
+                dispatch({ type: "SET_SELECTED_CATEGORY", value: spec ? spec._id : "All" });
               }}
               placeholder="Select category"
             />
@@ -401,7 +433,7 @@ const Professionals = () => {
         <img src={find} alt="" />
       </span>
       <div className="flex gap-2 flex-wrap">
-        {tags.map((tag) => (
+        {state.tags.map((tag) => (
           <span
             key={tag}
             className="flex items-center bg-blue-50 border border-blue-400 text-blue-700 px-3 py-1 rounded-full text-xs font-medium"
@@ -420,7 +452,7 @@ const Professionals = () => {
       <button
         type="button"
         className="ml-auto text-gray-400"
-        onClick={() => setShowTagDropdown((v) => !v)}
+        onClick={() => dispatch({ type: "SET_SHOW_TAG_DROPDOWN", value: !state.showTagDropdown })}
         tabIndex={-1}
       >
         <svg width="20" height="20" fill="none">
@@ -438,25 +470,25 @@ const Professionals = () => {
   <hr className="my-4 border-gray-200 border-1" />
 </div>
     {/* Dropdown */}
-    {showTagDropdown && (
+    {state.showTagDropdown && (
       <div className="absolute left-0 top-full mt-2 w-full bg-white border rounded-xl shadow-lg z-10 max-h-48 overflow-auto">
         {allSubCategories.map((tag) => (
           <button
             key={tag}
             className={`w-full text-left px-4 py-2 text-sm hover:bg-blue-50 ${
-              tags.includes(tag)
+              state.tags.includes(tag)
                 ? "bg-blue-100 text-blue-700 font-semibold"
                 : "text-gray-700"
             }`}
             onClick={() => {
-              if (tags.includes(tag)) {
+              if (state.tags.includes(tag)) {
                 handleTagChange(tag);
-              } else if (tags.length < 2) {
+              } else if (state.tags.length < 2) {
                 handleTagChange(tag);
               }
-              setShowTagDropdown(false);
+              dispatch({ type: "SET_SHOW_TAG_DROPDOWN", value: false });
             }}
-            disabled={!tags.includes(tag) && tags.length >= 2}
+            disabled={!state.tags.includes(tag) && state.tags.length >= 2}
           >
             {tag}
           </button>
@@ -473,15 +505,15 @@ const Professionals = () => {
             </label>
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-500">${budget[0]}</span>
-                <span className="text-xs text-gray-500">${budget[1]}</span>
+                <span className="text-xs text-gray-500">${state.budget[0]}</span>
+                <span className="text-xs text-gray-500">${state.budget[1]}</span>
               </div>
               <div className="flex items-center gap-2">
                 <input
                   type="range"
                   min={10}
                   max={100}
-                  value={budget[0]}
+                  value={state.budget[0]}
                   onChange={(e) => handleBudgetChange(e, 0)}
                   className="flex-1 accent-blue-600"
                 />
@@ -489,7 +521,7 @@ const Professionals = () => {
                   type="range"
                   min={10}
                   max={100}
-                  value={budget[1]}
+                  value={state.budget[1]}
                   onChange={(e) => handleBudgetChange(e, 1)}
                   className="flex-1 accent-blue-600"
                 />
@@ -512,7 +544,7 @@ const Professionals = () => {
                 >
                   <input
                     type="checkbox"
-                    checked={delivery.includes(opt.value)}
+                    checked={state.delivery.includes(opt.value)}
                     onChange={() => handleDeliveryChange(opt.value)}
                     className="accent-blue-600"
                   />
@@ -534,7 +566,7 @@ const Professionals = () => {
                 >
                   <input
                     type="checkbox"
-                    checked={rating.includes(opt.value)}
+                    checked={state.rating.includes(opt.value)}
                     onChange={() => handleRatingChange(opt.value)}
                     className="accent-blue-600"
                   />
@@ -552,7 +584,7 @@ const Professionals = () => {
               <label className="flex items-center gap-1 text-sm">
                 <input
                   type="checkbox"
-                  checked={verified === true}
+                  checked={state.verified === true}
                   onChange={() => handleVerifiedChange(true)}
                   className="accent-blue-600"
                 />
@@ -561,7 +593,7 @@ const Professionals = () => {
               <label className="flex items-center gap-1 text-sm">
                 <input
                   type="checkbox"
-                  checked={verified === false}
+                  checked={state.verified === false}
                   onChange={() => handleVerifiedChange(false)}
                   className="accent-blue-600"
                 />
@@ -576,10 +608,9 @@ const Professionals = () => {
           <div>
             <label className="block text-sm font-medium mb-1">Featured</label>            
             <ToggleSwitch
-    checked={featured}
+    checked={state.featured}
     onChange={() => {
-      setFeatured((prev) => !prev);
-      setPage(1);
+      dispatch({ type: "SET_FEATURED", value: !state.featured });
     }}
   />
           </div>
@@ -592,10 +623,9 @@ const Professionals = () => {
             <label className="block text-sm font-medium mb-1">Language</label>
             <DropdownSelector
               options={allLanguages}
-              value={language}
+              value={state.language}
               onChange={(val) => {
-                setLanguage(val);
-                setPage(1);
+                dispatch({ type: "SET_LANGUAGE", value: val });
               }}
               multi={true}
               max={2}
@@ -608,10 +638,9 @@ const Professionals = () => {
             <label className="block text-sm font-medium mb-1">Location</label>
             <DropdownSelector
               options={allLocations}
-              value={location}
+              value={state.location}
               onChange={(val) => {
-                setLocation(val);
-                setPage(1);
+                dispatch({ type: "SET_LOCATION", value: val });
               }}
               multi={true}
               max={2}
@@ -620,12 +649,12 @@ const Professionals = () => {
           </div>
         </div>
         {/* Mobile Filters Modal */}
-        {showMobileFilters && (
+        {state.showMobileFilters && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 lg:hidden">
             <div className="bg-white rounded-xl shadow-lg w-full max-w-sm p-6 relative overflow-y-auto max-h-[90vh]">
               <button
                 className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-xl"
-                onClick={() => setShowMobileFilters(false)}
+                onClick={() => dispatch({ type: "SET_SHOW_MOBILE_FILTERS", value: false })}
                 aria-label="Close"
               >
                 &times;
@@ -638,9 +667,9 @@ const Professionals = () => {
                 </label>
                 <DropdownSelector
                   options={["AI, Business, etc", ...allTags]}
-                  value={category}
+                  value={state.category}
                   onChange={(val) => {
-                    setCategory(val);
+                    dispatch({ type: "SET_CATEGORY", value: val });
                     setPage(1);
                   }}
                   placeholder="Select category"
@@ -657,7 +686,7 @@ const Professionals = () => {
                       <img src={find} alt="" />
                     </span>
                     <div className="flex gap-2 flex-wrap">
-                      {tags.map((tag) => (
+                      {state.tags.map((tag) => (
                         <span
                           key={tag}
                           className="flex items-center bg-blue-50 border border-blue-400 text-blue-700 px-3 py-1 rounded-full text-xs font-medium"
@@ -676,7 +705,7 @@ const Professionals = () => {
                     <button
                       type="button"
                       className="ml-auto text-gray-400"
-                      onClick={() => setShowTagDropdown((v) => !v)}
+                      onClick={() => dispatch({ type: "SET_SHOW_TAG_DROPDOWN", value: !state.showTagDropdown })}
                       tabIndex={-1}
                     >
                       <svg width="20" height="20" fill="none">
@@ -691,25 +720,25 @@ const Professionals = () => {
                     </button>
                   </div>
                   {/* Dropdown */}
-                  {showTagDropdown && (
+                  {state.showTagDropdown && (
                     <div className="absolute left-0 top-full mt-2 w-full bg-white border rounded-xl shadow-lg z-10 max-h-48 overflow-auto">
                       {allTags.map((tag) => (
                         <button
                           key={tag}
                           className={`w-full text-left px-4 py-2 text-sm hover:bg-blue-50 ${
-                            tags.includes(tag)
+                            state.tags.includes(tag)
                               ? "bg-blue-100 text-blue-700 font-semibold"
                               : "text-gray-700"
                           }`}
                           onClick={() => {
-                            if (tags.includes(tag)) {
+                            if (state.tags.includes(tag)) {
                               handleTagChange(tag);
-                            } else if (tags.length < 2) {
+                            } else if (state.tags.length < 2) {
                               handleTagChange(tag);
                             }
-                            setShowTagDropdown(false);
+                            dispatch({ type: "SET_SHOW_TAG_DROPDOWN", value: false });
                           }}
-                          disabled={!tags.includes(tag) && tags.length >= 2}
+                          disabled={!state.tags.includes(tag) && state.tags.length >= 2}
                         >
                           {tag}
                         </button>
@@ -726,15 +755,15 @@ const Professionals = () => {
                 </label>
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-500">${budget[0]}</span>
-                    <span className="text-xs text-gray-500">${budget[1]}</span>
+                    <span className="text-xs text-gray-500">${state.budget[0]}</span>
+                    <span className="text-xs text-gray-500">${state.budget[1]}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <input
                       type="range"
                       min={10}
                       max={100}
-                      value={budget[0]}
+                      value={state.budget[0]}
                       onChange={(e) => handleBudgetChange(e, 0)}
                       className="flex-1 accent-blue-600"
                     />
@@ -742,7 +771,7 @@ const Professionals = () => {
                       type="range"
                       min={10}
                       max={100}
-                      value={budget[1]}
+                      value={state.budget[1]}
                       onChange={(e) => handleBudgetChange(e, 1)}
                       className="flex-1 accent-blue-600"
                     />
@@ -762,7 +791,7 @@ const Professionals = () => {
                     >
                       <input
                         type="checkbox"
-                        checked={delivery.includes(opt.value)}
+                        checked={state.delivery.includes(opt.value)}
                         onChange={() => handleDeliveryChange(opt.value)}
                         className="accent-blue-600"
                       />
@@ -781,7 +810,7 @@ const Professionals = () => {
                     >
                       <input
                         type="checkbox"
-                        checked={rating.includes(opt.value)}
+                        checked={state.rating.includes(opt.value)}
                         onChange={() => handleRatingChange(opt.value)}
                         className="accent-blue-600"
                       />
@@ -798,7 +827,7 @@ const Professionals = () => {
                   <label className="flex items-center gap-1 text-sm">
                     <input
                       type="radio"
-                      checked={verified === true}
+                      checked={state.verified === true}
                       onChange={() => handleVerifiedChange(true)}
                       className="accent-blue-600"
                     />
@@ -807,7 +836,7 @@ const Professionals = () => {
                   <label className="flex items-center gap-1 text-sm">
                     <input
                       type="radio"
-                      checked={verified === false}
+                      checked={state.verified === false}
                       onChange={() => handleVerifiedChange(false)}
                       className="accent-blue-600"
                     />
@@ -823,10 +852,9 @@ const Professionals = () => {
                 </label>
                 <DropdownSelector
                   options={allLanguages}
-                  value={language}
+                  value={state.language}
                   onChange={(val) => {
-                    setLanguage(val);
-                    setPage(1);
+                    dispatch({ type: "SET_LANGUAGE", value: val });
                   }}
                   multi={true}
                   max={2}
@@ -841,10 +869,9 @@ const Professionals = () => {
                 </label>
                 <DropdownSelector
                   options={allLocations}
-                  value={location}
+                  value={state.location}
                   onChange={(val) => {
-                    setLocation(val);
-                    setPage(1);
+                    dispatch({ type: "SET_LOCATION", value: val });
                   }}
                   multi={true}
                   max={2}
@@ -857,14 +884,14 @@ const Professionals = () => {
                 className="w-full bg-gray-100 text-gray-700 py-2 rounded-xl font-semibold text-base mt-4"
                 onClick={() => {
                   clearFilters();
-                  setShowMobileFilters(false);
+                  dispatch({ type: "SET_SHOW_MOBILE_FILTERS", value: false });
                 }}
               >
                 Clear Filters
               </button>
               <button
                 className="w-full bg-blue-600 text-white py-2 rounded-xl font-semibold text-base mt-2"
-                onClick={() => setShowMobileFilters(false)}
+                onClick={() => dispatch({ type: "SET_SHOW_MOBILE_FILTERS", value: false })}
               >
                 Apply Filters
               </button>
@@ -918,42 +945,42 @@ const Professionals = () => {
             <div className="flex items-center justify-center gap-4 mt-6">
               <button
                 className={`px-3 py-1 rounded border ${
-                  page === 1
+                  state.page === 1
                     ? "bg-gray-100 text-gray-400"
                     : "bg-white text-blue-600 border-blue-400 hover:bg-blue-50"
                 }`}
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page === 1}
+                onClick={() => dispatch({ type: "SET_PAGE", value: Math.max(1, state.page - 1) })}
+                disabled={state.page === 1}
               >
                 <FiChevronLeft size={18} />
               </button>
               <span className="font-semibold text-sm">
-                Page {page} of {totalPages}
+                Page {state.page} of {totalPages}
               </span>
               <button
                 className={`px-3 py-1 rounded border ${
-                  page === totalPages
+                  state.page === totalPages
                     ? "bg-gray-100 text-gray-400"
                     : "bg-white text-blue-600 border-blue-400 hover:bg-blue-50"
                 }`}
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={page === totalPages}
+                onClick={() => dispatch({ type: "SET_PAGE", value: Math.min(totalPages, state.page + 1) })}
+                disabled={state.page === totalPages}
               >
                 <FiChevronRight size={18} />
               </button>
             </div>
           )}
         </div>
-        {showProfileModal && selectedProfessional && (
+        {state.showProfileModal && state.selectedProfessional && (
           <ProfessionalProfileModal
-            professionalId={selectedProfessional._id}
-            onClose={() => setShowProfileModal(false)}
+            professionalId={state.selectedProfessional._id}
+            onClose={() => dispatch({ type: "SET_SHOW_PROFILE_MODAL", value: false })}
           />
         )}
-        {showModal && selectedProfessional && (
+        {state.showModal && state.selectedProfessional && (
           <AskQuestionModal
-            professional={selectedProfessional}
-            onClose={() => setShowModal(false)}
+            professional={state.selectedProfessional}
+            onClose={() => dispatch({ type: "SET_SHOW_MODAL", value: false })}
           />
         )}
       </div>

@@ -13,7 +13,7 @@ const deliveryOptions = [
 
 const AskQuestionModal = ({ professional, onClose }) => {
   const [description, setDescription] = useState("");
-  const [editorState, setEditorState] = useState(null); // Store the full editor state
+  const [editorState, setEditorState] = useState(null); 
   const [images, setImages] = useState([]);
   const [deliveryTime, setDeliveryTime] = useState("Normal");
   const [showConfirm, setShowConfirm] = useState(false);
