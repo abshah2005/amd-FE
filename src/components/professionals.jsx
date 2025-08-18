@@ -434,6 +434,9 @@ const Professionals = () => {
         </svg>
       </button>
     </div>
+    <div className="text-xs text-gray-500 mt-1">
+  <hr className="my-4 border-gray-200 border-1" />
+</div>
     {/* Dropdown */}
     {showTagDropdown && (
       <div className="absolute left-0 top-full mt-2 w-full bg-white border rounded-xl shadow-lg z-10 max-h-48 overflow-auto">
@@ -493,6 +496,9 @@ const Professionals = () => {
               </div>
             </div>
           </div>
+         <div className="text-xs text-gray-500 mt-1">
+  <hr className="my-4 border-gray-200 border-1" />
+</div>
           {/* Delivery Time */}
           <div className="mb-4">
             <label className="block text-sm font-medium mb-1">
@@ -515,6 +521,9 @@ const Professionals = () => {
               ))}
             </div>
           </div>
+          <div className="text-xs text-gray-500 mt-1">
+  <hr className="my-4 border-gray-200 border-1" />
+</div>
           <div className="mb-4">
             <label className="block text-sm font-medium mb-1">Rating</label>
             <div className="flex flex-col gap-2">
@@ -534,6 +543,9 @@ const Professionals = () => {
               ))}
             </div>
           </div>
+          <div className="text-xs text-gray-500 mt-1">
+  <hr className="my-4 border-gray-200 border-1" />
+</div>
           <div className="mb-4">
             <label className="block text-sm font-medium mb-1">Verified</label>
             <div className="flex flex-col gap-4">
@@ -557,6 +569,9 @@ const Professionals = () => {
               </label>
             </div>
           </div>
+          <div className="text-xs text-gray-500 mt-1">
+  <hr className="my-4 border-gray-200 border-1" />
+</div>
 
           <div>
             <label className="block text-sm font-medium mb-1">Featured</label>            
@@ -568,6 +583,9 @@ const Professionals = () => {
     }}
   />
           </div>
+          <div className="text-xs text-gray-500 mt-1">
+  <hr className="my-4 border-gray-200 border-1" />
+</div>
 
           {/* Language */}
           <div className="mb-4">

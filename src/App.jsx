@@ -20,6 +20,7 @@ import { useAuth } from "./contextProvider/AuthContextProvider";
 import QuestionsPage from "./pages/QuestionsPage";
 import ProfessionalOnboarding from "./pages/ProfessionalOnboarding";
 import AccountSettings from "./pages/AccountSettings";
+import DashboardPage from "./pages/DashboardPage";
 
 // ProtectedRoute component
 function ProtectedRoute({ children }) {
@@ -41,7 +42,6 @@ function App() {
   return (
     <AuthProvider>
       <Routes>
-        {/* Protected MainLayout */}
         <Route
           element={
             <ProtectedRoute>
@@ -53,10 +53,9 @@ function App() {
           <Route path="/questions" element={<QuestionsPage />} />
         </Route>
 
-        {/* Public routes */}
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/account-settings" element={<AccountSettings />} />
-
+        <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/pofon" element={<ProfessionalOnboarding />} />
         <Route path="/resetPassword" element={<ResetPassword />} />
         <Route path="/signin" element={<SignInPage />} />

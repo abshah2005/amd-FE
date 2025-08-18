@@ -145,7 +145,7 @@ const MainNav = () => {
                 {/* actions */}
                 <div className="p-2">
                   <a
-                    href="/profile"
+                    href="/account-settings"
                     className="flex items-center gap-3 px-3 py-3 rounded hover:bg-gray-50 text-gray-800 text-sm"
                   >
                     <span className="w-6 h-6 flex items-center justify-center text-gray-700">
