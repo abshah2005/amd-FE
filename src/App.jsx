@@ -1,8 +1,8 @@
 import { Routes, Route, Outlet, Navigate } from "react-router-dom";
 import MainNav from "./components/MainNav";
-import Home from "./pages/Home";
-import About from "./pages/About";
 import SignUpPage from "./pages/Signup";
+import ProfessionalOnboarding from "./pages/ProfessionalOnboarding";
+import AccountSettings from "./pages/AccountSettings"
 import OnboardingScreen from "./pages/Onborading";
 import AccountSetup from "./pages/AccountSetup";
 import WaitingScreen from "./pages/WaitingScreen";
@@ -17,11 +17,9 @@ import RichEditor from "./pages/RichEditor";
 import { AuthProvider } from "./contextProvider/AuthContextProvider";
 
 import { useAuth } from "./contextProvider/AuthContextProvider";
-import QuestionsPage from "./pages/QuestionsPage";
-import ProfessionalOnboarding from "./pages/ProfessionalOnboarding";
-import AccountSettings from "./pages/AccountSettings";
 import DashboardPage from "./pages/DashboardPage";
 import AppSkeleton from "./pages/AppSkeleton";
+import QuestionsPage from "./pages/QuestionsPage";
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -29,13 +27,36 @@ function ProtectedRoute({ children }) {
   return user ? children : <Navigate to="/signin" replace />;
 }
 
-function ProtectedAdminRoute({ children }) {
+function ProtectedAskerRoute({ children }) {
   const { user, loading } = useAuth();
   if (loading) return <AppSkeleton />;
-  return user.role === "asker" || user.role === "Asker" ? (
+  if (!user) return <Navigate to="/signin" replace />;
+  return user.activeRole === "asker" || user.role === "asker" ? (
     children
   ) : (
-    <Navigate to="/signin" replace />
+    <Navigate to="/dashboard" replace />
+  );
+}
+
+function ProtectedNonAskerRoute({ children }) {
+  const { user, loading } = useAuth();
+  if (loading) return <AppSkeleton />;
+  if (!user) return <Navigate to="/signin" replace />;
+  return user.activeRole !== "asker" && user.role !== "asker" ? (
+    children
+  ) : (
+    <Navigate to="/" replace />
+  );
+}
+
+function LandingRedirect() {
+  const { user, loading } = useAuth();
+  if (loading) return <AppSkeleton />;
+  if (!user) return <Navigate to="/signin" replace />;
+  return user.activeRole === "asker" || user.role === "asker" ? (
+    <Test />
+  ) : (
+    <Navigate to="/dashboard" replace />
   );
 }
 
@@ -63,18 +84,28 @@ function App() {
             </ProtectedRoute>
           }
         >
-          <Route path="/" element={<Test />} />
+          <Route path="/" element={<LandingRedirect />} />
+
+          <Route
+            path="/test"
+            element={
+              <ProtectedAskerRoute>
+                <Test />
+              </ProtectedAskerRoute>
+            }
+          />
+
           <Route path="/questions" element={<QuestionsPage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
+
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedNonAskerRoute>
+                <DashboardPage />
+              </ProtectedNonAskerRoute>
+            }
+          />
         </Route>
-        {/* <Route
-          element={
-            <ProtectedAdminRoute>
-              <ProtectedLayout />
-            </ProtectedAdminRoute>
-          }
-        >
-        </Route> */}
 
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/account-settings" element={<AccountSettings />} />

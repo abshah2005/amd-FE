@@ -3,6 +3,8 @@ import DashboardStats from "../components/DashboardStats";
 import DashboardTabs from "../components/DashboardTabs";
 import DashboardTable from "../components/DashboardTable";
 import MainNav from "../components/MainNav";
+import { useAuth } from "../contextProvider/AuthContextProvider";
+import ProfessionalDashboard from "../components/ProfessionalDashboard";
 
 const professionalsData = [
   { name: "Alex Hales", joined: "YYYY/MM/DD", earnings: "$25", answers: 23, status: "Active" },
@@ -17,7 +19,12 @@ const askersData = [
 ];
 
 const DashboardPage = () => {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("Professionals");
+
+  // If current activeRole is professional, show professional dashboard
+  const isProfessional = user?.activeRole === "professional"  ;
+  if (isProfessional) return <ProfessionalDashboard />;
 
   return (
     <div className="min-h-screen bg-white flex flex-col items-center w-full">

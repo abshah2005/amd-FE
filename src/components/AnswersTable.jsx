@@ -1,6 +1,6 @@
 
-import React from 'react';
-export const AnswersTable = ({ answers }) => {
+import React from 'react'; 
+const AnswersTable = ({ answers }) => {
   const getStatusColor = (status) => {
     switch (status) {
       case 'Accepted':
@@ -84,3 +84,5 @@ export const AnswersTable = ({ answers }) => {
     </div>
   );
 };
+
+export default AnswersTable;

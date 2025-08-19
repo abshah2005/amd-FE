@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Tabs } from "../components/Tabs";
 import { SearchBar } from "./SearcBar";
 import { QuestionsTable } from "../components/QuestionsTable";
-import { AnswersTable } from "../components/AnswersTable";
+import  AnswersTable  from "../components/AnswersTable";
 import { useAuth } from "../contextProvider/AuthContextProvider";
 import { ArrowBack } from "@mui/icons-material";
 
