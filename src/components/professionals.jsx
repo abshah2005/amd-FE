@@ -100,7 +100,7 @@ function reducer(state, action) {
 }
 
 const Professionals = () => {
-  const { topCategories, allSubCategories, specializations, loading } =
+  const { allSubCategories, specializations, loading } =
     useSpecializations();
 
   // 3. Use useReducer
@@ -973,7 +973,8 @@ const Professionals = () => {
         </div>
         {state.showProfileModal && state.selectedProfessional && (
           <ProfessionalProfileModal
-            professionalId={state.selectedProfessional._id}
+            // professionalId={state.selectedProfessional._id}
+            professional={state.selectedProfessional}
             onClose={() => dispatch({ type: "SET_SHOW_PROFILE_MODAL", value: false })}
           />
         )}

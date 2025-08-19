@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useReducer, useRef, useEffect } from "react";
 import DropdownSelector from "./DropdownSelector";
 import TermsModal from "./TermsModal";
 import { ConfirmModal } from "./ConfirmModal";
@@ -11,58 +11,97 @@ const deliveryOptions = [
   { label: "Fast-Track", value: "Fast-Track" },
 ];
 
+// 1. Initial state
+const initialState = {
+  description: "",
+  editorState: null,
+  images: [],
+  deliveryTime: "Normal",
+  showConfirm: false,
+  showDiscard: false,
+  showTerms: false,
+  budget: "",
+  step: 1,
+  agreed: false,
+  showImageSelector: false,
+};
+
+// 2. Reducer function
+function reducer(state, action) {
+  switch (action.type) {
+    case "SET_DESCRIPTION":
+      return { ...state, description: action.value };
+    case "SET_EDITOR_STATE":
+      return { ...state, editorState: action.value };
+    case "SET_IMAGES":
+      return { ...state, images: action.value };
+    case "ADD_IMAGES":
+      return { ...state, images: [...state.images, ...action.value] };
+    case "REMOVE_IMAGE":
+      return {
+        ...state,
+        images: state.images.filter((_, i) => i !== action.value),
+      };
+    case "SET_DELIVERY_TIME":
+      return { ...state, deliveryTime: action.value };
+    case "SET_SHOW_CONFIRM":
+      return { ...state, showConfirm: action.value };
+    case "SET_SHOW_DISCARD":
+      return { ...state, showDiscard: action.value };
+    case "SET_SHOW_TERMS":
+      return { ...state, showTerms: action.value };
+    case "SET_BUDGET":
+      return { ...state, budget: action.value };
+    case "SET_STEP":
+      return { ...state, step: action.value };
+    case "SET_AGREED":
+      return { ...state, agreed: action.value };
+    case "SET_SHOW_IMAGE_SELECTOR":
+      return { ...state, showImageSelector: action.value };
+    case "RESET":
+      return { ...initialState };
+    default:
+      return state;
+  }
+}
+
 const AskQuestionModal = ({ professional, onClose }) => {
-  const [description, setDescription] = useState("");
-  const [editorState, setEditorState] = useState(null); 
-  const [images, setImages] = useState([]);
-  const [deliveryTime, setDeliveryTime] = useState("Normal");
-  const [showConfirm, setShowConfirm] = useState(false);
-  const [showDiscard, setShowDiscard] = useState(false);
-  const [showTerms, setShowTerms] = useState(false);
-  const [budget, setBudget] = useState("");
-  const [step, setStep] = useState(1);
-  const [agreed, setAgreed] = useState(false);
-  const [showImageSelector, setShowImageSelector] = useState(false);
+  const [state, dispatch] = useReducer(reducer, initialState);
   const fileInputRef = useRef();
 
-  const handleClose = () => setShowDiscard(true);
+  const handleClose = () => dispatch({ type: "SET_SHOW_DISCARD", value: true });
 
   const handleDiscard = () => {
-    setShowDiscard(false);
+    dispatch({ type: "SET_SHOW_DISCARD", value: false });
     onClose();
   };
 
   const truncateToFirstLine = (text, maxLength = 50) => {
     if (!text) return "";
-    
-    // Split by line breaks and get first line
-    const firstLine = text.split('\n')[0];
-    
-    // If first line is longer than maxLength, truncate it
+    const firstLine = text.split("\n")[0];
     if (firstLine.length > maxLength) {
-      return firstLine.substring(0, maxLength).trim() + '...';
+      return firstLine.substring(0, maxLength).trim() + "...";
     }
-    
-    // If original text has multiple lines, add ... to indicate more content
-    if (text.includes('\n') || text.length > firstLine.length) {
-      return firstLine + '...';
+    if (text.includes("\n") || text.length > firstLine.length) {
+      return firstLine + "...";
     }
-    
     return firstLine;
   };
 
-  const handleDoneClick = () => setShowConfirm(true);
+  const handleDoneClick = () =>
+    dispatch({ type: "SET_SHOW_CONFIRM", value: true });
 
   const handleConfirm = () => {
-    setShowConfirm(false);
+    console.log("AskQuestionModal state on Done:", state);
+    dispatch({ type: "SET_SHOW_CONFIRM", value: false });
     handleSubmit();
   };
 
   // Handle actual image upload
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
-    if (images.length + files.length > 5) return;
-    setImages([...images, ...files]);
+    if (state.images.length + files.length > 5) return;
+    dispatch({ type: "ADD_IMAGES", value: files });
     e.target.value = "";
   };
 
@@ -74,32 +113,32 @@ const AskQuestionModal = ({ professional, onClose }) => {
   }, []);
 
   const handleRemoveImage = (idx) => {
-    setImages(images.filter((_, i) => i !== idx));
+    dispatch({ type: "REMOVE_IMAGE", value: idx });
   };
 
   // Handler for images selected in modal
   const handleSelectImages = (selectedImages) => {
-    setImages(selectedImages);
+    dispatch({ type: "SET_IMAGES", value: selectedImages });
   };
 
   // Simulate submit
   const handleSubmit = () => {
-    if (!agreed) return;
-    // Prepare request body for API
+    if (!state.agreed) return;
     const formData = new FormData();
-    formData.append("professionalId", professional.id);
-    formData.append("description", description);
-    formData.append("deliveryTime", deliveryTime);
-    formData.append("budget", budget);
-    images.forEach((img) => formData.append("images", img));
+    formData.append("professionalId", professional._id);
+    formData.append("description", state.description);
+    formData.append("deliveryTime", state.deliveryTime);
+    formData.append("budget", state.budget);
+    state.images.forEach((img) => formData.append("images", img));
     // Example: fetch('/api/ask', { method: 'POST', body: formData });
     onClose();
+    dispatch({ type: "RESET" });
   };
 
   // Budget options for dropdown
   const budgetOptions = Array.from(
-    { length: professional.priceEnd - professional.priceStart + 1 },
-    (_, i) => professional.priceStart + i
+    { length: professional.priceRangeLow - professional.priceRangeHigh + 1 },
+    (_, i) => professional.priceRangeLow + i
   );
 
   // Dots for phase indicator (top right, visually aligned)
@@ -107,13 +146,13 @@ const AskQuestionModal = ({ professional, onClose }) => {
     <div className="flex gap-2 items-center">
       <span
         className={`w-2 h-2 rounded-full ${
-          step === 1 ? "bg-blue-600" : "bg-gray-300"
+          state.step === 1 ? "bg-blue-600" : "bg-gray-300"
         }`}
         style={{ display: "inline-block" }}
       />
       <span
         className={`w-2 h-2 rounded-full ${
-          step === 2 ? "bg-blue-600" : "bg-gray-300"
+          state.step === 2 ? "bg-blue-600" : "bg-gray-300"
         }`}
         style={{ display: "inline-block" }}
       />
@@ -124,7 +163,7 @@ const AskQuestionModal = ({ professional, onClose }) => {
     <div className="flex items-center  gap-3 mb-4">
       <div className="flex">
         <img
-          src={professional.avatar}
+          src={professional.profilePic}
           alt={professional.name}
           className="w-14 h-14 rounded"
         />
@@ -133,35 +172,37 @@ const AskQuestionModal = ({ professional, onClose }) => {
             <span className="font-semibold text-base pl-2">
               {professional.name}
             </span>
-            <span className="text-xs text-green-600 flex items-center gap-1">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 16 16"
-                fill="none"
-              >
-                <path
-                  d="M13.3334 8.66664C13.3334 12 11.0001 13.6666 8.22675 14.6333C8.08152 14.6825 7.92377 14.6802 7.78008 14.6266C5.00008 13.6666 2.66675 12 2.66675 8.66664V3.99997C2.66675 3.82316 2.73699 3.65359 2.86201 3.52857C2.98703 3.40355 3.1566 3.33331 3.33341 3.33331C4.66675 3.33331 6.33341 2.53331 7.49341 1.51997C7.63465 1.39931 7.81432 1.33301 8.00008 1.33301C8.18585 1.33301 8.36551 1.39931 8.50675 1.51997C9.67342 2.53997 11.3334 3.33331 12.6667 3.33331C12.8436 3.33331 13.0131 3.40355 13.1382 3.52857C13.2632 3.65359 13.3334 3.82316 13.3334 3.99997V8.66664Z"
-                  stroke="#36B37E"
-                  strokeWidth="1.35"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M6 7.99984L7.33333 9.33317L10 6.6665"
-                  stroke="#36B37E"
-                  strokeWidth="1.35"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </span>
+            {professional.verified?<span className="text-xs text-green-600 flex items-center gap-1">
+              {/* Verified icon */}
+              
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                >
+                  <path
+                    d="M13.3334 8.66664C13.3334 12 11.0001 13.6666 8.22675 14.6333C8.08152 14.6825 7.92377 14.6802 7.78008 14.6266C5.00008 13.6666 2.66675 12 2.66675 8.66664V3.99997C2.66675 3.82316 2.73699 3.65359 2.86201 3.52857C2.98703 3.40355 3.1566 3.33331 3.33341 3.33331C4.66675 3.33331 6.33341 2.53331 7.49341 1.51997C7.63465 1.39931 7.81432 1.33301 8.00008 1.33301C8.18585 1.33301 8.36551 1.39931 8.50675 1.51997C9.67342 2.53997 11.3334 3.33331 12.6667 3.33331C12.8436 3.33331 13.0131 3.40355 13.1382 3.52857C13.2632 3.65359 13.3334 3.82316 13.3334 3.99997V8.66664Z"
+                    stroke="#36B37E"
+                    strokeWidth="1.35"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M6 7.99984L7.33333 9.33317L10 6.6665"
+                    stroke="#36B37E"
+                    strokeWidth="1.35"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>:
+            </span>:<></>}
+            
             <span className="text-xs text-blue-800  cursor-pointer pl-2">
               See Profile
             </span>
           </div>
-
           <span className="text-xs text-gray-500 pl-2">
             {professional.title}
           </span>
@@ -175,9 +216,8 @@ const AskQuestionModal = ({ professional, onClose }) => {
 
   // Enhanced description change handler - Store both plain text and editor state
   const handleDescriptionChange = (data) => {
-    console.log("Description changed:", data.editorState);
-    setDescription(data.plainText);
-    setEditorState(data.editorState); // Store the complete editor state
+    dispatch({ type: "SET_DESCRIPTION", value: data.plainText });
+    dispatch({ type: "SET_EDITOR_STATE", value: data.editorState });
   };
 
   return (
@@ -190,17 +230,17 @@ const AskQuestionModal = ({ professional, onClose }) => {
           &times;
         </button>
         {/* Step 1: Ask Question */}
-        {step === 1 && (
+        {state.step === 1 && (
           <div className="p-8">
             <h2 className="text-xl font-semibold mb-4 flex items-center">
-              Hi, I'm {professional.name} <span className="ml-2">👋</span>
+              Hi, I'm {professional.firstName} <span className="ml-2">👋</span>
             </h2>
             <ProfileHeader />
             <div className="mb-4">
               <LexicalEditor
-                key={`step-1-editor-${step}`} // Include step in key for proper remounting
-                value={description}
-                initialEditorState={editorState} // Pass the stored editor state back
+                key={`step-1-editor-${state.step}`}
+                value={state.description}
+                initialEditorState={state.editorState}
                 onChange={handleDescriptionChange}
                 placeholder="Type your question..."
                 height={50}
@@ -211,6 +251,7 @@ const AskQuestionModal = ({ professional, onClose }) => {
             <div className="mb-4">
               <div className="flex items-center justify-between mb-1">
                 <span className="text-xs text-gray-500 flex items-center gap-1">
+                  {/* Attach Images icon */}
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="16"
@@ -236,7 +277,9 @@ const AskQuestionModal = ({ professional, onClose }) => {
                 </span>
                 <button
                   className="float-right mt-2 px-4 py-1 rounded  text-blue-800 text-sm font-medium"
-                  onClick={() => setShowImageSelector(true)}
+                  onClick={() =>
+                    dispatch({ type: "SET_SHOW_IMAGE_SELECTOR", value: true })
+                  }
                   type="button"
                 >
                   Add
@@ -246,7 +289,7 @@ const AskQuestionModal = ({ professional, onClose }) => {
                 className="flex flex-col gap-2   h-[10vh] md:h-[15vh] overflow-y-auto"
                 style={{ scrollbarWidth: "thin" }}
               >
-                {images.map((img, idx) => (
+                {state.images.map((img, idx) => (
                   <div key={idx} className="flex items-center gap-2 py-1">
                     <img
                       src={URL.createObjectURL(img)}
@@ -287,8 +330,8 @@ const AskQuestionModal = ({ professional, onClose }) => {
                     </button>
                     <button
                       className="ml-2 bg-gray-100 rounded px-2 py-1 flex items-center justify-center"
-                      title="More"
-                      disabled
+                      title="Remove"
+                      onClick={() => handleRemoveImage(idx)}
                     >
                       <svg
                         width="16"
@@ -305,7 +348,6 @@ const AskQuestionModal = ({ professional, onClose }) => {
                 ))}
               </div>
             </div>
-
             <div className="mb-4 flex justify-between space-between">
               <div className="flex flex-col">
                 <label className="block text-sm font-medium mb-1">
@@ -315,16 +357,18 @@ const AskQuestionModal = ({ professional, onClose }) => {
                   Fast-track answers include an additional payment.
                 </span>
               </div>
-
               <div className="min-w-[120px]">
                 <DropdownSelector
                   options={deliveryOptions.map((opt) => opt.label)}
-                  value={deliveryTime}
+                  value={state.deliveryTime}
                   onChange={(label) => {
                     const selected = deliveryOptions.find(
                       (opt) => opt.label === label
                     );
-                    setDeliveryTime(selected ? selected.value : label);
+                    dispatch({
+                      type: "SET_DELIVERY_TIME",
+                      value: selected ? selected.value : label,
+                    });
                   }}
                   placeholder="Select delivery"
                   rounded={false}
@@ -335,8 +379,8 @@ const AskQuestionModal = ({ professional, onClose }) => {
             <div className="flex justify-end mt-8">
               <button
                 className="bg-blue-600 text-white px-6 py-2 rounded-full font-semibold text-sm hover:bg-blue-700 transition"
-                onClick={() => setStep(2)}
-                disabled={!description.trim()} // Check for actual content, not length
+                onClick={() => dispatch({ type: "SET_STEP", value: 2 })}
+                disabled={!state.description.trim()}
               >
                 Next <span className="ml-2">&#8594;</span>
               </button>
@@ -344,7 +388,7 @@ const AskQuestionModal = ({ professional, onClose }) => {
           </div>
         )}
         {/* Step 2: Summary & Budget */}
-        {step === 2 && (
+        {state.step === 2 && (
           <div className="p-8">
             <div className="flex ">
               <div>
@@ -354,19 +398,20 @@ const AskQuestionModal = ({ professional, onClose }) => {
                   <label className="block text-sm font-medium mb-1">
                     Set a budget
                   </label>
-
                   <span className="text-xs text-gray-500 mt-1 block">
                     This professional has set their price between $
-                    {professional.priceStart} and ${professional.priceEnd}.
-                    Please enter or select an amount within this range.
+                    {professional.priceRangeLow} and $
+                    {professional.priceRangeHigh}. Please enter or select an
+                    amount within this range.
                   </span>
                 </div>
-
                 <div className="flex items-center justify-end gap-2 ">
                   <select
                     className="border rounded px-2 py-1"
-                    value={budget || professional.priceStart}
-                    onChange={(e) => setBudget(e.target.value)}
+                    value={state.budget || professional.priceRangeLow}
+                    onChange={(e) =>
+                      dispatch({ type: "SET_BUDGET", value: e.target.value })
+                    }
                   >
                     {budgetOptions.map((price) => (
                       <option key={price} value={price}>
@@ -375,12 +420,12 @@ const AskQuestionModal = ({ professional, onClose }) => {
                     ))}
                   </select>
                   <span className="text-gray-500 text-sm font-medium">
-                    ${professional.priceStart} - ${professional.priceEnd}
+                    ${professional.priceRangeLow} - $
+                    {professional.priceRangeHigh}
                   </span>
                 </div>
               </div>
             </div>
-
             <div className="mb-4">
               <span className="font-semibold text-base">Summary</span>
               <div className="border rounded-lg p-3 mt-2 bg-gray-50">
@@ -388,19 +433,25 @@ const AskQuestionModal = ({ professional, onClose }) => {
                   <span className="font-medium text-gray-700">
                     Description:
                   </span>
-                  <span className="ml-2 text-gray-700">{truncateToFirstLine(description,30)}</span> 
+                  <span className="ml-2 text-gray-700">
+                    {truncateToFirstLine(state.description, 30)}
+                  </span>
                 </div>
                 <div className="mb-2">
                   <span className="font-medium text-gray-700">
                     Images Attached
                   </span>
-                  <span className="ml-2 text-gray-700">— {images.length}</span>
+                  <span className="ml-2 text-gray-700">
+                    — {state.images.length}
+                  </span>
                 </div>
                 <div className="mb-2">
                   <span className="font-medium text-gray-700">
                     Delivery Time
                   </span>
-                  <span className="ml-2 text-gray-700">— {deliveryTime}</span>
+                  <span className="ml-2 text-gray-700">
+                    — {state.deliveryTime}
+                  </span>
                 </div>
               </div>
             </div>
@@ -410,23 +461,26 @@ const AskQuestionModal = ({ professional, onClose }) => {
                 Please agree to the
                 <span
                   className="text-bold cursor-pointer text-red-500"
-                  onClick={() => setShowTerms(true)}
+                  onClick={() =>
+                    dispatch({ type: "SET_SHOW_TERMS", value: true })
+                  }
                 >
                   Terms of use
                 </span>
                 <span>before submitting</span>
               </div>
-
               <div className="flex justify-center items-center mt-auto">
                 <input
                   type="checkbox"
-                  checked={agreed}
-                  onChange={(e) => setAgreed(e.target.checked)}
+                  checked={state.agreed}
+                  onChange={(e) =>
+                    dispatch({ type: "SET_AGREED", value: e.target.checked })
+                  }
                   id="agree"
                 />
               </div>
             </div>
-            {!agreed && (
+            {!state.agreed && (
               <div className="mb-2 text-red-500 text-xs  p-2 rounded flex items-center">
                 You must agree to the Terms of Use
                 <span>to submit</span>
@@ -435,16 +489,16 @@ const AskQuestionModal = ({ professional, onClose }) => {
             <div className="flex justify-between mt-4">
               <button
                 className="bg-gray-100 text-gray-700 px-5 py-2 rounded-full font-semibold text-sm hover:bg-gray-200 transition"
-                onClick={() => setStep(1)}
+                onClick={() => dispatch({ type: "SET_STEP", value: 1 })}
               >
                 Back
               </button>
               <button
                 className={`bg-blue-600 text-white px-5 py-2 rounded-full font-semibold text-sm hover:bg-blue-700 transition ${
-                  !agreed ? "opacity-50 cursor-not-allowed" : ""
+                  !state.agreed ? "opacity-50 cursor-not-allowed" : ""
                 }`}
-                onClick={() => setShowConfirm(true)}
-                disabled={!agreed}
+                onClick={handleDoneClick}
+                disabled={!state.agreed}
               >
                 Done
               </button>
@@ -452,38 +506,32 @@ const AskQuestionModal = ({ professional, onClose }) => {
           </div>
         )}
       </div>
-      <TermsModal open={showTerms} onClose={() => setShowTerms(false)} />
+      <TermsModal
+        open={state.showTerms}
+        onClose={() => dispatch({ type: "SET_SHOW_TERMS", value: false })}
+      />
       <ConfirmModal
-        open={showConfirm}
-        onClose={() => setShowConfirm(false)}
+        open={state.showConfirm}
+        onClose={() => dispatch({ type: "SET_SHOW_CONFIRM", value: false })}
         onConfirm={handleConfirm}
-        agreed={agreed}
-        setAgreed={setAgreed}
+        agreed={state.agreed}
+        setAgreed={(v) => dispatch({ type: "SET_AGREED", value: v })}
       />
       <DiscardModal
-        open={showDiscard}
-        onClose={() => setShowDiscard(false)}
+        open={state.showDiscard}
+        onClose={() => dispatch({ type: "SET_SHOW_DISCARD", value: false })}
         onDiscard={handleDiscard}
       />
       <ImageSelectorModal
-        open={showImageSelector}
-        onClose={() => setShowImageSelector(false)}
-        onSelectImages={(imgs) => setImages(imgs)}
-        initialImages={images}
+        open={state.showImageSelector}
+        onClose={() =>
+          dispatch({ type: "SET_SHOW_IMAGE_SELECTOR", value: false })
+        }
+        onSelectImages={handleSelectImages}
+        initialImages={state.images}
       />
     </div>
   );
 };
 
 export default AskQuestionModal;
-
-
-
-
-
-
-
-
-
-
-

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../contextProvider/AuthContextProvider";
-import { useToggleActiveRole } from "../hooks/userhooks"; 
+import { useToggleActiveRole } from "../hooks/userhooks";
 import logo from "../assets/logo.svg";
 import searchIcon from "../assets/search.svg";
 import dropdownIcon from "../assets/dropdown.svg";
@@ -11,27 +12,41 @@ import bellIcon from "../assets/bell.svg";
 import Banner from "./Banner";
 import Setting from "../icons/Setting";
 import Logout from "../icons/Logout";
+import MessageLogo from "../icons/MessageLogo";
+import ActiveMessageIcon from "../icons/ActiveMessageIcon";
 
-const MainNav = ({isDashboard}) => {
+const MainNav = ({ isDashboard }) => {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
-  const { user, logout, refreshCurrentUser } = useAuth(); 
-  const { mutateAsync: toggleActiveRole, isLoading: togglingRole } = useToggleActiveRole();
+  const { user, logout, refreshCurrentUser } = useAuth();
+  const { mutateAsync: toggleActiveRole, isLoading: togglingRole } =
+    useToggleActiveRole();
+
+  // <-- new: use location to determine active route (no extra state)
+  const location = useLocation();
+  const isQuestionsActive = location.pathname.startsWith("/questions");
 
   const canToggleRole =
-    Array.isArray(user?.roles) && user.roles.includes("professional") && user.roles.includes("asker");
+    Array.isArray(user?.roles) &&
+    user.roles.includes("professional") &&
+    user.roles.includes("asker");
 
-  const switchLabel = user?.activeRole === "professional" ? "Switch to Asker" : "Switch to Professional";
+  const switchLabel =
+    user?.activeRole === "professional"
+      ? "Switch to Asker"
+      : "Switch to Professional";
 
   const modalRef = useRef(null);
 
-  const userProfilePic = user?.profilePic || "https://your-cdn.com/user-profile.jpg";
-  const displayName = user?.fullName
-  const email = user?.email
+  const userProfilePic =
+    user?.profilePic || "https://your-cdn.com/user-profile.jpg";
+  const displayName = user?.fullName;
+  const email = user?.email;
 
   useEffect(() => {
     function handleOutside(e) {
-      if (modalRef.current && !modalRef.current.contains(e.target)) setShowProfileModal(false);
+      if (modalRef.current && !modalRef.current.contains(e.target))
+        setShowProfileModal(false);
     }
     function handleEsc(e) {
       if (e.key === "Escape") setShowProfileModal(false);
@@ -51,45 +66,50 @@ const MainNav = ({isDashboard}) => {
       <nav className="w-full bg-white px-4 lg:px-8 py-3 flex items-center justify-between shadow-sm border-b border-gray-200">
         {/* Logo */}
         <div className="flex items-center relative lg:left-10">
-          <a href="/">
-          <img src={logo} alt="AskMeDirect" className="w-24 lg:w-28" />
-          </a>
+          <Link to="/">
+            <img src={logo} alt="AskMeDirect" className="w-24 lg:w-28" />
+          </Link>
         </div>
 
         {/* Desktop Center Section */}
 
-        {
-          !isDashboard && (
-<div className="hidden lg:flex flex-1 justify-center gap-2">
-          <div className="flex items-center bg-[#F0F1F3] rounded-full px-4 py-2 w-[340px] max-w-md">
-            <img src={findIcon} alt="Search" className="w-4 h-4 mr-2" />
-            <input
-              type="text"
-              placeholder="Search"
-              className="bg-transparent outline-none flex-1 text-sm"
-            />
-            <img src={dropdownIcon} alt="Dropdown" className="w-4 h-4 ml-2" />
-          </div>
-          <button className="ml-4 bg-blue-600 rounded-full w-9 h-9 flex items-center justify-center">
-            <img src={searchIcon} alt="Search" className="w-5 h-5" />
-          </button>
-          <div className="flex items-center justify-between space-between">
-            <div className="w-[1px] h-6 bg-black mx-2"></div>
-            <button className="flex items-center gap-1 text-blue-600 font-medium text-sm ">
-              Find a Professional
+        {user.activeRole==='asker' && (
+          <div className="hidden lg:flex flex-1 justify-center gap-2">
+            <div className="flex items-center bg-[#F0F1F3] rounded-full px-4 py-2 w-[340px] max-w-md">
+              <img src={findIcon} alt="Search" className="w-4 h-4 mr-2" />
+              <input
+                type="text"
+                placeholder="Search"
+                className="bg-transparent outline-none flex-1 text-sm"
+              />
+              <img src={dropdownIcon} alt="Dropdown" className="w-4 h-4 ml-2" />
+            </div>
+            <button className="ml-4 bg-blue-600 rounded-full w-9 h-9 flex items-center justify-center">
+              <img src={searchIcon} alt="Search" className="w-5 h-5" />
             </button>
-            <div className="flex items-center pl-4">
-              <img src={userIcon} alt="User" className="w-6 h-6" />
+            <div className="flex items-center justify-between space-between">
+              <div className="w-[1px] h-6 bg-black mx-2"></div>
+              <button className="flex items-center gap-1 text-blue-600 font-medium text-sm ">
+                Find a Professional
+              </button>
+              <div className="flex items-center pl-4">
+                <img src={userIcon} alt="User" className="w-6 h-6" />
+              </div>
             </div>
           </div>
-        </div>
-          )
-        }
-        
+        )}
 
         {/* Desktop Right Section */}
         <div className="hidden lg:flex items-center gap-6 relative lg:right-10">
-          {!isDashboard? (<img src={sendIcon} alt="Send" className="w-5 h-5" />):<></> }
+          {!user.isAdmin && (
+            <Link
+              to="/questions"
+              aria-current={isQuestionsActive ? "page" : undefined}
+              className={`rounded-full p-1 flex items-center justify-center transition`}
+            >
+              {isQuestionsActive ? <ActiveMessageIcon /> : <MessageLogo />}
+            </Link>
+          )}
           <img src={bellIcon} alt="Bell" className="w-5 h-5" />
 
           {/* Profile: clickable avatar opens modal-style card */}
@@ -118,8 +138,12 @@ const MainNav = ({isDashboard}) => {
                       {user?.firstName ? user.firstName[0] : "U"}
                     </div>
                     <div className="min-w-0">
-                      <div className="font-semibold text-gray-900 text-sm truncate">{displayName}</div>
-                      <div className="text-xs text-gray-500 truncate">{email}</div>
+                      <div className="font-semibold text-gray-900 text-sm truncate">
+                        {displayName}
+                      </div>
+                      <div className="text-xs text-gray-500 truncate">
+                        {email}
+                      </div>
                     </div>
                   </div>
 
@@ -128,17 +152,25 @@ const MainNav = ({isDashboard}) => {
                       <button
                         onClick={async () => {
                           try {
-                            const target = user?.activeRole === "professional" ? "asker" : "professional";
+                            const target =
+                              user?.activeRole === "professional"
+                                ? "asker"
+                                : "professional";
                             await toggleActiveRole(target); // hook handles PUT + refresh
                             // ensure context is up-to-date (safe no-op if hook already refreshes)
-                            if (typeof refreshCurrentUser === "function") await refreshCurrentUser();
+                            if (typeof refreshCurrentUser === "function")
+                              await refreshCurrentUser();
                             setShowProfileModal(false);
                           } catch (err) {
                             console.error("Role toggle failed", err);
                           }
                         }}
                         disabled={togglingRole}
-                        className={`w-full ${togglingRole ? "opacity-60 cursor-wait" : "bg-white border border-blue-200"} text-blue-600 rounded-full py-2 text-sm font-medium`}
+                        className={`w-full ${
+                          togglingRole
+                            ? "opacity-60 cursor-wait"
+                            : "bg-white border border-blue-200"
+                        } text-blue-600 rounded-full py-2 text-sm font-medium`}
                       >
                         {togglingRole ? "Switching..." : switchLabel}
                       </button>
@@ -151,15 +183,15 @@ const MainNav = ({isDashboard}) => {
 
                 {/* actions */}
                 <div className="p-2">
-                  <a
-                    href="/account-settings"
+                  <Link
+                    to={"/account-settings"}
                     className="flex items-center gap-3 px-3 py-3 rounded hover:bg-gray-50 text-gray-800 text-sm"
                   >
                     <span className="w-6 h-6 flex items-center justify-center text-gray-700">
                       <Setting />
                     </span>
                     <span className="font-medium">Account Settings</span>
-                  </a>
+                  </Link>
 
                   <button
                     onClick={() => {
@@ -253,10 +285,23 @@ const MainNav = ({isDashboard}) => {
                   Find a Professional
                 </button>
                 <div className="flex items-center gap-6 mb-4 h-[80vh] justify-center">
-                  <div className="bg-gray-100 rounded-full w-10 h-10 flex items-center justify-center">
-                    <img src={sendIcon} alt="Send" className="w-5 h-5" />
-                  </div>
-                  <div className="bg-gray-100 rounded-full w-10 h-10 flex items-center justify-center">
+                  <Link
+                    to="/questions"
+                    className={`rounded-full w-10 h-10 flex items-center justify-center transition ${
+                      isQuestionsActive ? "bg-blue-600" : "bg-gray-100"
+                    }`}
+                  >
+                    {isQuestionsActive ? (
+                      <ActiveMessageIcon />
+                    ) : (
+                      <MessageLogo />
+                    )}
+                  </Link>
+                  <div
+                    className={`rounded-full w-10 h-10 flex items-center justify-center ${
+                      isQuestionsActive ? "" : "bg-gray-100"
+                    }`}
+                  >
                     <img src={bellIcon} alt="Bell" className="w-5 h-5" />
                   </div>
                 </div>

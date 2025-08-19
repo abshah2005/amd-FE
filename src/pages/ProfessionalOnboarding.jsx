@@ -22,7 +22,7 @@ const initialProfessional = {
   isFirm: false,
   firm: "",
   exampleQuestions: [],
-  deliveryTime: "", // number of days
+  deliveryTime: "", 
   languages: [],
 };
 const initialPayment = {

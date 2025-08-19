@@ -39,10 +39,8 @@ function ProtectedAdminRoute({ children }) {
   );
 }
 
-function ProtectedLayout(){
-  return(
-    <Outlet />
-  )
+function ProtectedLayout() {
+  return <Outlet />;
 }
 
 function MainLayout() {
@@ -67,16 +65,16 @@ function App() {
         >
           <Route path="/" element={<Test />} />
           <Route path="/questions" element={<QuestionsPage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
         </Route>
-        <Route
+        {/* <Route
           element={
             <ProtectedAdminRoute>
               <ProtectedLayout />
             </ProtectedAdminRoute>
           }
         >
-          <Route path="/dashboard" element={<DashboardPage />} />
-        </Route>
+        </Route> */}
 
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/account-settings" element={<AccountSettings />} />
