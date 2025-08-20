@@ -97,9 +97,8 @@ const SignUpPage = () => {
             expert insights — or receive a custom quote in return.
           </p>
         </div>
-        {/* why is the white div going out of black div? */}
-        <div className="w-full md:w-1/2 flex items-center justify-center p-2  ">
-          <div className="bg-white w-[90%] max-w-sm rounded-lg shadow-sm p-8 ">
+        <div className="w-full md:w-1/2 flex items-center justify-center p-2  rounded-lg">
+          <div className="bg-white h-full w-[85%] max-w-sm rounded-2xl shadow-sm p-5">
             <button
               onClick={handleLinkedInSignup}
               disabled={isLoading}
@@ -115,7 +114,7 @@ const SignUpPage = () => {
                 flex
                 items-center
                 justify-center
-                mb-6
+                mb-1
                 transition
                 ${isLoading ? "opacity-70 cursor-not-allowed" : ""}
               `}
@@ -141,7 +140,7 @@ const SignUpPage = () => {
               </svg>
               {isLoading ? "Processing..." : "Sign up with LinkedIn"}
             </button>
-            <div className="relative mb-6">
+            <div className="relative mb-4 mt-4">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-300"></div>
               </div>
@@ -150,7 +149,7 @@ const SignUpPage = () => {
               </div>
             </div>
             {error && (
-              <div className="mb-4 p-2 bg-red-100 text-red-700 text-sm rounded">
+              <div className="mb-3 p-2 bg-red-100 text-red-700 text-sm rounded">
                 {error}
               </div>
             )}
@@ -273,6 +272,7 @@ const SignUpPage = () => {
                   font-medium
                   py-2
                   px-4
+                  
                   rounded-[24px]
                   transition
                   disabled:bg-[#60718B]
