@@ -1,43 +1,73 @@
-import React, { useEffect } from "react";
-import { replace, useLocation, useNavigate } from "react-router-dom";
+import React, { useEffect, useRef } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import logo from "../assets/logo.svg";
 import logo2 from "../assets/icon.svg";
 import { useRegistrationState } from "../hooks/userhooks";
 import Navigation from "../components/Navigation";
-// import { useNavigationBlocker } from "../hooks/NavigationBlocker";
 
 const WaitingScreen = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user } = location.state || {};
+  const { user, isRegistered } = location.state || {};
   const email = user?.email;
-  const { data, isSuccess, refetch } = useRegistrationState(email);
+  const { refetch } = useRegistrationState(email);
 
-  // useNavigationBlocker(true);
+  const refetchRef = useRef(refetch);
+  const hasNavigatedRef = useRef(false); // 🚀 prevent multiple redirects
 
   useEffect(() => {
-    if (!email) {
-      console.error("Email not provided to waiting screen.");
-      return;
-    }
+    refetchRef.current = refetch;
+  }, [refetch]);
 
-    const timer = setTimeout(() => {
-      refetch().then(() => {
-        if (isSuccess && data?.data?.isRegistrationComplete) {
-          navigate("/signupfi", {
-            state: {
-              user: data.data,
-            },
-          },{replace:true});
+  useEffect(() => {
+    if (!email) return;
+
+    let mounted = true;
+    const interval = setInterval(async () => {
+      try {
+        if (hasNavigatedRef.current) return; // already navigated, don't do anything
+
+        const result = await refetchRef.current();
+        const freshData = result?.data?.data;
+        console.log("WaitingScreen: registration state", freshData);
+
+        if (!freshData || !mounted) return;
+
+        const payloadUser = freshData.user ?? freshData;
+        const role =
+          payloadUser?.role ??
+          freshData?.role ??
+          payloadUser?.activeRole ??
+          freshData?.activeRole;
+
+        const registrationComplete =
+          freshData.isRegistrationComplete ?? payloadUser?.isRegistrationComplete;
+
+        if (registrationComplete) {
+          hasNavigatedRef.current = true; // mark as navigated
+
+          if (role === "asker") {
+            navigate("/signupfi", { state: { user: payloadUser }, replace: true });
+          } else if (role === "professional" ) {
+            navigate("/pofon", { state: { user: payloadUser }, replace: true });
+          } else {
+            console.log("Unknown role:", role);
+          }
+
+          clearInterval(interval); // stop polling
         } else {
-        
           console.log("Registration not complete yet");
         }
-      });
+      } catch (err) {
+        console.error("WaitingScreen refetch error:", err);
+      }
     }, 3000);
 
-    return () => clearTimeout(timer);
-  }, [email, isSuccess, data, navigate, refetch]);
+    return () => {
+      mounted = false;
+      clearInterval(interval);
+    };
+  }, [email, navigate]);
 
   return (
     <div className="min-h-screen bg-[#F0F1F3] flex flex-col">
@@ -57,8 +87,6 @@ const WaitingScreen = () => {
           />
         </div>
       </div>
-
-      
     </div>
   );
 };

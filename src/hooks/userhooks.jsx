@@ -153,6 +153,23 @@ export default function useUpdateProfile(options = {}) {
   });
 }
 
+export const useRegisterStep4 = () => {
+  return useMutation({
+    mutationFn: async (formData) => {
+      const { data } = await axios.put(
+        `${API_BASE_URL}/users/register/step4`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      return data;
+    },
+  });
+};
+
 export const useLinkedInProfile = (email) => {
   return useQuery({
     queryKey: ["linkedinProfile", email],

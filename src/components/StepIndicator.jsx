@@ -24,7 +24,8 @@ const StepIndicator = ({
   onStepClick,
   userName = "Alex",
   onContinue,
-  continueDisabled = true,
+  continueDisabled = false,
+  payloadData
 }) => (
   <div>
     <h2 className="text-2xl font-semibold mb-6">
@@ -64,8 +65,13 @@ const StepIndicator = ({
      <button
         className="w-[50%] mt-6 bg-gray-200 text-gray-500 font-semibold py-2 rounded-full cursor-not-allowed text-sm"
         type="button"
-        disabled={continueDisabled}
-        onClick={onContinue}
+        // disabled={continueDisabled}
+        onClick={()=>{
+          if(currentStep===1 ){
+            console.log("Payload Data coming from step indicator:", payloadData);
+          }
+          // if(onContinue) onContinue();
+        }}
       >
         Save & Continue
       </button>

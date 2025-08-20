@@ -1,36 +1,17 @@
 import React, { useEffect, useState, useMemo } from "react";
 import ToggleSwitch from "./ToggleSwitch";
+import useSpecializations from "../hooks/useSpecializations"; // <-- import the hook
+import { useRegisterStep4 } from "../hooks/userhooks";
+import { useNavigate } from "react-router-dom";
 
-// Simulate API call for categories/subcategories (replace with real API)
-const fetchCategories = () =>
-  Promise.resolve([
-    {
-      _id: "689a2c4ff087f0ff5104e779",
-      category: "Design",
-      subCategories: [
-        "UI/UX",
-        "Graphic Design",
-        "Product Design",
-        "Logo Design",
-        "Presentation Design",
-      ],
-    },
-    {
-      _id: "689a2bf3f087f0ff5104e76f",
-      category: "Business Strategy",
-      subCategories: [
-        "Startup Consulting",
-        "Growth Strategy",
-        "Pitch Decks",
-        "Market Analysis",
-        "Business Planning",
-      ],
-    },
-    // ...other categories
-  ]);
+const ProfessionalDetailsForm = ({ values, onChange, onNext, loading, personal,setPayloadData }) => {
+  // Fetch categories/specializations from API
+  const { specializations, loading: specializationsLoading } = useSpecializations();
+  const navigate = useNavigate();
+  const registerStep4Mutation = useRegisterStep4();
 
-const ProfessionalDetailsForm = ({ values, onChange, onNext, loading }) => {
-  const [categories, setCategories] = useState([]);
+  // Use fetched categories instead of hardcoded
+  const categories = specializations || [];
 
   // Initialize local representation from incoming values
   const [added, setAdded] = useState(
@@ -53,10 +34,6 @@ const ProfessionalDetailsForm = ({ values, onChange, onNext, loading }) => {
 
   const [tags, setTags] = useState(initialTagList);
   const [tagInput, setTagInput] = useState("");
-
-  useEffect(() => {
-    fetchCategories().then(setCategories);
-  }, []);
 
   // sync parent when added or tags change
   useEffect(() => {
@@ -144,10 +121,72 @@ const ProfessionalDetailsForm = ({ values, onChange, onNext, loading }) => {
   return (
     <form
       className="w-full max-w-2xl bg-white rounded-2xl border p-8"
-      onSubmit={(e) => {
+      onSubmit={async (e) => {
         e.preventDefault();
         if (!categoriesValid) return;
-        onNext();
+
+        // Build payload matching the server expectation
+        const payload = {
+          currency:"$",
+          email: personal?.email || "",
+          professional: {
+            selectedSpecializations: values.selectedSpecializations || [],
+            title: values.title || "",
+            about: Array.isArray(values.about)
+              ? values.about
+              : values.about && values.about.length > 0
+              ? [values.about]
+              : personal?.description
+              ? [personal.description]
+              : [],
+            exampleQuestions: values.exampleQuestions || [],
+            deliveryTime:
+              values.deliveryTime ?? values.deliveryTime === 0
+                ? values.deliveryTime
+                : undefined,
+            languages:
+              (values.languages && values.languages.length > 0
+                ? values.languages
+                : personal?.languages) || [],
+            country:
+              (Array.isArray(values.country) && values.country.length > 0
+                ? values.country
+                : Array.isArray(personal?.locations)
+                ? personal.locations
+                : personal?.location
+                ? [personal.location]
+                : []) || [],
+            priceRangeLow: values.priceRangeLow ?? values.priceMin ?? undefined,
+            priceRangeHigh: values.priceRangeHigh ?? values.priceMax ?? undefined,
+            currency: values.currency || "",
+            tags: values.tags || [],
+          },
+        };
+
+        if (setPayloadData) setPayloadData(payload);
+
+        // Create FormData (multipart/form-data) because profile picture may be uploaded
+        const formData = new FormData();
+        formData.append("email", payload.email);
+        formData.append("professional", JSON.stringify(payload.professional));
+        if (personal?.profileImageFile) {
+          formData.append("profilePic", personal.profileImageFile);
+        }
+
+        // Call API
+        try {
+          const result = await registerStep4Mutation.mutateAsync(formData);
+          // On success, redirect to waiting with user object
+          if (result?.data?.user) {
+            navigate("/signupfi", {
+              state: { user: result.data.user, email: result.data.user.email },
+              replace: true,
+            });
+          }
+        } catch (err) {
+          // Handle error (show message, etc)
+          console.error("Step 4 registration error:", err);
+        }
       }}
     >
       {/* inject small css to hide scrollbar but allow horizontal scroll */}
@@ -346,8 +385,12 @@ const ProfessionalDetailsForm = ({ values, onChange, onNext, loading }) => {
         <ExampleQuestionInput questions={values.exampleQuestions || []} setQuestions={(qs) => onChange("exampleQuestions", qs)} />
       </div>
 
-      <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded-full font-semibold mt-4" disabled={loading || !categoriesValid}>
-        {loading ? "Saving..." : "Save & Continue"}
+      <button
+        type="submit"
+        className="bg-blue-600 text-white px-6 py-2 rounded-full font-semibold mt-4"
+        disabled={registerStep4Mutation.isLoading || !categoriesValid}
+      >
+        {registerStep4Mutation.isLoading ? "Saving..." : "Save & Continue"}
       </button>
     </form>
   );

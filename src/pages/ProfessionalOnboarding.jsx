@@ -1,11 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import StepIndicator from "../components/StepIndicator";
 import PersonalInfoForm from "../components/PersonalnfoForm";
 import ProfessionalDetailsForm from "../components/ProfessionalDetailsForm";
 import PaymentSetupForm from "../components/PaymentSetupForm";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const initialPersonal = {
   profileImage: "",
+  profileImageFile: null,
   firstName: "",
   lastName: "",
   email: "",
@@ -14,7 +16,6 @@ const initialPersonal = {
   location: "",
 };
 const initialProfessional = {
-  // new shape: array of { specialization: "<id>", subCategories: [ "sub1", "sub2" ] }
   selectedSpecializations: [],
   tags: [],
   priceMin: "",
@@ -31,21 +32,30 @@ const initialPayment = {
 };
 
 const ProfessionalOnboarding = () => {
-  const [step, setStep] = useState(1);
+  const location = useLocation();
+  const { user } = location.state || {};
+  const [step, setStep] = useState(0);
   const [personal, setPersonal] = useState(initialPersonal);
   const [professional, setProfessional] = useState(initialProfessional);
   const [payment, setPayment] = useState(initialPayment);
-
+  const [payloadData,setPayloadData]=useState({});
+  initialPersonal.email=user?.email ;
   // For completed steps
   const completedSteps = step;
 
-  // Handlers
-  const handlePersonalChange = (field, value) =>
-    setPersonal((prev) => ({ ...prev, [field]: value }));
-  const handleProfessionalChange = (field, value) =>
-    setProfessional((prev) => ({ ...prev, [field]: value }));
-  const handlePaymentChange = (field, value) =>
-    setPayment((prev) => ({ ...prev, [field]: value }));
+  // Memoized handlers
+  const handlePersonalChange = useCallback(
+    (field, value) => setPersonal((prev) => ({ ...prev, [field]: value })),
+    []
+  );
+  const handleProfessionalChange = useCallback(
+    (field, value) => setProfessional((prev) => ({ ...prev, [field]: value })),
+    []
+  );
+  const handlePaymentChange = useCallback(
+    (field, value) => setPayment((prev) => ({ ...prev, [field]: value })),
+    []
+  );
 
   // For image upload (simulate)
   const handleImageChange = (e) => {
@@ -54,6 +64,7 @@ const ProfessionalOnboarding = () => {
       setPersonal((prev) => ({
         ...prev,
         profileImage: URL.createObjectURL(file),
+        profileImageFile: file,
       }));
     }
   };
@@ -95,7 +106,9 @@ const ProfessionalOnboarding = () => {
     rightContent = (
       <ProfessionalDetailsForm
         values={professional}
+        personal={personal}
         onChange={handleProfessionalChange}
+        setPayloadData={setPayloadData}
         onNext={() => setStep(2)}
       />
     );
@@ -119,6 +132,7 @@ const ProfessionalOnboarding = () => {
             currentStep={step}
             completedSteps={completedSteps}
             onStepClick={setStep}
+            payloadData={payloadData}
           />
         </div>
         {/* Right: Step Content */}

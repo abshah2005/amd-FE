@@ -28,9 +28,6 @@ const DashboardPage = () => {
 
   return (
     <div className="min-h-screen bg-white flex flex-col items-center w-full">
-      {/* <div className="w-full">
-      <MainNav  />
-      </div>   */}
       <div className="w-full flex mt-10 justify-center">
         <DashboardStats />
       </div>

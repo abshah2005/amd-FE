@@ -71,12 +71,21 @@ const PersonalInfoForm = ({
   const languageOptions = ["English", "French", "Spanish", "German"];
   const countryOptions = ["UK", "USA", "France", "Germany"];
 
+  // Validation for mandatory fields
+  const isValid =
+    values.profileImage || values.profileImageFile
+    && values.firstName?.trim()
+    && values.lastName?.trim()
+    && values.description?.trim()?.length > 0
+    && Array.isArray(values.languages) && values.languages.length > 0
+    && Array.isArray(values.locations) && values.locations.length > 0;
+
   return (
     <form
       className="w-full max-w-2xl bg-white rounded-2xl border p-8"
       onSubmit={e => {
         e.preventDefault();
-        onNext();
+        if (isValid) onNext();
       }}
     >
       <div className="mb-6">
@@ -155,7 +164,7 @@ const PersonalInfoForm = ({
             placeholder="Share a bit about your work experience — including your background, areas of expertise, and any notable roles you’ve held."
             value={values.description}
             onChange={e => onChange("description", e.target.value)}
-            minLength={150}
+            minLength={50}
             required
             rows={4}
           />
@@ -238,6 +247,14 @@ const PersonalInfoForm = ({
           </div>
         </div>
       </div>
+      {/* Save & Continue Button */}
+      <button
+        type="submit"
+        className={`bg-blue-600 text-white px-6 py-2 rounded-full font-semibold mt-4 ${!isValid ? "opacity-50 cursor-not-allowed" : ""}`}
+        disabled={!isValid || loading}
+      >
+        {loading ? "Saving..." : "Save & Continue"}
+      </button>
     </form>
   );
 };
