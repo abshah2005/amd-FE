@@ -2,7 +2,7 @@ import { Routes, Route, Outlet, Navigate } from "react-router-dom";
 import MainNav from "./components/MainNav";
 import SignUpPage from "./pages/Signup";
 import ProfessionalOnboarding from "./pages/ProfessionalOnboarding";
-import AccountSettings from "./pages/AccountSettings"
+import AccountSettings from "./pages/AccountSettings";
 import OnboardingScreen from "./pages/Onborading";
 import AccountSetup from "./pages/AccountSetup";
 import WaitingScreen from "./pages/WaitingScreen";
@@ -105,6 +105,15 @@ function App() {
               </ProtectedNonAskerRoute>
             }
           />
+
+          {/* <Route
+            path="/pofon"
+            element={
+              <ProtectedNonAskerRoute>
+                <ProfessionalOnboarding />
+              </ProtectedNonAskerRoute>
+            }
+          /> */}
         </Route>
 
         <Route path="/signup" element={<SignUpPage />} />

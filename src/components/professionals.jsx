@@ -36,7 +36,7 @@ const ratingOptions = [
   { label: "5 rating", value: 5 },
 ];
 
-const PAGE_SIZE = 1;
+const PAGE_SIZE = 5;
 
 const initialState = {
   selectedCategory: "All",
@@ -119,6 +119,24 @@ const Professionals = () => {
   }, [state.showMobileFilters]);
 
   const filters = useMemo(() => {
+    // Only include page and limit if all filters are at their default
+    const isDefault =
+      (state.selectedCategory === "All" || !state.selectedCategory) &&
+      (state.category === "All" || !state.category) &&
+      (!state.tags || state.tags.length === 0) &&
+      (!state.budget || (state.budget[0] === 10 && state.budget[1] === 100)) &&
+      (!state.delivery || state.delivery.length === 0) &&
+      (!state.rating || state.rating.length === 0) &&
+      (state.verified === "" || state.verified === undefined) &&
+      (!state.language || state.language.length === 0) &&
+      (!state.location || state.location.length === 0) &&
+      !state.featured;
+
+    if (isDefault) {
+      return { page: state.page, limit: PAGE_SIZE };
+    }
+
+    // Otherwise, include filters as before
     const tagParam = state.tags.length
       ? state.tags
       : (!state.selectedCategory || state.selectedCategory === "All") && state.category && state.category !== "All"

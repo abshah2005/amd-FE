@@ -5,6 +5,7 @@ import { QuestionsTable } from "../components/QuestionsTable";
 import  AnswersTable  from "../components/AnswersTable";
 import { useAuth } from "../contextProvider/AuthContextProvider";
 import { ArrowBack } from "@mui/icons-material";
+import { Link } from "react-router-dom";
 
 const questionData = [
   {
@@ -340,15 +341,17 @@ const QuestionsPage = () => {
     <div className="min-h-screen  bg-white p-6">
       {isProfessional && (
         <div className="md:w-[91%] mx-auto flex items-center mb-2">
+          <Link to={"/"}>
           <button
             type="button"
-            onClick={() => navigate(-1)}
+            // onClick={() => navigate(-1)}
             className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800"
             aria-label="Back to Dashboard"
           >
             <ArrowBack fontSize="small" />
             <span className="font-medium">Back To Dashboard</span>
           </button>
+          </Link>
         </div>
       )}
 

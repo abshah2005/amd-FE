@@ -44,7 +44,7 @@ const WaitingScreen = () => {
           freshData.isRegistrationComplete ?? payloadUser?.isRegistrationComplete;
 
         if (registrationComplete) {
-          hasNavigatedRef.current = true; // mark as navigated
+          hasNavigatedRef.current = true; 
 
           if (role === "asker") {
             navigate("/signupfi", { state: { user: payloadUser }, replace: true });

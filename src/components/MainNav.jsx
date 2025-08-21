@@ -15,6 +15,22 @@ import Logout from "../icons/Logout";
 import MessageLogo from "../icons/MessageLogo";
 import ActiveMessageIcon from "../icons/ActiveMessageIcon";
 
+function RoleSwitchOverlay({ show }) {
+  return (
+    <div
+      className={`fixed inset-0 z-[9999] flex items-center justify-center transition-all duration-300 ${
+        show ? "backdrop-blur-sm bg-black/20 opacity-100" : "opacity-0 pointer-events-none"
+      }`}
+      style={{ transition: "opacity 0.3s" }}
+    >
+      <div className="flex flex-col items-center">
+        <div className="w-12 h-12 rounded-full border-4 border-blue-600 border-t-transparent animate-spin mb-4" />
+        <span className="text-white text-lg font-semibold">Switching role…</span>
+      </div>
+    </div>
+  );
+}
+
 const MainNav = ({ isDashboard }) => {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -28,8 +44,8 @@ const MainNav = ({ isDashboard }) => {
 
   const canToggleRole =
     Array.isArray(user?.roles) &&
-    user.roles.includes("professional") &&
-    user.roles.includes("asker");
+    user?.roles.includes("professional") &&
+    user?.roles.includes("asker");
 
   const switchLabel =
     user?.activeRole === "professional"
@@ -73,7 +89,7 @@ const MainNav = ({ isDashboard }) => {
 
         {/* Desktop Center Section */}
 
-        {user.activeRole==='asker' && (
+        {user?.activeRole==='asker' && (
           <div className="hidden lg:flex flex-1 justify-center gap-2">
             <div className="flex items-center bg-[#F0F1F3] rounded-full px-4 py-2 w-[340px] max-w-md">
               <img src={findIcon} alt="Search" className="w-4 h-4 mr-2" />
@@ -101,7 +117,7 @@ const MainNav = ({ isDashboard }) => {
 
         {/* Desktop Right Section */}
         <div className="hidden lg:flex items-center gap-6 relative lg:right-10">
-          {!user.isAdmin && (
+          {!user?.isAdmin && (
             <Link
               to="/questions"
               aria-current={isQuestionsActive ? "page" : undefined}
@@ -128,6 +144,8 @@ const MainNav = ({ isDashboard }) => {
             </button>
 
             {showProfileModal && (
+              <>
+              <RoleSwitchOverlay show={togglingRole} />
               <div
                 ref={modalRef}
                 className="absolute  right-5 mt-2 w-72 bg-white rounded-xl shadow-xl z-50 ring-1 ring-black ring-opacity-5"
@@ -208,6 +226,8 @@ const MainNav = ({ isDashboard }) => {
                   </button>
                 </div>
               </div>
+              </>
+              
             )}
           </div>
         </div>

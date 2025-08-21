@@ -4,6 +4,7 @@ import PersonalInfoForm from "../components/PersonalnfoForm";
 import ProfessionalDetailsForm from "../components/ProfessionalDetailsForm";
 import PaymentSetupForm from "../components/PaymentSetupForm";
 import { useLocation, useNavigate } from "react-router-dom";
+import MainNav from "../components/MainNav";
 
 const initialPersonal = {
   profileImage: "",
@@ -23,7 +24,7 @@ const initialProfessional = {
   isFirm: false,
   firm: "",
   exampleQuestions: [],
-  deliveryTime: "", 
+  deliveryTime: "",
   languages: [],
 };
 const initialPayment = {
@@ -38,8 +39,8 @@ const ProfessionalOnboarding = () => {
   const [personal, setPersonal] = useState(initialPersonal);
   const [professional, setProfessional] = useState(initialProfessional);
   const [payment, setPayment] = useState(initialPayment);
-  const [payloadData,setPayloadData]=useState({});
-  initialPersonal.email=user?.email ;
+  const [payloadData, setPayloadData] = useState({});
+  initialPersonal.email = user?.email;
   // For completed steps
   const completedSteps = step;
 
@@ -124,19 +125,30 @@ const ProfessionalOnboarding = () => {
     );
 
   return (
-    <div className="min-h-screen bg-[#F0F1F3] flex flex-col">
-      <div className="max-w-6xl mx-auto w-full flex flex-col md:flex-row gap-8 py-10">
-        {/* Left: Step Indicator */}
-        <div className="w-full md:w-1/3">
-          <StepIndicator
-            currentStep={step}
-            completedSteps={completedSteps}
-            onStepClick={setStep}
-            payloadData={payloadData}
-          />
+    <div className="bg-[#F0F1F3] w-full">
+      <div className="bg-[#F0F1F3]">
+
+      </div>
+        <div className="w-[80%] m-auto  bg-blue-50 border border-blue-100 text-blue-700 text-sm px-4 py-2 mb-4 rounded">
+          Just a few more details! Fill out the info below to start connecting
+          with askers.
         </div>
-        {/* Right: Step Content */}
-        <div className="flex-1 flex justify-center">{rightContent}</div>
+
+      <div className="min-h-screen  flex flex-col">
+        {/* <MainNav /> */}
+        <div className="max-w-6xl mx-auto w-full flex flex-col md:flex-row gap-8 py-10">
+          {/* Left: Step Indicator */}
+          <div className="w-full md:w-1/3">
+            <StepIndicator
+              currentStep={step}
+              completedSteps={completedSteps}
+              onStepClick={setStep}
+              payloadData={payloadData}
+            />
+          </div>
+          {/* Right: Step Content */}
+          <div className="flex-1 flex justify-center">{rightContent}</div>
+        </div>
       </div>
     </div>
   );
