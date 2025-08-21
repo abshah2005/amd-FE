@@ -19,13 +19,17 @@ function RoleSwitchOverlay({ show }) {
   return (
     <div
       className={`fixed inset-0 z-[9999] flex items-center justify-center transition-all duration-300 ${
-        show ? "backdrop-blur-sm bg-black/20 opacity-100" : "opacity-0 pointer-events-none"
+        show
+          ? "backdrop-blur-sm bg-black/20 opacity-100"
+          : "opacity-0 pointer-events-none"
       }`}
       style={{ transition: "opacity 0.3s" }}
     >
       <div className="flex flex-col items-center">
         <div className="w-12 h-12 rounded-full border-4 border-blue-600 border-t-transparent animate-spin mb-4" />
-        <span className="text-white text-lg font-semibold">Switching role…</span>
+        <span className="text-white text-lg font-semibold">
+          Switching role…
+        </span>
       </div>
     </div>
   );
@@ -35,8 +39,9 @@ const MainNav = ({ isDashboard }) => {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const { user, logout, refreshCurrentUser } = useAuth();
-  const { mutateAsync: toggleActiveRole, isLoading: togglingRole } =
+  const { mutateAsync: toggleActiveRole, isPending:isLoading } =
     useToggleActiveRole();
+  
 
   // <-- new: use location to determine active route (no extra state)
   const location = useLocation();
@@ -79,6 +84,8 @@ const MainNav = ({ isDashboard }) => {
 
   return (
     <div>
+      {console.log("isLoading",isLoading)}
+      <RoleSwitchOverlay show={isLoading} />
       <nav className="w-full bg-white px-4 lg:px-8 py-3 flex items-center justify-between shadow-sm border-b border-gray-200">
         {/* Logo */}
         <div className="flex items-center relative lg:left-10">
@@ -89,7 +96,7 @@ const MainNav = ({ isDashboard }) => {
 
         {/* Desktop Center Section */}
 
-        {user?.activeRole==='asker' && (
+        {user?.activeRole === "asker" && (
           <div className="hidden lg:flex flex-1 justify-center gap-2">
             <div className="flex items-center bg-[#F0F1F3] rounded-full px-4 py-2 w-[340px] max-w-md">
               <img src={findIcon} alt="Search" className="w-4 h-4 mr-2" />
@@ -144,8 +151,6 @@ const MainNav = ({ isDashboard }) => {
             </button>
 
             {showProfileModal && (
-              <>
-              <RoleSwitchOverlay show={togglingRole} />
               <div
                 ref={modalRef}
                 className="absolute  right-5 mt-2 w-72 bg-white rounded-xl shadow-xl z-50 ring-1 ring-black ring-opacity-5"
@@ -176,21 +181,21 @@ const MainNav = ({ isDashboard }) => {
                                 : "professional";
                             await toggleActiveRole(target); // hook handles PUT + refresh
                             // ensure context is up-to-date (safe no-op if hook already refreshes)
-                            if (typeof refreshCurrentUser === "function")
-                              await refreshCurrentUser();
+                            // if (typeof refreshCurrentUser === "function")
+                            //   await refreshCurrentUser();
                             setShowProfileModal(false);
                           } catch (err) {
                             console.error("Role toggle failed", err);
                           }
                         }}
-                        disabled={togglingRole}
+                        disabled={isLoading}
                         className={`w-full ${
-                          togglingRole
+                          isLoading
                             ? "opacity-60 cursor-wait"
                             : "bg-white border border-blue-200"
                         } text-blue-600 rounded-full py-2 text-sm font-medium`}
                       >
-                        {togglingRole ? "Switching..." : switchLabel}
+                        {isLoading ? "Switching..." : switchLabel}
                       </button>
                     </div>
                   )}
@@ -226,8 +231,6 @@ const MainNav = ({ isDashboard }) => {
                   </button>
                 </div>
               </div>
-              </>
-              
             )}
           </div>
         </div>
