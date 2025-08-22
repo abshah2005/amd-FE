@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import DashboardStats from "../components/DashboardStats";
-import DashboardTabs from "../components/DashboardTabs";
+import DashboardTabs from "../components/Dashboardtabs";
 import DashboardTable from "../components/DashboardTable";
 import { useDashboardStats, useDashboardUsers } from "../hooks/useDashboard";
 import { useAuth } from "../contextProvider/AuthContextProvider";
