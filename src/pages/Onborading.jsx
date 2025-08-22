@@ -10,7 +10,7 @@ import PageWrapper from "../components/PageWrapper";
 const OnboardingScreen = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { email } = location.state || {};
+  const { email,name } = location.state || {};
   const [selectedRole, setSelectedRole] = useState("");
   const { mutate: registerStep2, isLoading } = useRegisterStep2();
 
@@ -66,7 +66,7 @@ const OnboardingScreen = () => {
           {/* Header */}
           <div className="w-full text-center mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Welcome aboard, <span className="underline">John!</span>
+              Welcome aboard, <span className="underline">{name}!</span>
             </h1>
             <p className="text-gray-600 mt-4">
               Before we dive in, tell us how you'd like to use AskMeDirect.

@@ -8,7 +8,7 @@ const columns = {
     { label: "NO. OF ANSWER", key: "answers" },
     { label: "STATUS", key: "status" },
   ],
-  Asker: [
+  Askers: [
     { label: "NAME", key: "name" },
     { label: "JOINED DATE", key: "joined" },
     { label: "TOTAL SPENDINGS", key: "spendings" },

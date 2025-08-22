@@ -17,11 +17,12 @@ export const LinkedInCallback = () => {
       try {
         const response = await mutation.mutateAsync({ code });
         const email = response.data.user.email;
+        const name = response.data.user.firstName;
         if (response.data.user.isRegistrationComplete) {
           await loginWithLinkedIn(response.data.accessToken);
           navigate("/", { state: {} });
         } else {
-          navigate("/onboard", { state: { email } });
+          navigate("/onboard", { state: { email,name } });
         }
       } catch (err) {
         navigate("/signup", { state: { error: "LinkedIn authentication failed" } });

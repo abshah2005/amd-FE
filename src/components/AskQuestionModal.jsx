@@ -72,6 +72,7 @@ const AskQuestionModal = ({ professional, onClose }) => {
   const handleClose = () => dispatch({ type: "SET_SHOW_DISCARD", value: true });
 
   const handleDiscard = () => {
+    dispatch({ type: "RESET" });
     dispatch({ type: "SET_SHOW_DISCARD", value: false });
     onClose();
   };
@@ -170,7 +171,7 @@ const AskQuestionModal = ({ professional, onClose }) => {
         <div className="flex flex-col justify-center">
           <div className="flex items-center gap-2">
             <span className="font-semibold text-base pl-2">
-              {professional.name}
+              {professional.firstName} {professional.lastName}
             </span>
             {professional.verified?<span className="text-xs text-green-600 flex items-center gap-1">
               {/* Verified icon */}
@@ -204,7 +205,7 @@ const AskQuestionModal = ({ professional, onClose }) => {
             </span>
           </div>
           <span className="text-xs text-gray-500 pl-2">
-            {professional.title}
+            {professional.tags.splice(0,3).join(",")}
           </span>
         </div>
       </div>
@@ -219,6 +220,11 @@ const AskQuestionModal = ({ professional, onClose }) => {
     dispatch({ type: "SET_DESCRIPTION", value: data.plainText });
     dispatch({ type: "SET_EDITOR_STATE", value: data.editorState });
   };
+
+  useEffect(() => {
+    // Reset state whenever a new professional is passed in
+    dispatch({ type: "RESET" });
+  }, [professional]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">

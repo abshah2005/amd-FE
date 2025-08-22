@@ -508,7 +508,7 @@ export default function LexicalEditor({
 
   return (
     <>
-      <style jsx global>{`
+      <style>{`
         .editor-container {
           background-color: #f5f5f5;
           height: ${height}px;

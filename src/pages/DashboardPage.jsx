@@ -59,7 +59,7 @@ const DashboardPage = () => {
       <div className="w-[1100px] max-w-full mx-auto mt-2">
         <h1 className="text-2xl font-bold text-gray-900 mb-6 ml-3">Users</h1>
         <DashboardTabs
-          tabs={["Professionals", "Asker"]}
+          tabs={["Professionals", "Askers"]}
           activeTab={activeTab}
           setActiveTab={(tab) => {
             setActiveTab(tab);

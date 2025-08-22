@@ -447,7 +447,7 @@ const prof = user?.professional || {};
   
 
 const ProfileView = () => {
-  const { user } = useAuth();
+  const { user,refreshCurrentUser } = useAuth();
   const [editing, setEditing] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
@@ -458,9 +458,9 @@ const ProfileView = () => {
   
   // Setup the update profile mutation
   const updateProfile = useUpdateProfile({
-    onSuccess: () => {
+    onSuccess:async () => {
       setEditing(false);
-      // You might want to refresh user data here
+      await refreshCurrentUser();
     }
   });
 

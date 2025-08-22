@@ -60,7 +60,7 @@ const MainNav = ({ isDashboard }) => {
   const modalRef = useRef(null);
 
   const userProfilePic =
-    user?.profilePic || "https://your-cdn.com/user-profile.jpg";
+    user?.profilePic || "https://static.vecteezy.com/system/resources/thumbnails/028/569/170/small_2x/single-man-icon-people-icon-user-profile-symbol-person-symbol-businessman-stock-vector.jpg";
   const displayName = user?.fullName;
   const email = user?.email;
 
