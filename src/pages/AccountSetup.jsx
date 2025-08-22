@@ -16,7 +16,7 @@ const AccountSetup = () => {
   const [lastName, setLastName] = useState("");
   const [profileImage, setProfileImage] = useState(null);
   const [profileImageFile, setProfileImageFile] = useState(null);
-  const { mutate: registerStep3, isLoading } = useRegisterStep3();
+  const { mutate: registerStep3, isPending } = useRegisterStep3();
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
@@ -175,14 +175,14 @@ const AccountSetup = () => {
               </button>
               <button
                 type="submit"
-                disabled={!firstName || !lastName || isLoading}
+                disabled={!firstName || !lastName || isPending}
                 className={`px-6 py-2 rounded-lg text-sm font-medium ${
-                  !firstName || !lastName || isLoading
+                  !firstName || !lastName || isPending
                     ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                     : "bg-blue-600 hover:bg-blue-700 text-white"
                 }`}
               >
-                {isLoading ? "Processing..." : "Next"}
+                {isPending ? "Processing..." : "Next"}
               </button>
             </div>
           </form>

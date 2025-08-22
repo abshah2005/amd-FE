@@ -12,7 +12,7 @@ const OnboardingScreen = () => {
   const navigate = useNavigate();
   const { email,name } = location.state || {};
   const [selectedRole, setSelectedRole] = useState("");
-  const { mutate: registerStep2, isLoading } = useRegisterStep2();
+  const { mutate: registerStep2, isPending } = useRegisterStep2();
 
   const handleSubmit = () => {
     if (!selectedRole || !email) return;
@@ -186,10 +186,10 @@ const OnboardingScreen = () => {
           <div className="w-full flex justify-center md:justify-end">
             <button
               onClick={handleSubmit}
-              disabled={!selectedRole || isLoading}
+              disabled={!selectedRole || isPending}
               className="w-full relative md:top-2 md:right-4  md:w-[20%] bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 md:px-4 md:py-2 rounded-[24px] transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? "Processing..." : "Next"}
+              {isPending ? "Processing..." : "Next"}
             </button>
           </div>
         </div>

@@ -554,9 +554,9 @@ const ProfessionalDetailsForm = ({
       <button
         type="submit"
         className="bg-blue-600 text-white px-6 py-2 rounded-full font-semibold mt-4"
-        disabled={registerStep4Mutation.isLoading || !categoriesValid}
+        disabled={registerStep4Mutation.isPending || !categoriesValid}
       >
-        {registerStep4Mutation.isLoading ? "Saving..." : "Save & Continue"}
+        {registerStep4Mutation.isPending ? "Saving..." : "Save & Continue"}
       </button>
     </form>
   );
