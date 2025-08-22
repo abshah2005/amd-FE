@@ -245,8 +245,7 @@ const Professionals = () => {
       </>
     );
   };
-
-  // Delivery time label
+// Helper to get delivery label
   const getDeliveryLabel = (days) => {
     if (days <= 1) return "Less than 24hr";
     if (days <= 7) return "Less than 7 days";
