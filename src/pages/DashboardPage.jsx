@@ -45,7 +45,7 @@ const DashboardPage = () => {
 
   const mappedAskers = askers.map((row) => ({
     name: row.name,
-    joined: row.joinedDate,
+    joined: new Date(row.joinedDate).toISOString().slice(0, 10),
     spendings: row.totalSpendings,
     questions: row.questionsAsked,
     status: row.status,

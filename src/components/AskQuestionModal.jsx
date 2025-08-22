@@ -205,7 +205,7 @@ const AskQuestionModal = ({ professional, onClose }) => {
             </span>
           </div>
           <span className="text-xs text-gray-500 pl-2">
-            {professional.tags.splice(0,3).join(",")}
+            {professional.tags.slice(0,3).join(",")}
           </span>
         </div>
       </div>

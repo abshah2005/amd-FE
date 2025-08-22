@@ -100,8 +100,7 @@ function reducer(state, action) {
 }
 
 const Professionals = () => {
-  const { allSubCategories, specializations, loading } =
-    useSpecializations();
+  const { allSubCategories, specializations, loading } = useSpecializations();
 
   // 3. Use useReducer
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -139,14 +138,18 @@ const Professionals = () => {
     // Otherwise, include filters as before
     const tagParam = state.tags.length
       ? state.tags
-      : (!state.selectedCategory || state.selectedCategory === "All") && state.category && state.category !== "All"
+      : (!state.selectedCategory || state.selectedCategory === "All") &&
+        state.category &&
+        state.category !== "All"
       ? [state.category]
       : undefined;
 
     const out = {
       page: state.page,
       limit: PAGE_SIZE,
-      ...(state.selectedCategory && state.selectedCategory !== "All" ? { category: state.selectedCategory } : {}),
+      ...(state.selectedCategory && state.selectedCategory !== "All"
+        ? { category: state.selectedCategory }
+        : {}),
       ...(tagParam ? { tags: tagParam } : {}),
       ...(state.budget?.[0] !== undefined ? { minPrice: state.budget[0] } : {}),
       ...(state.budget?.[1] !== undefined ? { maxPrice: state.budget[1] } : {}),
@@ -159,11 +162,24 @@ const Professionals = () => {
     };
     return out;
   }, [
-    state.page, state.selectedCategory, state.category, state.tags, state.budget,
-    state.delivery, state.rating, state.verified, state.language, state.location, state.featured
+    state.page,
+    state.selectedCategory,
+    state.category,
+    state.tags,
+    state.budget,
+    state.delivery,
+    state.rating,
+    state.verified,
+    state.language,
+    state.location,
+    state.featured,
   ]);
 
-  const { data: professionalsData, isLoading: professionalsLoading, isError: professionalsError } = useProfessionals(filters, { debounceTime: 500 });
+  const {
+    data: professionalsData,
+    isLoading: professionalsLoading,
+    isError: professionalsError,
+  } = useProfessionals(filters, { debounceTime: 500 });
   const professionals = professionalsData?.results || [];
   const total = professionalsData?.total || 0;
   const totalPages = Math.ceil((total || 0) / PAGE_SIZE);
@@ -209,7 +225,7 @@ const Professionals = () => {
   };
 
   const renderTags = (tags) => {
-    const mainTags = tags.slice(0, 3);
+    const mainTags = tags.slice(0, 2);
     const extraCount = tags.length - 3;
     return (
       <>
@@ -244,13 +260,16 @@ const Professionals = () => {
         key={prof._id}
         className={`flex items-center gap-6 bg-white rounded-xl  p-4 mb-6  relative`}
       >
-        <div className="relative">
+        <div className="relative h-[34vh]">
           <img
-            src={prof.profilePic || "https://randomuser.me/api/portraits/men/32.jpg"}
+            src={
+              prof.profilePic ||
+              "https://randomuser.me/api/portraits/men/32.jpg"
+            }
             alt={`${prof.firstName || ""} ${prof.lastName || ""}`}
             onClick={() => {
-             dispatch({ type: "SET_SELECTED_PROFESSIONAL", value: prof });
-    dispatch({ type: "SET_SHOW_PROFILE_MODAL", value: true });
+              dispatch({ type: "SET_SELECTED_PROFESSIONAL", value: prof });
+              dispatch({ type: "SET_SHOW_PROFILE_MODAL", value: true });
             }}
             style={{ cursor: "pointer" }}
             className={`w-44 h-52 rounded-xl object-cover ${
@@ -263,7 +282,7 @@ const Professionals = () => {
             </span>
           )}
         </div>
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0  h-[34vh] ">
           <div className="flex items-center gap-2 mb-1">
             <span className="font-semibold text-lg">
               {`${prof.firstName || ""} ${prof.lastName || ""}`.trim()}
@@ -277,14 +296,20 @@ const Professionals = () => {
             )}
           </div>
           <div className="text-sm text-gray-600 mb-1 flex flex-wrap gap-2">
-            {prof.title && <span className="font-medium">{prof.title}</span>}
+            {prof.tags && (
+              <span className="font-medium">
+                {prof.tags.slice(0, 2).join(", ")}
+              </span>
+            )}
             {prof.entityType === "firm" && prof.firmName && (
               <span className="ml-2">· associated with {prof.firmName}</span>
             )}
           </div>
           <div className="flex gap-4 items-center mb-2">
             <span className="font-semibold">
-              {prof.currency}{prof.priceRangeLow ?? ""} - {prof.currency}{prof.priceRangeHigh ?? ""}{" "}
+              {prof.currency}
+              {prof.priceRangeLow ?? ""} - {prof.currency}
+              {prof.priceRangeHigh ?? ""}{" "}
               <span className="text-gray-500 text-xs">per question</span>
             </span>
             <span className="flex items-center gap-1 text-yellow-500 font-medium">
@@ -299,21 +324,24 @@ const Professionals = () => {
           </div>
           <div className="text-gray-700 text-sm mb-2">{prof.about[0]}</div>
         </div>
-        <div className="flex flex-col items-center gap-3 min-w-[160px] h-[28vh] justify-between">
+        <div className="flex flex-col items-center gap-3 min-w-[160px]  h-[34vh] justify-between">
           <div>
             <button
-              className="bg-blue-600 text-white px-5 py-2 rounded-full font-semibold text-sm hover:bg-blue-700 transition"
+              className="bg-blue-600 text-white px-5 py-2 rounded-full font-semibold text-sm hover:bg-blue-700 transition "
               onClick={() => {
+                //             dispatch({ type: "SET_SELECTED_PROFESSIONAL", value: prof });
+                // dispatch({ type: "SET_SHOW_MODAL", value: true });
                 dispatch({ type: "SET_SELECTED_PROFESSIONAL", value: prof });
-    dispatch({ type: "SET_SHOW_MODAL", value: true });
+                dispatch({ type: "SET_SHOW_PROFILE_MODAL", value: true });
               }}
             >
-              Ask a question
+              Open Profile
             </button>
           </div>
           <div className="flex flex-col items-end gap-1 mt-auto">
             <span className="text-xs text-gray-500">
-              Delivery Time: {getDeliveryLabel(prof.deliveryTime ?? prof.delivery ?? 0)}
+              Delivery Time:{" "}
+              {getDeliveryLabel(prof.deliveryTime ?? prof.delivery ?? 0)}
             </span>
           </div>
         </div>
@@ -344,11 +372,31 @@ const Professionals = () => {
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1">
-            <span className="font-semibold text-base">{`${prof.firstName || ""} ${prof.lastName || ""}`.trim()}</span>
+            <span className="font-semibold text-base">
+              {`${prof.firstName || ""} ${prof.lastName || ""}`.trim()}
+            </span>
             {prof.verified && (
-              <svg /* verified icon */ xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M13.3334 8.66664C13.3334 12 11.0001 13.6666 8.22675 14.6333C8.08152 14.6825 7.92377 14.6802 7.78008 14.6266C5.00008 13.6666 2.66675 12 2.66675 8.66664V3.99997C2.66675 3.82316 2.73699 3.65359 2.86201 3.52857C2.98703 3.40355 3.1566 3.33331 3.33341 3.33331C4.66675 3.33331 6.33341 2.53331 7.49341 1.51997C7.63465 1.39931 7.81432 1.33301 8.00008 1.33301C8.18585 1.33301 8.36551 1.39931 8.50675 1.51997C9.67342 2.53997 11.3334 3.33331 12.6667 3.33331C12.8436 3.33331 13.0131 3.40355 13.1382 3.52857C13.2632 3.65359 13.3334 3.82316 13.3334 3.99997V8.66664Z" stroke="#36B37E" strokeWidth="1.35" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M6 7.99984L7.33333 9.33317L10 6.6665" stroke="#36B37E" strokeWidth="1.35" strokeLinecap="round" strokeLinejoin="round"/>
+              <svg
+                /* verified icon */ xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+              >
+                <path
+                  d="M13.3334 8.66664C13.3334 12 11.0001 13.6666 8.22675 14.6333C8.08152 14.6825 7.92377 14.6802 7.78008 14.6266C5.00008 13.6666 2.66675 12 2.66675 8.66664V3.99997C2.66675 3.82316 2.73699 3.65359 2.86201 3.52857C2.98703 3.40355 3.1566 3.33331 3.33341 3.33331C4.66675 3.33331 6.33341 2.53331 7.49341 1.51997C7.63465 1.39931 7.81432 1.33301 8.00008 1.33301C8.18585 1.33301 8.36551 1.39931 8.50675 1.51997C9.67342 2.53997 11.3334 3.33331 12.6667 3.33331C12.8436 3.33331 13.0131 3.40355 13.1382 3.52857C13.2632 3.65359 13.3334 3.82316 13.3334 3.99997V8.66664Z"
+                  stroke="#36B37E"
+                  strokeWidth="1.35"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M6 7.99984L7.33333 9.33317L10 6.6665"
+                  stroke="#36B37E"
+                  strokeWidth="1.35"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
               </svg>
             )}
           </div>
@@ -372,7 +420,9 @@ const Professionals = () => {
           </span>
         </span>
       </div>
-      <div className="flex flex-wrap gap-1 mb-2">{renderTags(prof.tags || [])}</div>
+      <div className="flex flex-wrap gap-1 mb-2">
+        {renderTags(prof.tags || [])}
+      </div>
       <div className="text-gray-700 text-xs mb-2 line-clamp-3">
         {prof.about}
       </div>
@@ -396,18 +446,22 @@ const Professionals = () => {
   return (
     <div>
       <div className="w-full mb-6">
-          <CategoriesSlider
-            categories={[{_id:"All",category:"All"},...specializations]}
-            selectedCategory={state.selectedCategory}
-            onSelect={(val) => dispatch({ type: "SET_SELECTED_CATEGORY", value: val })}
-          />
-        </div>
+        <CategoriesSlider
+          categories={[{ _id: "All", category: "All" }, ...specializations]}
+          selectedCategory={state.selectedCategory}
+          onSelect={(val) =>
+            dispatch({ type: "SET_SELECTED_CATEGORY", value: val })
+          }
+        />
+      </div>
       <div className="flex flex-col lg:flex-row gap-8 w-full mt-8">
         {/* Mobile Filters Button */}
         <div className="lg:hidden w-full mb-4">
           <button
             className="w-full bg-blue-600 text-white py-2 rounded-xl font-semibold text-base"
-            onClick={() => dispatch({ type: "SET_SHOW_MOBILE_FILTERS", value: true })}
+            onClick={() =>
+              dispatch({ type: "SET_SHOW_MOBILE_FILTERS", value: true })
+            }
           >
             Filters
           </button>
@@ -434,87 +488,100 @@ const Professionals = () => {
                 // keep human-readable label in `category` for UI, but prefer id for server filtering
                 dispatch({ type: "SET_CATEGORY", value: val });
                 const spec = specializations.find((s) => s.category === val);
-                dispatch({ type: "SET_SELECTED_CATEGORY", value: spec ? spec._id : "All" });
+                dispatch({
+                  type: "SET_SELECTED_CATEGORY",
+                  value: spec ? spec._id : "All",
+                });
               }}
               placeholder="Select category"
             />
           </div>
 
           {/* Tags */}
-<div className="mb-4">
-  <label className="block text-sm font-medium mb-1">
-    Tags (max - 2)
-  </label>
-  <div className="relative">
-    <div className="flex items-center border rounded-full px-4 py-2 bg-white w-full">
-      <span className="mr-2 text-gray-400">
-        <img src={find} alt="" />
-      </span>
-      <div className="flex gap-2 flex-wrap">
-        {state.tags.map((tag) => (
-          <span
-            key={tag}
-            className="flex items-center bg-blue-50 border border-blue-400 text-blue-700 px-3 py-1 rounded-full text-xs font-medium"
-          >
-            {tag}
-            <button
-              type="button"
-              className="ml-1 text-blue-500 font-bold focus:outline-none"
-              onClick={() => handleTagChange(tag)}
-            >
-              &times;
-            </button>
-          </span>
-        ))}
-      </div>
-      <button
-        type="button"
-        className="ml-auto text-gray-400"
-        onClick={() => dispatch({ type: "SET_SHOW_TAG_DROPDOWN", value: !state.showTagDropdown })}
-        tabIndex={-1}
-      >
-        <svg width="20" height="20" fill="none">
-          <path
-            d="M6 8l4 4 4-4"
-            stroke="#94A3B8"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </button>
-    </div>
-    <div className="text-xs text-gray-500 mt-1">
-  <hr className="my-4 border-gray-200 border-1" />
-</div>
-    {/* Dropdown */}
-    {state.showTagDropdown && (
-      <div className="absolute left-0 top-full mt-2 w-full bg-white border rounded-xl shadow-lg z-10 max-h-48 overflow-auto">
-        {allSubCategories.map((tag) => (
-          <button
-            key={tag}
-            className={`w-full text-left px-4 py-2 text-sm hover:bg-blue-50 ${
-              state.tags.includes(tag)
-                ? "bg-blue-100 text-blue-700 font-semibold"
-                : "text-gray-700"
-            }`}
-            onClick={() => {
-              if (state.tags.includes(tag)) {
-                handleTagChange(tag);
-              } else if (state.tags.length < 2) {
-                handleTagChange(tag);
-              }
-              dispatch({ type: "SET_SHOW_TAG_DROPDOWN", value: false });
-            }}
-            disabled={!state.tags.includes(tag) && state.tags.length >= 2}
-          >
-            {tag}
-          </button>
-        ))}
-      </div>
-    )}
-  </div>
-</div>
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1">
+              Tags (max - 2)
+            </label>
+            <div className="relative">
+              <div className="flex items-center border rounded-full px-4 py-2 bg-white w-full">
+                <span className="mr-2 text-gray-400">
+                  <img src={find} alt="" />
+                </span>
+                <div className="flex gap-2 flex-wrap">
+                  {state.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="flex items-center bg-blue-50 border border-blue-400 text-blue-700 px-3 py-1 rounded-full text-xs font-medium"
+                    >
+                      {tag}
+                      <button
+                        type="button"
+                        className="ml-1 text-blue-500 font-bold focus:outline-none"
+                        onClick={() => handleTagChange(tag)}
+                      >
+                        &times;
+                      </button>
+                    </span>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  className="ml-auto text-gray-400"
+                  onClick={() =>
+                    dispatch({
+                      type: "SET_SHOW_TAG_DROPDOWN",
+                      value: !state.showTagDropdown,
+                    })
+                  }
+                  tabIndex={-1}
+                >
+                  <svg width="20" height="20" fill="none">
+                    <path
+                      d="M6 8l4 4 4-4"
+                      stroke="#94A3B8"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </button>
+              </div>
+              <div className="text-xs text-gray-500 mt-1">
+                <hr className="my-4 border-gray-200 border-1" />
+              </div>
+              {/* Dropdown */}
+              {state.showTagDropdown && (
+                <div className="absolute left-0 top-full mt-2 w-full bg-white border rounded-xl shadow-lg z-10 max-h-48 overflow-auto">
+                  {allSubCategories.map((tag) => (
+                    <button
+                      key={tag}
+                      className={`w-full text-left px-4 py-2 text-sm hover:bg-blue-50 ${
+                        state.tags.includes(tag)
+                          ? "bg-blue-100 text-blue-700 font-semibold"
+                          : "text-gray-700"
+                      }`}
+                      onClick={() => {
+                        if (state.tags.includes(tag)) {
+                          handleTagChange(tag);
+                        } else if (state.tags.length < 2) {
+                          handleTagChange(tag);
+                        }
+                        dispatch({
+                          type: "SET_SHOW_TAG_DROPDOWN",
+                          value: false,
+                        });
+                      }}
+                      disabled={
+                        !state.tags.includes(tag) && state.tags.length >= 2
+                      }
+                    >
+                      {tag}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
 
           {/* Budget Range */}
           <div className="mb-4">
@@ -523,8 +590,12 @@ const Professionals = () => {
             </label>
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-500">${state.budget[0]}</span>
-                <span className="text-xs text-gray-500">${state.budget[1]}</span>
+                <span className="text-xs text-gray-500">
+                  ${state.budget[0]}
+                </span>
+                <span className="text-xs text-gray-500">
+                  ${state.budget[1]}
+                </span>
               </div>
               <div className="flex items-center gap-2">
                 <input
@@ -546,9 +617,9 @@ const Professionals = () => {
               </div>
             </div>
           </div>
-         <div className="text-xs text-gray-500 mt-1">
-  <hr className="my-4 border-gray-200 border-1" />
-</div>
+          <div className="text-xs text-gray-500 mt-1">
+            <hr className="my-4 border-gray-200 border-1" />
+          </div>
           {/* Delivery Time */}
           <div className="mb-4">
             <label className="block text-sm font-medium mb-1">
@@ -572,8 +643,8 @@ const Professionals = () => {
             </div>
           </div>
           <div className="text-xs text-gray-500 mt-1">
-  <hr className="my-4 border-gray-200 border-1" />
-</div>
+            <hr className="my-4 border-gray-200 border-1" />
+          </div>
           <div className="mb-4">
             <label className="block text-sm font-medium mb-1">Rating</label>
             <div className="flex flex-col gap-2">
@@ -594,8 +665,8 @@ const Professionals = () => {
             </div>
           </div>
           <div className="text-xs text-gray-500 mt-1">
-  <hr className="my-4 border-gray-200 border-1" />
-</div>
+            <hr className="my-4 border-gray-200 border-1" />
+          </div>
           <div className="mb-4">
             <label className="block text-sm font-medium mb-1">Verified</label>
             <div className="flex flex-col gap-4">
@@ -620,21 +691,21 @@ const Professionals = () => {
             </div>
           </div>
           <div className="text-xs text-gray-500 mt-1">
-  <hr className="my-4 border-gray-200 border-1" />
-</div>
+            <hr className="my-4 border-gray-200 border-1" />
+          </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Featured</label>            
+            <label className="block text-sm font-medium mb-1">Featured</label>
             <ToggleSwitch
-    checked={state.featured}
-    onChange={() => {
-      dispatch({ type: "SET_FEATURED", value: !state.featured });
-    }}
-  />
+              checked={state.featured}
+              onChange={() => {
+                dispatch({ type: "SET_FEATURED", value: !state.featured });
+              }}
+            />
           </div>
           <div className="text-xs text-gray-500 mt-1">
-  <hr className="my-4 border-gray-200 border-1" />
-</div>
+            <hr className="my-4 border-gray-200 border-1" />
+          </div>
 
           {/* Language */}
           <div className="mb-4">
@@ -672,7 +743,9 @@ const Professionals = () => {
             <div className="bg-white rounded-xl shadow-lg w-full max-w-sm p-6 relative overflow-y-auto max-h-[90vh]">
               <button
                 className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-xl"
-                onClick={() => dispatch({ type: "SET_SHOW_MOBILE_FILTERS", value: false })}
+                onClick={() =>
+                  dispatch({ type: "SET_SHOW_MOBILE_FILTERS", value: false })
+                }
                 aria-label="Close"
               >
                 &times;
@@ -723,7 +796,12 @@ const Professionals = () => {
                     <button
                       type="button"
                       className="ml-auto text-gray-400"
-                      onClick={() => dispatch({ type: "SET_SHOW_TAG_DROPDOWN", value: !state.showTagDropdown })}
+                      onClick={() =>
+                        dispatch({
+                          type: "SET_SHOW_TAG_DROPDOWN",
+                          value: !state.showTagDropdown,
+                        })
+                      }
                       tabIndex={-1}
                     >
                       <svg width="20" height="20" fill="none">
@@ -754,9 +832,14 @@ const Professionals = () => {
                             } else if (state.tags.length < 2) {
                               handleTagChange(tag);
                             }
-                            dispatch({ type: "SET_SHOW_TAG_DROPDOWN", value: false });
+                            dispatch({
+                              type: "SET_SHOW_TAG_DROPDOWN",
+                              value: false,
+                            });
                           }}
-                          disabled={!state.tags.includes(tag) && state.tags.length >= 2}
+                          disabled={
+                            !state.tags.includes(tag) && state.tags.length >= 2
+                          }
                         >
                           {tag}
                         </button>
@@ -773,8 +856,12 @@ const Professionals = () => {
                 </label>
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-500">${state.budget[0]}</span>
-                    <span className="text-xs text-gray-500">${state.budget[1]}</span>
+                    <span className="text-xs text-gray-500">
+                      ${state.budget[0]}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      ${state.budget[1]}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <input
@@ -909,7 +996,9 @@ const Professionals = () => {
               </button>
               <button
                 className="w-full bg-blue-600 text-white py-2 rounded-xl font-semibold text-base mt-2"
-                onClick={() => dispatch({ type: "SET_SHOW_MOBILE_FILTERS", value: false })}
+                onClick={() =>
+                  dispatch({ type: "SET_SHOW_MOBILE_FILTERS", value: false })
+                }
               >
                 Apply Filters
               </button>
@@ -919,9 +1008,11 @@ const Professionals = () => {
 
         {/* Professionals */}
         <div className="flex-1">
-          <h2 className="text-xl font-semibold mb-2">
+          <h2 className="text-xl font-bold mb-2">
             Choose a professional.{" "}
-            <span className="font-normal">Write your question. Get Answer</span>
+            <span className="font-normal text-gray-500 font-semibold">
+              Write your question. Get Answer
+            </span>
           </h2>
           <p className="mb-6 text-gray-600">
             Getting trusted advice is a smart way to move faster, solve
@@ -937,7 +1028,9 @@ const Professionals = () => {
               </div>
             </div>
           ) : professionalsError ? (
-            <div className="text-red-600 mt-6">Failed to load professionals</div>
+            <div className="text-red-600 mt-6">
+              Failed to load professionals
+            </div>
           ) : paginatedProfessionals.length === 0 ? (
             <div className="text-gray-500 mt-8">
               No professionals found for selected filters.
@@ -967,7 +1060,12 @@ const Professionals = () => {
                     ? "bg-gray-100 text-gray-400"
                     : "bg-white text-blue-600 border-blue-400 hover:bg-blue-50"
                 }`}
-                onClick={() => dispatch({ type: "SET_PAGE", value: Math.max(1, state.page - 1) })}
+                onClick={() =>
+                  dispatch({
+                    type: "SET_PAGE",
+                    value: Math.max(1, state.page - 1),
+                  })
+                }
                 disabled={state.page === 1}
               >
                 <FiChevronLeft size={18} />
@@ -981,7 +1079,12 @@ const Professionals = () => {
                     ? "bg-gray-100 text-gray-400"
                     : "bg-white text-blue-600 border-blue-400 hover:bg-blue-50"
                 }`}
-                onClick={() => dispatch({ type: "SET_PAGE", value: Math.min(totalPages, state.page + 1) })}
+                onClick={() =>
+                  dispatch({
+                    type: "SET_PAGE",
+                    value: Math.min(totalPages, state.page + 1),
+                  })
+                }
                 disabled={state.page === totalPages}
               >
                 <FiChevronRight size={18} />
@@ -993,7 +1096,9 @@ const Professionals = () => {
           <ProfessionalProfileModal
             // professionalId={state.selectedProfessional._id}
             professional={state.selectedProfessional}
-            onClose={() => dispatch({ type: "SET_SHOW_PROFILE_MODAL", value: false })}
+            onClose={() =>
+              dispatch({ type: "SET_SHOW_PROFILE_MODAL", value: false })
+            }
           />
         )}
         {state.showModal && state.selectedProfessional && (

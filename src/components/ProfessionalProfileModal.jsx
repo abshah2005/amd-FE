@@ -66,6 +66,13 @@ const iconMap = {
 const ProfessionalProfileModal = ({ professional, onClose }) => {
   const [isQuestionOpen, setIsQuestionOpen] = useState(false);
 
+   const getDeliveryLabel = (days) => {
+    if (days <= 1) return "Less than 24hr";
+    if (days <= 7) return "Less than 7 days";
+    if (days <= 10) return "Less than 10 days";
+    return `Within ${days} days`;
+  };
+
   const prof = {
     ...dummyData,
     ...(professional || {}),
@@ -168,7 +175,7 @@ const ProfessionalProfileModal = ({ professional, onClose }) => {
               )}
             </div>
             <div className="text-sm text-slate-700 mb-1 text-center">
-              {prof.title}{" "}
+              {prof.tags.slice(0,2).join(", ")}{" "}
               <span className="text-slate-500">• {prof.associated}</span>
             </div>
             <div className="flex gap-3 items-center mb-1 text-sm">
@@ -211,7 +218,7 @@ const ProfessionalProfileModal = ({ professional, onClose }) => {
             </div>
             <div className="mt-2 text-xs  px-4 py-1 self-start mb-2 flex-grow"></div>
             <div className="text-xs text-slate-500 bg-gray-100 rounded-xl px-4 py-1 self-start mb-2 mt-auto">
-              Delivery Time: {prof.deliveryTime}
+              Delivery Time: {getDeliveryLabel(prof.deliveryTime)}
             </div>
           </div>
           {/* Right */}
