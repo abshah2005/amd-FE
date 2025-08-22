@@ -814,7 +814,7 @@ const Professionals = () => {
                       </svg>
                     </button>
                   </div>
-                  {/* Dropdown */}
+                  {/*i am fixing deployment issues*/}
                   {state.showTagDropdown && (
                     <div className="absolute left-0 top-full mt-2 w-full bg-white border rounded-xl shadow-lg z-10 max-h-48 overflow-auto">
                       {allTags.map((tag) => (
