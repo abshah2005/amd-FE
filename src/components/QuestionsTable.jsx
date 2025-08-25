@@ -5,14 +5,16 @@ import { FiSearch, FiMoreHorizontal } from 'react-icons/fi';
 export const QuestionsTable = ({ questions }) => {
   const getStatusColor = (status) => {
     switch (status) {
-      case 'Accepted':
-      case 'Approved':
-      case 'Answered':
+      case 'approved':
+      case 'closed':
         return 'text-green-600';
-      case 'Declined':
+      case 'rejected':
         return 'text-red-600';
-      case 'Awaiting Response':
-      case 'Requested':
+      case 'submitted':
+      case 'awaiting_response':
+      case 'awaiting_payment':
+      case 'paid':
+      case 'in_thread':
         return 'text-yellow-600';
       default:
         return 'text-gray-600';
@@ -72,7 +74,7 @@ export const QuestionsTable = ({ questions }) => {
                   {question.professional.name}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {question.proposedBudget}
+                  {question.price}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                   <span className={getStatusColor(question.status)}>

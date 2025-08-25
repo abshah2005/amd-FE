@@ -43,3 +43,30 @@ export function useDashboardUsers(type = "professional", page = 1, limit = 20, o
     ...options,
   });
 }
+
+
+export function useProfessionalStats() {
+  return useQuery({
+    queryKey: ["professionalStats"],
+    queryFn: async () => {
+      const { data } = await axios.get(`${API_BASE_URL}/admin/dashboard/stats/prof`, {
+          headers: getAuthHeaders(),
+        });
+      return data?.data;
+    },
+    staleTime: 1000 * 60 * 5,
+  });
+}
+
+export function usePendingQuestions() {
+  return useQuery({
+    queryKey: ["pendingQuestions"],
+    queryFn: async () => {
+      const { data } = await axios.get(`${API_BASE_URL}/admin/dashboard/pending`, {
+          headers: getAuthHeaders(),
+        });
+      return data?.data;
+    },
+    staleTime: 1000 * 60 * 2,
+  });
+}

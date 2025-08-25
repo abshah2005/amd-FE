@@ -3,19 +3,22 @@ import React from 'react';
 const AnswersTable = ({ answers }) => {
   const getStatusColor = (status) => {
     switch (status) {
-      case 'Accepted':
-      case 'Approved':
-      case 'Answered':
+      case 'approved':
+      case 'closed':
         return 'text-green-600';
-      case 'Declined':
+      case 'rejected':
         return 'text-red-600';
-      case 'Awaiting Response':
-      case 'Requested':
+      case 'submitted':
+      case 'awaiting_response':
+      case 'awaiting_payment':
+      case 'paid':
+      case 'in_thread':
         return 'text-yellow-600';
       default:
         return 'text-gray-600';
     }
   };
+
 
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
@@ -68,11 +71,13 @@ const AnswersTable = ({ answers }) => {
                   {a.asker?.name || a.askerName || '—'}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {a.proposedBudget || a.price || '—'}
+                   {a.price || '—'}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
-                  <span className={getStatusColor(a.status)}>{a.status}</span>
-                </td>
+  <span className={getStatusColor(a.status)}>
+    {a.status}
+  </span>
+</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {a.deliveryTime}
                 </td>

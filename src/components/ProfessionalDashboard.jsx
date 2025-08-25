@@ -1,41 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../contextProvider/AuthContextProvider";
-
-const demoStats = {
-  activeQuestions: "03",
-  questionsCompleted: "13",
-  avgRating: "4.5",
-  totalEarnings: "$750",
-};
-
-const demoShareUrl = "www.askmedirect.com/theprofessional_12";
-
-const demoActiveQuestions = [
-  {
-    text: "Looking for guidance on how to structure my investor pitch.",
-    daysLeft: 5,
-  },
-  {
-    text: "Looking for guidance on how to structure my investor pitch.",
-    daysLeft: 10,
-  },
-  {
-    text: "Looking for guidance on how to structure my investor pitch.",
-    daysLeft: 12,
-  },
-];
-
-const demoPendingAnswers = [
-  {
-    id: "Qno. 1a",
-    submittedDate: "YYYY/MM/DD",
-    question: "Looking for guidance on how to structure my investor pitch.",
-    asker: "John Doe",
-    price: "$25",
-    status: "Awaiting Response",
-    deliveryTime: "Normal",
-  },
-];
+import {
+  useProfessionalStats,
+  usePendingQuestions,
+} from "../hooks/useDashboard";
 
 function StatsCard({ title, value }) {
   return (
@@ -72,9 +40,19 @@ function SidebarList({ items }) {
             <div className="w-2 h-2 rounded-full bg-gray-800 mt-1" />
             <div>
               <div className="text-xs text-gray-500">
-                {it.daysLeft} days remaining
+                {(() => {
+                  const today = new Date();
+                  const answerBy = new Date(it.answerBy);
+                  const diff = Math.ceil(
+                    (answerBy - today) / (1000 * 60 * 60 * 24)
+                  );
+                  if (isNaN(diff)) return "Time is yet to be decided";
+                  return `${diff} days remaining`;
+                })()}
               </div>
-              <div className="text-sm text-gray-700 mt-1">{it.text}</div>
+              <div className="text-sm text-gray-700 mt-1">
+                {it.body.slice(0, 40) + "..."}
+              </div>
             </div>
           </li>
         ))}
@@ -128,39 +106,28 @@ function StatusCell({ status }) {
 
 export default function ProfessionalDashboard() {
   const { user } = useAuth();
-  const [pending, setPending] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [tab, setTab] = useState("Active");
   const [q, setQ] = useState("");
 
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        // replace with real API call later: e.g. /api/professional/:id/dashboard
-        await new Promise((r) => setTimeout(r, 200));
-        if (mounted) setPending(demoPendingAnswers);
-      } catch (err) {
-        if (mounted) setError(err);
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    })();
-    return () => (mounted = false);
-  }, [user]);
+  // Fetch stats and pending questions
+  const {
+    data: stats,
+    isLoading: statsLoading,
+    error: statsError,
+  } = useProfessionalStats();
+  const { data: pending, isLoading: loading, error } = usePendingQuestions();
 
-  const filtered = pending.filter((it) => {
-    if (!q) return true;
-    const s = q.toLowerCase();
-    return (
-      (it.question || "").toLowerCase().includes(s) ||
-      (it.asker || "").toLowerCase().includes(s) ||
-      (it.id || "").toLowerCase().includes(s)
-    );
-  });
+  // Only show items whose status is NOT closed or rejected
+  const filtered = (pending || []).filter(
+    (it) =>
+      it.status !== "closed" &&
+      it.status !== "rejected" &&
+      (!q ||
+        (it.question || "").toLowerCase().includes(q.toLowerCase()) ||
+        (it.asker?.user?.firstName || it.asker?.firstName || it.asker || "")
+          .toLowerCase()
+          .includes(q.toLowerCase()) ||
+        (it.id || "").toLowerCase().includes(q.toLowerCase()))
+  );
 
   return (
     <div className=" bg-white pt-0 ">
@@ -169,10 +136,8 @@ export default function ProfessionalDashboard() {
           {/* Left Sidebar */}
           <aside className="col-span-3 pl-8  border-r  min-h-[80vh] ">
             <div className="mt-8">
-
-            <SidebarList items={demoActiveQuestions} />
+              <SidebarList items={filtered || []} />
             </div>
-
           </aside>
 
           {/* Right Main Content */}
@@ -180,39 +145,45 @@ export default function ProfessionalDashboard() {
             <div className="flex justify-between items-start mb-8">
               <h1 className="text-2xl font-semibold mt-4">Dashboard</h1>
               <div className="w-80 ">
-                <ShareBox url={demoShareUrl} />
+                <ShareBox url={stats?.shareUrl || ""} />
               </div>
             </div>
 
             <div className="grid grid-cols-4 gap-6 mb-8">
               <StatsCard
                 title="Active Questions"
-                value={demoStats.activeQuestions}
+                value={statsLoading ? "..." : stats?.activeQuestions ?? "0"}
               />
               <StatsCard
                 title="Question Completed"
-                value={demoStats.questionsCompleted}
+                value={statsLoading ? "..." : stats?.questionsCompleted ?? "0"}
               />
-              <StatsCard title="Avg. Rating" value={demoStats.avgRating} />
+              <StatsCard
+                title="Avg. Rating"
+                value={statsLoading ? "..." : stats?.avgRating ?? "0"}
+              />
               <StatsCard
                 title="Total Earnings"
-                value={demoStats.totalEarnings}
+                value={statsLoading ? "..." : `$${stats?.totalEarnings ?? "0"}`}
               />
             </div>
 
             <section>
-              <h2 className="text-xl font-semibold mb-4">Pending Actions</h2>
               <div className="bg-white rounded-[12px] border">
                 <div className="p-4 border-b">
                   <div className="flex justify-between items-center">
-                    <TabsBar active={tab} setActive={setTab} />
+                    <div className="pt-2">
+                      <h2 className="text-xl font-semibold mb-4">
+                        Pending Actions
+                      </h2>
+                    </div>
                     <SearchInput
                       value={q}
                       onChange={(e) => setQ(e.target.value)}
                     />
                   </div>
                 </div>
-                <div className="p-4 overflow-x-auto">
+                <div className=" overflow-x-auto">
                   {loading ? (
                     <div className="text-center text-gray-600">Loading…</div>
                   ) : error ? (
@@ -250,16 +221,20 @@ export default function ProfessionalDashboard() {
                         {filtered.map((row) => (
                           <tr key={row.id} className="hover:bg-gray-50">
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 font-medium">
-                              {row.id}
+                              {row._id}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                              {row.submittedDate}
+                              {new Date(row.createdAt)
+                                .toISOString()
+                                .slice(0, 10)}
                             </td>
                             <td className="px-6 py-4 text-sm text-gray-700 max-w-lg truncate">
-                              {row.question}
+                              {row.body.slice(0, 40) + "..."}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                              {row.asker}
+                              {row.asker?.user?.firstName ||
+                                row.asker?.firstName ||
+                                row.asker}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                               {row.price}
@@ -268,7 +243,7 @@ export default function ProfessionalDashboard() {
                               <StatusCell status={row.status} />
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                              {row.deliveryTime}
+                              {row.deliveryType}
                             </td>
                           </tr>
                         ))}

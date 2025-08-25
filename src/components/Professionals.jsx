@@ -323,8 +323,8 @@ const Professionals = () => {
           </div>
           <div className="text-gray-700 text-sm mb-2">
   {prof.about[0]
-    ? prof.about[0].split(" ").length > 80
-      ? prof.about[0].split(" ").slice(0, 80).join(" ") + " ..."
+    ? prof.about[0].split(" ").length > 40
+      ? prof.about[0].split(" ").slice(0, 40).join(" ") + " ..."
       : prof.about[0]
     : ""}
 </div>
