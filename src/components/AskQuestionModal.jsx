@@ -138,7 +138,7 @@ const AskQuestionModal = ({ professional, onClose }) => {
 
   // Budget options for dropdown
   const budgetOptions = Array.from(
-    { length: professional.priceRangeLow - professional.priceRangeHigh + 1 },
+    { length: professional.priceRangeHigh - professional.priceRangeLow + 1 },
     (_, i) => professional.priceRangeLow + i
   );
 
