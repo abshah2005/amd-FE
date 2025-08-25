@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { FiSearch, FiMoreHorizontal } from 'react-icons/fi';
 
 
-export const QuestionsTable = ({ questions }) => {
+export const QuestionsTable = ({ questions,setModalOpen }) => {
   const getStatusColor = (status) => {
     switch (status) {
       case 'approved':
@@ -59,7 +59,7 @@ export const QuestionsTable = ({ questions }) => {
                 <td className="px-6 py-4 whitespace-nowrap">
                   <input type="checkbox" className="rounded border-gray-300" />
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 font-medium">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 font-medium" onClick={() => setModalOpen(true)} style={{cursor: 'pointer'}}>
                   {question.id}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">

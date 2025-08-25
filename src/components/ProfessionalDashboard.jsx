@@ -4,6 +4,7 @@ import {
   useProfessionalStats,
   usePendingQuestions,
 } from "../hooks/useDashboard";
+import { getStatusLabel } from "../utils/StatusUtil";
 
 function StatsCard({ title, value }) {
   return (
@@ -95,13 +96,21 @@ function SearchInput({ value, onChange }) {
 }
 
 function StatusCell({ status }) {
+  const label = getStatusLabel(status);
   const map = {
-    Accepted: "text-green-600",
+    Pending: "text-yellow-600",
     Approved: "text-blue-600",
+    Rejected: "text-red-600",
+    Quoted: "text-purple-600",
+    "Awaiting Payment": "text-orange-600",
+    Paid: "text-green-600",
     "Awaiting Response": "text-yellow-600",
-    Declined: "text-red-600",
+    Answered: "text-blue-700",
+    Ongoing: "text-indigo-600",
+    Completed: "text-green-700",
+    Cancelled: "text-gray-500",
   };
-  return <span className={map[status] || "text-gray-600"}>{status}</span>;
+  return <span className={map[label] || "text-gray-600"}>{label}</span>;
 }
 
 export default function ProfessionalDashboard() {

@@ -338,14 +338,79 @@ function ValueSyncPlugin({ value }) {
 }
 
 // Add a new plugin to handle editor state restoration
+// function EditorStatePlugin({ initialEditorState }) {
+//   const [editor] = useLexicalComposerContext();
+//   const [hasSetInitialState, setHasSetInitialState] = useState(false);
+
+//   // useEffect(() => {
+//   //   if (initialEditorState && !hasSetInitialState) {
+//   //     editor.setEditorState(initialEditorState);
+//   //     setHasSetInitialState(true);
+//   //   }
+//   // }, [initialEditorState, editor, hasSetInitialState]);
+
+//   useEffect(() => {
+//     if (initialEditorState && !hasSetInitialState) {
+//       try {
+//         // If initialEditorState is a string, parse it
+//         const editorStateObj = typeof initialEditorState === 'string' 
+//           ? JSON.parse(initialEditorState) 
+//           : initialEditorState;
+          
+//         editor.update(() => {
+//           // Create nodes from the parsed state
+//           const root = $getRoot();
+//           root.clear();
+          
+//           // Create a paragraph node
+//           const paragraph = $createParagraphNode();
+//           // Add the text content
+//           paragraph.append(
+//             $createTextNode(
+//               editorStateObj.root?.children?.[0]?.children?.[0]?.text || "")
+//           );
+//           root.append(paragraph);
+//         });
+        
+//         setHasSetInitialState(true);
+//       } catch (error) {
+//         console.error("Failed to set initial editor state:", error);
+//       }
+//     }
+//   }, [initialEditorState, editor, hasSetInitialState]);
+
+//   return null;
+// }
+
+
 function EditorStatePlugin({ initialEditorState }) {
   const [editor] = useLexicalComposerContext();
   const [hasSetInitialState, setHasSetInitialState] = useState(false);
 
   useEffect(() => {
     if (initialEditorState && !hasSetInitialState) {
-      editor.setEditorState(initialEditorState);
-      setHasSetInitialState(true);
+      try {
+        // If initialEditorState is a string, parse it
+        const editorStateObj = typeof initialEditorState === 'string' 
+          ? JSON.parse(initialEditorState) 
+          : initialEditorState;
+          
+        // Extract the text content
+        const textContent = editorStateObj.root?.children?.[0]?.children?.[0]?.text || "";
+        
+        // Update the editor with the text
+        editor.update(() => {
+          const root = $getRoot();
+          root.clear();
+          const paragraph = $createParagraphNode();
+          paragraph.append($createTextNode(textContent));
+          root.append(paragraph);
+        });
+        
+        setHasSetInitialState(true);
+      } catch (error) {
+        console.error("Failed to set initial editor state:", error);
+      }
     }
   }, [initialEditorState, editor, hasSetInitialState]);
 
@@ -354,6 +419,7 @@ function EditorStatePlugin({ initialEditorState }) {
 
 // Main Editor Component - ensure proper initial value handling
 export default function LexicalEditor({
+  showDescription = true,
   value = "",
   initialValue = "",
   initialEditorState = null, // Add this new prop
@@ -392,41 +458,76 @@ export default function LexicalEditor({
   }, [value, plainTextContent]);
 
   // Enhanced onChange handler
+  // const handleEditorChange = useCallback(
+  //   (editorState) => {
+  //     editorState.read(() => {
+  //       const root = $getRoot();
+  //       const textContent = root.getTextContent();
+
+  //       // Update state
+  //       setPlainTextContent(textContent);
+  //       setHtmlContent(textContent);
+  //       setEditorContent(textContent);
+  //       setIsEmpty(textContent.trim() === "");
+
+  //       // Calculate counts
+  //       const words = textContent.trim()
+  //         ? textContent.trim().split(/\s+/).length
+  //         : 0;
+  //       const characters = textContent.length;
+  //       setWordCount(words);
+  //       setCharacterCount(characters);
+
+  //       // Call parent onChange with comprehensive data
+  //       if (onChange) {
+  //         onChange({
+  //           plainText: textContent,
+  //           html: textContent, // You can enhance this to get actual HTML
+  //           isEmpty: textContent.trim() === "",
+  //           wordCount: words,
+  //           characterCount: characters,
+  //           editorState,
+  //         });
+  //       }
+  //     });
+  //   },
+  //   [onChange]
+  // );
   const handleEditorChange = useCallback(
-    (editorState) => {
-      editorState.read(() => {
-        const root = $getRoot();
-        const textContent = root.getTextContent();
+  (editorState) => {
+    editorState.read(() => {
+      const root = $getRoot();
+      const textContent = root.getTextContent();
 
-        // Update state
-        setPlainTextContent(textContent);
-        setHtmlContent(textContent);
-        setEditorContent(textContent);
-        setIsEmpty(textContent.trim() === "");
+      // Update state
+      setPlainTextContent(textContent);
+      setHtmlContent(textContent);
+      setEditorContent(textContent);
+      setIsEmpty(textContent.trim() === ""); // Check if the editor is empty
 
-        // Calculate counts
-        const words = textContent.trim()
-          ? textContent.trim().split(/\s+/).length
-          : 0;
-        const characters = textContent.length;
-        setWordCount(words);
-        setCharacterCount(characters);
+      // Calculate counts
+      const words = textContent.trim()
+        ? textContent.trim().split(/\s+/).length
+        : 0;
+      const characters = textContent.length;
+      setWordCount(words);
+      setCharacterCount(characters);
 
-        // Call parent onChange with comprehensive data
-        if (onChange) {
-          onChange({
-            plainText: textContent,
-            html: textContent, // You can enhance this to get actual HTML
-            isEmpty: textContent.trim() === "",
-            wordCount: words,
-            characterCount: characters,
-            editorState,
-          });
-        }
-      });
-    },
-    [onChange]
-  );
+      // Call parent onChange with comprehensive data
+      if (onChange) {
+        onChange({
+          plainText: textContent,
+          html: textContent, // You can enhance this to get actual HTML
+          isEmpty: textContent.trim() === "", // Check if the editor is empty
+          wordCount: words,
+          characterCount: characters,
+          editorState,
+        });
+      }
+    });
+  },
+  [onChange]
+);
 
   // Submit handler
   const handleSubmit = useCallback(() => {
@@ -631,10 +732,15 @@ export default function LexicalEditor({
           backgroundColor: "white",
         }}
       >
-        <MenuIcon sx={{ fontSize: 20, color: "#666", marginRight: 1 }} />
-        <Typography variant="body2" sx={{ color: "black", fontWeight: 500 }}>
-          Description
-        </Typography>
+        
+        {showDescription && (
+
+          <Typography variant="body2" sx={{ color: "black", fontWeight: 500 }}>
+            <MenuIcon sx={{ fontSize: 20, color: "#666", marginRight: 1 }} />
+            Description
+          </Typography>
+        )}
+
         {maxLength && (
           <Typography
             variant="caption"
@@ -735,9 +841,11 @@ export default function LexicalEditor({
 
             {/* Add the new plugin for editor state restoration */}
             <EditorStatePlugin initialEditorState={initialEditorState} />
-            
+
             {/* Keep existing plugins but make them conditional */}
-            {!initialEditorState && <InitialContentPlugin initialContent={value || initialValue} />}
+            {!initialEditorState && (
+              <InitialContentPlugin initialContent={value || initialValue} />
+            )}
             {!initialEditorState && <ValueSyncPlugin value={value} />}
           </Box>
 

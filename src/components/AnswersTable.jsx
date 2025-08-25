@@ -1,6 +1,6 @@
 
 import React from 'react'; 
-const AnswersTable = ({ answers }) => {
+const AnswersTable = ({ answers, setModalOpen }) => {
   const getStatusColor = (status) => {
     switch (status) {
       case 'approved':
@@ -58,7 +58,7 @@ const AnswersTable = ({ answers }) => {
                 <td className="px-6 py-4 whitespace-nowrap">
                   <input type="checkbox" className="rounded border-gray-300" />
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 font-medium">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 font-medium" onClick={() => setModalOpen(true)} style={{cursor: 'pointer'}}>
                   {a.id}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">

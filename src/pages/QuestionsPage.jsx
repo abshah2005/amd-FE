@@ -7,17 +7,18 @@ import { useAuth } from "../contextProvider/AuthContextProvider";
 import { ArrowBack } from "@mui/icons-material";
 import { Link } from "react-router-dom";
 import { useQuestions, useAnswers } from "../hooks/useQuestionsAndAnswers";
+import { getStatusLabel } from "../utils/StatusUtil";
+import QuestionThreadModal from "../components/QuestionThreadModal";
 
 const mappedQuestions = (questions) =>
   questions.map((q) => ({
     id: q._id,
     submittedDate: new Date(q.createdAt).toISOString().slice(0, 10),
     question: q.title,
-    professional: {name: q.professional?.user?.fullName || "Professional"},
-    price: q.price || '—',
-    status: q.status || 'Pending',
-    // deliveryTime: new Date(q.answerBy).toISOString().slice(0, 10),
-    deliveryTime:q.deliveryType
+    professional: { name: q.professional?.user?.fullName || "Professional" },
+    price: q.price || "—",
+    status: getStatusLabel(q.status),
+    deliveryTime: q.deliveryType,
   }));
 
 const mappedAnswers = (answers) =>
@@ -25,35 +26,31 @@ const mappedAnswers = (answers) =>
     id: a._id,
     submittedDate: new Date(a.createdAt).toISOString().slice(0, 10),
     question: a.title,
-    asker: {name: a.asker?.fullName || "Asker"},
-    price: a.price || '—',
-    status: a.status || 'Pending',
+    asker: { name: a.asker?.fullName || "Asker" },
+    price: a.price || "—",
+    status: getStatusLabel(a.status),
     // deliveryTime: new Date(a.answerBy).toISOString().slice(0, 10),
-    deliveryTime:a.deliveryType
-
+    deliveryTime: a.deliveryType,
   }));
 
 const QuestionsPage = () => {
   const { user } = useAuth();
+  const [modalOpen, setModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("Active");
   const [searchTerm, setSearchTerm] = useState("");
   const activeStatuses = [
-  "approved",
-  "submitted",
-  "awaiting_response",
-  "awaiting_payment",
-  "paid",
-  "in_thread"
-];
+    "approved",
+    "submitted",
+    "awaiting_response",
+    "awaiting_payment",
+    "paid",
+    "in_thread",
+  ];
 
-const archivedStatuses = [
-  "closed",
-  "rejected"
-];
+  const archivedStatuses = ["closed", "rejected"];
 
   const isProfessional = user?.activeRole === "professional";
 
-  // For active tab
   const {
     data: activeItems,
     isLoading: loadingActive,
@@ -84,28 +81,27 @@ const archivedStatuses = [
   const loadingItems = activeTab === "Active" ? loadingActive : loadingArchived;
   const itemsError = activeTab === "Active" ? activeError : archivedError;
 
-  console.log('Mapped items for table:', items);
-  const filteredItems = items
-    .filter((q) =>
-      activeTab === "Active"
-        ? q.status !== "rejected" && q.status !== "closed"
-        : q.status === "rejected" || q.status === "closed"
-    )
-    // .filter(
-    //   (question) =>
-    //     (question.question || "")
-    //       .toLowerCase()
-    //       .includes(searchTerm.toLowerCase()) ||
-    //     (
-    //       (isProfessional
-    //         ? question.asker?.name
-    //         : question.professional?.name) || ""
-    //     )
-    //       .toLowerCase()
-    //       .includes(searchTerm.toLowerCase())
-    // );
+  console.log("Mapped items for table:", items);
+  const filteredItems = items.filter((q) =>
+    activeTab === "Active"
+      ? q.status !== "Rejected" && q.status !== "Completed"
+      : q.status === "Rejected" || q.status === "Completed"
+  );
+  // .filter(
+  //   (question) =>
+  //     (question.question || "")
+  //       .toLowerCase()
+  //       .includes(searchTerm.toLowerCase()) ||
+  //     (
+  //       (isProfessional
+  //         ? question.asker?.name
+  //         : question.professional?.name) || ""
+  //     )
+  //       .toLowerCase()
+  //       .includes(searchTerm.toLowerCase())
+  // );
 
-  console.log('Filtered items after search and status filter:', filteredItems);
+  console.log("Filtered items after search and status filter:", filteredItems);
   const title = isProfessional ? "My Answers" : "My Questions";
 
   return (
@@ -149,9 +145,9 @@ const archivedStatuses = [
               Failed to load {isProfessional ? "answers" : "questions"}
             </div>
           ) : isProfessional ? (
-            <AnswersTable answers={filteredItems} />
+            <AnswersTable answers={filteredItems} setModalOpen={setModalOpen}  />
           ) : (
-            <QuestionsTable questions={filteredItems} />
+            <QuestionsTable questions={filteredItems} setModalOpen={setModalOpen} />
           )}
         </div>
 
@@ -162,6 +158,26 @@ const archivedStatuses = [
           </div>
         </div>
       </div>
+      <QuestionThreadModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        role="professional"
+        status="submitted"
+        question={{
+          id: "1a",
+          submittedDate: "YYYY/MM/DD",
+          asker: "John Doe",
+          budget: 20,
+          deliveryTime: "Normal",
+          fastDelivery: "2 days",
+          images: [
+            "https://yourdomain.com/image1.jpg",
+            "https://yourdomain.com/image2.jpg",
+          ],
+          description:
+            "What legal steps should I take before raising a seed round as a first-time founder?",
+        }}
+      />
     </div>
   );
 };

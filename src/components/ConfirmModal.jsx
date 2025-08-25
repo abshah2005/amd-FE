@@ -6,6 +6,7 @@ export const ConfirmModal = ({
   onConfirm,
   agreed,
   setAgreed,
+  isLoading,
 }) => {
   if (!open) return null;
   return (
@@ -26,7 +27,7 @@ export const ConfirmModal = ({
           <br />
           Please review everything before continuing.
         </p>
-        
+
         <div className="mb-4 flex flex-col p-2">
           <div>
             <input
@@ -45,21 +46,22 @@ export const ConfirmModal = ({
           </p>
         </div>
 
-        <div className="flex justify-end gap-6 mt-4">
+        <div className="mt-4 flex justify-end gap-2">
           <button
-            className=" text-gray-700 px-4 py-2 font-semibold text-sm "
+            className="px-4 py-2 bg-gray-200 rounded-md"
             onClick={onClose}
+            disabled={isLoading}
           >
             Cancel
           </button>
           <button
-            className={`bg-blue-600 text-white px-4 py-2 rounded-full font-semibold text-sm hover:bg-blue-700 ${
-              !agreed ? "opacity-50 cursor-not-allowed" : ""
+            className={`px-4 py-2 bg-blue-600 text-white rounded-md ${
+              !agreed || isLoading ? "opacity-50 cursor-not-allowed" : ""
             }`}
             onClick={onConfirm}
-            disabled={!agreed}
+            disabled={!agreed || isLoading}
           >
-            Done
+            {isLoading ? "Submitting..." : "Confirm"}
           </button>
         </div>
       </div>

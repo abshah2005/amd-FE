@@ -5,6 +5,7 @@ import DashboardTable from "../components/Dashboardtable";
 import { useDashboardStats, useDashboardUsers } from "../hooks/useDashboard";
 import { useAuth } from "../contextProvider/AuthContextProvider";
 import ProfessionalDashboard from "../components/ProfessionalDashboard";
+import { getStatusLabel } from "../utils/StatusUtil";
 
 const PAGE_SIZE = 5;
 
@@ -40,7 +41,7 @@ const DashboardPage = () => {
     joined: new Date(row.joinedDate).toISOString().slice(0, 10),
     earnings: row.totalEarnings,
     answers: row.questionsAnswered,
-    status: row.status,
+    status: getStatusLabel( row.status),
   }));
 
   const mappedAskers = askers.map((row) => ({
@@ -48,7 +49,7 @@ const DashboardPage = () => {
     joined: new Date(row.joinedDate).toISOString().slice(0, 10),
     spendings: row.totalSpendings,
     questions: row.questionsAsked,
-    status: row.status,
+    status: getStatusLabel( row.status),
   }));
 
   return (

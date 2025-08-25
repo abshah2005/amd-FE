@@ -5,18 +5,21 @@ import { ConfirmModal } from "./ConfirmModal";
 import { DiscardModal } from "./DiscardModal";
 import ImageSelectorModal from "./ImageSelectorModal";
 import LexicalEditor from "./RichTextEditor";
+import { useCreateQuestion } from "../hooks/useCreateQuestion";
+import { useNavigate } from "react-router-dom";
 
 const deliveryOptions = [
-  { label: "Normal", value: "Normal" },
-  { label: "Fast-Track", value: "Fast-Track" },
+  { label: "Normal", value: "normal" },
+  { label: "Fast-Track", value: "fast" },
 ];
 
 // 1. Initial state
 const initialState = {
   description: "",
+  feedbackMsg: "",
   editorState: null,
   images: [],
-  deliveryTime: "Normal",
+  deliveryTime: "normal",
   showConfirm: false,
   showDiscard: false,
   showTerms: false,
@@ -35,6 +38,8 @@ function reducer(state, action) {
       return { ...state, editorState: action.value };
     case "SET_IMAGES":
       return { ...state, images: action.value };
+    case "SET_FEEDBACKMSG":
+      return { ...state, feedbackMsg: action.value };
     case "ADD_IMAGES":
       return { ...state, images: [...state.images, ...action.value] };
     case "REMOVE_IMAGE":
@@ -68,6 +73,8 @@ function reducer(state, action) {
 const AskQuestionModal = ({ professional, onClose }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const fileInputRef = useRef();
+  const createQuestion = useCreateQuestion();
+  const navigate = useNavigate();
 
   const handleClose = () => dispatch({ type: "SET_SHOW_DISCARD", value: true });
 
@@ -93,9 +100,38 @@ const AskQuestionModal = ({ professional, onClose }) => {
     dispatch({ type: "SET_SHOW_CONFIRM", value: true });
 
   const handleConfirm = () => {
-    console.log("AskQuestionModal state on Done:", state);
-    dispatch({ type: "SET_SHOW_CONFIRM", value: false });
-    handleSubmit();
+    if (!state.agreed) return;
+
+    const questionData = {
+      professionalId: professional._id,
+      description: state.description,
+      deliveryTime: state.deliveryTime,
+      budget: state.budget || professional.priceRangeLow,
+      images: state.images,
+      editorState: state.editorState,
+    };
+
+    createQuestion.mutate(questionData, {
+      onSuccess: (data) => {
+        dispatch({
+          type: "SET_FEEDBACKMSG",
+          value: "Question submitted successfully!",
+        });
+        dispatch({ type: "SET_SHOW_CONFIRM", value: false });
+        dispatch({ type: "RESET" });
+        onClose();
+        navigate("/questions");
+      },
+      onError: (error) => {
+        dispatch({
+          type: "SET_FEEDBACKMSG",
+          value:
+            error?.response?.data?.message ||
+            "Failed to submit question. Please try again.",
+        });
+        dispatch({ type: "SET_SHOW_CONFIRM", value: false });
+      },
+    });
   };
 
   // Handle actual image upload
@@ -120,20 +156,6 @@ const AskQuestionModal = ({ professional, onClose }) => {
   // Handler for images selected in modal
   const handleSelectImages = (selectedImages) => {
     dispatch({ type: "SET_IMAGES", value: selectedImages });
-  };
-
-  // Simulate submit
-  const handleSubmit = () => {
-    if (!state.agreed) return;
-    const formData = new FormData();
-    formData.append("professionalId", professional._id);
-    formData.append("description", state.description);
-    formData.append("deliveryTime", state.deliveryTime);
-    formData.append("budget", state.budget);
-    state.images.forEach((img) => formData.append("images", img));
-    // Example: fetch('/api/ask', { method: 'POST', body: formData });
-    onClose();
-    dispatch({ type: "RESET" });
   };
 
   // Budget options for dropdown
@@ -173,9 +195,9 @@ const AskQuestionModal = ({ professional, onClose }) => {
             <span className="font-semibold text-base pl-2">
               {professional.firstName} {professional.lastName}
             </span>
-            {professional.verified?<span className="text-xs text-green-600 flex items-center gap-1">
-              {/* Verified icon */}
-              
+            {professional.verified ? (
+              <span className="text-xs text-green-600 flex items-center gap-1">
+                {/* Verified icon */}
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="16"
@@ -197,15 +219,18 @@ const AskQuestionModal = ({ professional, onClose }) => {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   />
-                </svg>:
-            </span>:<></>}
-            
+                </svg>
+              </span>
+            ) : (
+              <></>
+            )}
+
             <span className="text-xs text-blue-800  cursor-pointer pl-2">
               See Profile
             </span>
           </div>
           <span className="text-xs text-gray-500 pl-2">
-            {professional.tags.slice(0,3).join(",")}
+            {professional.tags.slice(0, 3).join(",")}
           </span>
         </div>
       </div>
@@ -229,6 +254,11 @@ const AskQuestionModal = ({ professional, onClose }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
       <div className="bg-white rounded-xl shadow-lg w-[90%] md:w-full max-w-2xl p-0 relative">
+        {state.feedbackMsg && (
+          <div className="p-3 text-center text-sm text-blue-700 bg-blue-50 rounded">
+            {state.feedbackMsg}
+          </div>
+        )}
         <button
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-700"
           onClick={handleClose}
@@ -414,7 +444,7 @@ const AskQuestionModal = ({ professional, onClose }) => {
                 <div className="flex items-center justify-end gap-2 ">
                   <select
                     className="border rounded px-2 py-1"
-                    value={state.budget || professional.priceRangeLow}
+                    value={professional.priceRangeLow}
                     onChange={(e) =>
                       dispatch({ type: "SET_BUDGET", value: e.target.value })
                     }
@@ -522,6 +552,7 @@ const AskQuestionModal = ({ professional, onClose }) => {
         onConfirm={handleConfirm}
         agreed={state.agreed}
         setAgreed={(v) => dispatch({ type: "SET_AGREED", value: v })}
+        isLoading={createQuestion.isPending}
       />
       <DiscardModal
         open={state.showDiscard}
