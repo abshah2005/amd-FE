@@ -102,24 +102,24 @@ const QuestionThreadModal = ({
       <div className="overflow-x-auto">
         <table className="m-auto border-collapse ">
           <thead>
-            <tr className=" text-left text-xs text-gray-500">
-              <th className="px-3 py-2">Submitted Date</th>
-              <th className="px-3 py-2">Asker</th>
-              <th className="px-3 py-2">Proposed budget</th>
-              <th className="px-3 py-2">Status</th>
-              <th className="px-3 py-2">Delivery Time</th>
-              <th className="px-3 py-2">Fast Delivery</th>
-              <th className="px-3 py-2">Payment Status</th>
-              <th className="px-3 py-2 text-right">More</th>
+            <tr className=" text-left text-xs text-gray-500 ">
+              <th className="px-3 py-2 font-bold">Submitted Date</th>
+              <th className="px-3 py-2  font-bold">Asker</th>
+              <th className="px-3 py-2 font-bold">Proposed budget</th>
+              <th className="px-3 py-2 font-bold">Status</th>
+              <th className="px-3 py-2 font-bold">Delivery Time</th>
+              <th className="px-3 py-2 font-bold">Fast Delivery</th>
+              <th className="px-3 py-2 font-bold">Payment Status</th>
+              <th className="px-3 py-2 font-bold text-right">More</th>
             </tr>
           </thead>
           <tbody>
             <tr className="text-sm">
-              <td className="px-4 py-2">{question.submittedDate}</td>
-              <td className="px-4 py-2">{question.asker}</td>
-              <td className="px-4 py-2">${question.budget}</td>
-              <td className="px-4 py-2">
-                <div className="flex items-center text-yellow-500">
+              <td className="px-3 py-2 font-bold">{question.submittedDate}</td>
+              <td className="px-3 py-2 font-bold">{question.asker}</td>
+              <td className="px-3 py-2 font-bold">${question.budget}</td>
+              <td className="px-2 py-2">
+                <div className="flex items-center text-yellow-500 ">
                   Awaiting Response
                   <svg
                     className="ml-1 w-4 h-4"
@@ -134,8 +134,8 @@ const QuestionThreadModal = ({
                   </svg>
                 </div>
               </td>
-              <td className="px-4 py-2">
-                <div className="flex items-center">
+              <td className="px-3 py-2">
+                <div className="flex items-center font-bold">
                   {question.deliveryTime}
                   <svg
                     className="ml-1 w-4 h-4"
@@ -150,8 +150,8 @@ const QuestionThreadModal = ({
                   </svg>
                 </div>
               </td>
-              <td className="px-4 py-2">
-                <div className="flex items-center">
+              <td className="px-3 py-2">
+                <div className="flex items-center font-bold font-bold">
                   {question.fastDelivery}
                   <svg
                     className="ml-1 w-4 h-4"
@@ -166,7 +166,7 @@ const QuestionThreadModal = ({
                   </svg>
                 </div>
               </td>
-              <td className="px-4 py-2">N/A</td>
+              <td className="px-4 py-2 font-bold">N/A</td>
               <td className="px-4 py-2 text-right">
                 <svg
                   className="inline-block w-5 h-5"
@@ -256,7 +256,7 @@ const QuestionThreadModal = ({
           <PricingInput
             initialMode="normal"
             price={question.budget} // Pass the budget or price
-            status={"approved"} // Editable only if status is "approved"
+            status={"approved"} 
             isPaid={status === "unpaid"} // Disable interactions if the question is paid
             onPriceChange={(newPrice) =>
               console.log("Price updated:", newPrice)
@@ -282,8 +282,9 @@ const QuestionThreadModal = ({
 
             <LexicalEditor
               value="hi lets this this questions thing"
-              initialValue="hi lets this this questions thing"
-              initialEditorState={editorStateString}
+            //   initialEditorState={editorStateString}
+              initialEditorState={null}
+              showDescription={false}
               onChange={() => {}}
               placeholder=""
               height={50}
