@@ -1,7 +1,6 @@
 import React, { useReducer, useMemo, useEffect } from "react";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { FaStar } from "react-icons/fa";
-import { MdVerified } from "react-icons/md";
 import find from "../assets/find.svg";
 import DropdownSelector from "./DropdownSelector";
 import CategoriesSlider from "./Categories";
@@ -287,11 +286,10 @@ const Professionals = () => {
               {`${prof.firstName || ""} ${prof.lastName || ""}`.trim()}
             </span>
             {prof.verified && (
-              <MdVerified
-                className="text-green-500"
-                title="Verified"
-                size={18}
-              />
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+  <path d="M20 13C20 18 16.5 20.5 12.34 21.95C12.1222 22.0238 11.8855 22.0202 11.67 21.94C7.5 20.5 4 18 4 13V5.99996C4 5.73474 4.10536 5.48039 4.29289 5.29285C4.48043 5.10532 4.73478 4.99996 5 4.99996C7 4.99996 9.5 3.79996 11.24 2.27996C11.4519 2.09896 11.7214 1.99951 12 1.99951C12.2786 1.99951 12.5481 2.09896 12.76 2.27996C14.51 3.80996 17 4.99996 19 4.99996C19.2652 4.99996 19.5196 5.10532 19.7071 5.29285C19.8946 5.48039 20 5.73474 20 5.99996V13Z" stroke="#36B37E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M9 12L11 14L15 10" stroke="#36B37E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
             )}
           </div>
           <div className="text-sm text-gray-600 mb-1 flex flex-wrap gap-2">
@@ -383,8 +381,8 @@ const Professionals = () => {
             {prof.verified && (
               <svg
                 /* verified icon */ xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
+                width="14"
+                height="14"
                 viewBox="0 0 16 16"
                 fill="none"
               >
@@ -510,7 +508,7 @@ const Professionals = () => {
             <div className="relative">
               <div className="flex items-center border rounded-full px-4 py-2 bg-white w-full">
                 <span className="mr-2 text-gray-400">
-                  <img src={find} alt="" />
+                  <img loading="lazy" src={find} alt="" />
                 </span>
                 <div className="flex gap-2 flex-wrap">
                   {state.tags.map((tag) => (
