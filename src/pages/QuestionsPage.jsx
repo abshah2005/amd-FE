@@ -29,7 +29,7 @@ const mappedAnswers = (answers) =>
     price: a.price || '—',
     status: a.status || 'Pending',
     // deliveryTime: new Date(a.answerBy).toISOString().slice(0, 10),
-    deliveryTime:q.deliveryType
+    deliveryTime:a.deliveryType
 
   }));
 
