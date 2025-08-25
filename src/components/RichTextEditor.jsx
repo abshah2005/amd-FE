@@ -390,23 +390,13 @@ function EditorStatePlugin({ initialEditorState }) {
   useEffect(() => {
     if (initialEditorState && !hasSetInitialState) {
       try {
-        // If initialEditorState is a string, parse it
-        const editorStateObj = typeof initialEditorState === 'string' 
-          ? JSON.parse(initialEditorState) 
-          : initialEditorState;
-          
-        // Extract the text content
-        const textContent = editorStateObj.root?.children?.[0]?.children?.[0]?.text || "";
-        
-        // Update the editor with the text
-        editor.update(() => {
-          const root = $getRoot();
-          root.clear();
-          const paragraph = $createParagraphNode();
-          paragraph.append($createTextNode(textContent));
-          root.append(paragraph);
-        });
-        
+        const editorState =
+          typeof initialEditorState === "string"
+            ? editor.parseEditorState(initialEditorState) // ✅ Convert JSON/string to Lexical EditorState
+            : initialEditorState;
+
+        editor.setEditorState(editorState); // ✅ Restore full state (formatting + structure)
+
         setHasSetInitialState(true);
       } catch (error) {
         console.error("Failed to set initial editor state:", error);
@@ -416,6 +406,7 @@ function EditorStatePlugin({ initialEditorState }) {
 
   return null;
 }
+
 
 // Main Editor Component - ensure proper initial value handling
 export default function LexicalEditor({

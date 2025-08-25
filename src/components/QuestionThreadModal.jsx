@@ -283,7 +283,7 @@ const QuestionThreadModal = ({
             <LexicalEditor
               value="hi lets this this questions thing"
               initialValue="hi lets this this questions thing"
-              initialEditorState={JSON.parse(editorStateString)}
+              initialEditorState={editorStateString}
               onChange={() => {}}
               placeholder=""
               height={50}
