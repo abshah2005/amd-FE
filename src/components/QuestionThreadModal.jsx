@@ -1,51 +1,26 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import LexicalEditor from "./RichTextEditor";
 import PricingInput from "./PricingInput";
+import { useEffect } from "react";
 
 const QuestionThreadModal = ({
   open,
   onClose,
-  role, // "asker" or "professional"
-  status, // "submitted", "approved", etc.
-  question, // { id, submittedDate, asker, professional, budget, deliveryTime, fastDelivery, images, description, responses }
+  role,
+  status,
+  question,
 }) => {
   const [showMessage, setShowMessage] = useState(true);
+  const [editorContent, setEditorContent] = useState(null);
   const [answer, setAnswer] = useState(null);
-  const [editorValue, setEditorValue] = useState("");
-  const [editorState, setEditorState] = useState(null);
-  const editorStateString = `{
-  "root": {
-    "children": [
-      {
-        "children": [
-          {
-            "detail": 0,
-            "format": 1,
-            "mode": "normal",
-            "style": "",
-            "text": "hi lets this this questions thing",
-            "type": "text",
-            "version": 1
-          }
-        ],
-        "direction": "ltr",
-        "format": "",
-        "indent": 0,
-        "type": "paragraph",
-        "version": 1,
-        "textFormat": 1,
-        "textStyle": ""
-      }
-    ],
-    "direction": "ltr",
-    "format": "",
-    "indent": 0,
-    "type": "root",
-    "version": 1,
-    "textFormat": 1
-  }
-}`;
+  const editorContentRef = useRef({
+    html: null,
+    plainText: null
+  }); // Modified to store both formats
+  
   if (!open) return null;
+
+ 
 
   // Helper to render images from src links
   const renderImages = (images) => (
@@ -306,38 +281,47 @@ const QuestionThreadModal = ({
         {/* Response area */}
         <div className="mt-8">
           <h2 className="font-semibold text-lg mb-3">Answer</h2>
-          <div className="  rounded-lg">
-          
+          <div className="rounded-lg">
             <LexicalEditor
-          value={null}
-          initialEditorState={null}
-          onChange={() => {}}
-          placeholder=""
-          height={50}
-          hideSubmitButton={true}
-          autoFocus={false}
-          readOnly={false}
-        />
+              value={""}
+              initialEditorState={null}
+              onChange={(editorData) => {
+                
+                editorContentRef.current = {
+                  html: editorData.html,
+                  plainText: editorData.plainText
+                };
+              }}
+              placeholder="Type your answer here..."
+              height={150}
+              hideSubmitButton={true}
+              autoFocus={false}
+              readOnly={false}
+            />
             <div className="flex justify-end mt-4">
               <button
                 className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                onClick={() => setAnswer(editorValue)}
-                disabled={!editorValue}
+                onClick={() => { 
+                  // Use both formats from the ref
+                  setAnswer(editorContentRef.current.html);
+                  console.log("Answer submitted (HTML):", editorContentRef.current.html);
+                  console.log("Answer submitted (Plain text):", editorContentRef.current.plainText);
+                  
+                  // You can now use the plainText for other purposes
+                  // For example, send both formats to your API
+                  // submitAnswer({
+                  //   html: editorContentRef.current.html,
+                  //   text: editorContentRef.current.plainText
+                  // });
+                }}
               >
                 Send
               </button>
             </div>
           </div>
           {answer && (
-            <div className="mt-6">
-              <LexicalEditor
-                initialEditorState={answer}
-                readOnly={true}
-                disabled={true}
-                showDescription={false}
-                hideSubmitButton={true}
-                height={120}
-              />
+            <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+              <div className="text-sm text-gray-700" dangerouslySetInnerHTML={{ __html: answer }}></div>
             </div>
           )}
         </div>
@@ -548,17 +532,17 @@ const QuestionThreadModal = ({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 w-full">
-      <div className="bg-white rounded-xl shadow-lg w-full max-w-4xl p-0 relative overflow-y-auto max-h-[95vh]" onClick={e => e.stopPropagation()}>
-        <button
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-700"
-          onClick={onClose}
-        >
-          &times;
-        </button>
-        {content}
-      </div>
-    </div>
+    <div
+  className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 w-full"
+  onClick={onClose}  
+>
+  <div
+    className="bg-white rounded-xl shadow-lg w-full max-w-4xl p-0 relative overflow-y-auto max-h-[95vh]"
+    onClick={(e) => e.stopPropagation()} 
+  >
+    {content}
+  </div>
+</div>
   );
 };
 
