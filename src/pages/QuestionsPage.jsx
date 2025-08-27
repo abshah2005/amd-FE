@@ -145,9 +145,12 @@ const QuestionsPage = () => {
               Failed to load {isProfessional ? "answers" : "questions"}
             </div>
           ) : isProfessional ? (
-            <AnswersTable answers={filteredItems} setModalOpen={setModalOpen}  />
+            <AnswersTable answers={filteredItems} setModalOpen={setModalOpen} />
           ) : (
-            <QuestionsTable questions={filteredItems} setModalOpen={setModalOpen} />
+            <QuestionsTable
+              questions={filteredItems}
+              setModalOpen={setModalOpen}
+            />
           )}
         </div>
 
@@ -162,8 +165,15 @@ const QuestionsPage = () => {
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         role="professional"
-        status="submitted"
+        status="payment_awaiting"
+        payment={{ ispaid: true, amount: 20 }}
         question={{
+          // feedback: {
+          //   // rating: 2,
+          //   // text: "The answer is insightful and well-explained. It gave me the clarity I needed to move forward. A bit more detail on the legal implications would've made it perfect. Still, really helpful overall!",
+          //   // date: "2025/02/01",
+          //   // user: "John Doe",
+          // },
           id: "1a",
           submittedDate: "YYYY/MM/DD",
           asker: "John Doe",
@@ -174,6 +184,80 @@ const QuestionsPage = () => {
             "https://yourdomain.com/image1.jpg",
             "https://yourdomain.com/image2.jpg",
           ],
+          timeline: [
+            {
+              at: "2025-08-24T09:42:46.308Z",
+              status: "submitted",
+              by: "68a817210c101a6b024c846a",
+              note: "Your question has been received by the professional. You'll receive a response or custom quote soon.",
+              _id: "68aade960e21f50832c1bcb9",
+            },
+            {
+              at: "2025-08-24T09:45:07.524Z",
+              status: "approved_and_quoted",
+              by: "68a819900c101a6b024c849e",
+              note: "The price for the question is set to $20 from the professional.",
+              _id: "68aadf23b505b24bce94bf94",
+            },
+            {
+              at: "2025-08-24T09:49:05.830Z",
+              status: "answered",
+              by: "68a819900c101a6b024c849e",
+              note: "Your question has been answered. You can ask a follow up question.",
+              _id: "68aae011b25b1dce0678fd35",
+            },
+            {
+              at: "2025-08-24T09:50:06.542Z",
+              status: "in_thread",
+              by: "68a817210c101a6b024c846a",
+              note: "Follow-up question asked.",
+              _id: "68aae04eb25b1dce0678fd3c",
+            },
+            {
+              at: "2025-08-24T09:52:39.545Z",
+              status: "followup_answered",
+              by: "68a819900c101a6b024c849e",
+              note: "Follow-up question answered.",
+              _id: "68aae0e7b25b1dce0678fd51",
+            },
+            {
+              at: "2025-08-26T09:43:59.442Z",
+              status: "auto_closed_after_followup_window",
+              by: "system",
+              note: "Thread closed and payout sent.",
+              _id: "68ad81dfe4fdfd8b0e3d05c7",
+            },
+          ],
+          
+          thread: {
+            threadClosedEarlier: false,
+            messages: [
+              {
+                sender: "68a819900c101a6b024c849e",
+                role: "professional",
+                body: "To optimize your website for SEO, start with keyword research, improve site speed, and ensure mobile responsiveness.",
+                attachments: [],
+                isFollowUp: false,
+                createdAt: "2025-08-24T09:49:05.829Z",
+              },
+              {
+                sender: "68a817210c101a6b024c846a",
+                role: "asker",
+                body: "Can you recommend any specific tools for keyword research?",
+                attachments: [],
+                isFollowUp: true,
+                createdAt: "2025-08-24T09:50:06.541Z",
+              },
+              {
+                sender: "68a819900c101a6b024c849e",
+                role: "professional",
+                body: "You can use tools like SEMrush, Ahrefs, or Google Keyword Planner for keyword research.",
+                attachments: [],
+                isFollowUp: true,
+                createdAt: "2025-08-24T09:52:39.545Z",
+              },
+            ],
+          },
           description:
             "What legal steps should I take before raising a seed round as a first-time founder?",
         }}

@@ -20,6 +20,7 @@ import { useAuth } from "./contextProvider/AuthContextProvider";
 import DashboardPage from "./pages/DashboardPage";
 import AppSkeleton from "./pages/AppSkeleton";
 import QuestionsPage from "./pages/QuestionsPage";
+import TestPayQuestion from "./pages/TestPayQuestion";
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -127,6 +128,7 @@ function App() {
         <Route path="/waiting" element={<WaitingScreen />} />
         <Route path="/signupfi" element={<SignupFi />} />
         <Route path="/editor" element={<RichEditor />} />
+        <Route path="/stripe" element={<TestPayQuestion />} />
         <Route path="/auth/linkedin/callback" element={<LinkedInCallback />} />
         <Route path="/resetSuccess" element={<PasswordResetSuccess />} />
       </Routes>

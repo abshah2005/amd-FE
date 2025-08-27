@@ -10,6 +10,9 @@ const QuestionThreadModal = ({
   question, // { id, submittedDate, asker, professional, budget, deliveryTime, fastDelivery, images, description, responses }
 }) => {
   const [showMessage, setShowMessage] = useState(true);
+  const [answer, setAnswer] = useState(null);
+  const [editorValue, setEditorValue] = useState("");
+  const [editorState, setEditorState] = useState(null);
   const editorStateString = `{
   "root": {
     "children": [
@@ -66,6 +69,41 @@ const QuestionThreadModal = ({
     </div>
   );
 
+  // Helper to combine and sort timeline and thread messages
+  const getActivityFeed = () => {
+    // Timeline events
+    const timelineFeed = (question.timeline || []).map((event) => ({
+      type: "timeline",
+      at: event.at,
+      status: event.status,
+      note: event.note,
+      by: event.by,
+      _id: event._id,
+    }));
+
+    // Thread messages
+    const threadFeed = (question.thread?.messages || []).map((msg, idx) => ({
+      type: "thread",
+      at: msg.createdAt,
+      role: msg.role,
+      body: msg.body,
+      sender: msg.role === "asker" ? question.asker : "Professional",
+      isFollowUp: msg.isFollowUp,
+      _id: msg._id || idx,
+    }));
+
+    // Sort timeline and thread separately (latest first)
+    const sortedTimeline = [...timelineFeed].sort(
+      (a, b) => new Date(b.at) - new Date(a.at)
+    );
+    const sortedThread = [...threadFeed].sort(
+      (a, b) => new Date(b.at) - new Date(a.at)
+    );
+
+    // Return timeline first, then thread
+    return [...sortedTimeline, ...sortedThread];
+  };
+
   // UI for professional viewing a submitted question
   const ProfessionalSubmittedView = () => (
     <div
@@ -75,28 +113,27 @@ const QuestionThreadModal = ({
       {/* Header with question number and close button */}
       <div className="flex justify-between items-center p-4 border-b">
         <span className="font-semibold text-lg">Qno. {question.id}</span>
-        {/* <button className="text-gray-500" onClick={onClose}>
-          X
-        </button> */}
       </div>
 
       {/* Instruction banner */}
-      {showMessage && (
-        <div className="w-full bg-gray-200">
-          <div className="bg-gray-200 border-l-4 w-[98%] border-black p-3 flex justify-between items-center m-auto">
-            <p className="text-sm text-gray-700">
-              To quote a price, first change your status to 'Approved'. Then
-              select your delivery time and enter your quote.
-            </p>
-            <button
-              className="text-blue-600 text-sm"
-              onClick={() => setShowMessage(false)} // Hide the message on click
-            >
-              dismiss
-            </button>
+      {question.status === "submitted" &&
+        status !== "approved" &&
+        showMessage && (
+          <div className="w-full bg-gray-200">
+            <div className="bg-gray-200 border-l-4 w-[98%] border-black p-3 flex justify-between items-center m-auto">
+              <p className="text-sm text-gray-700">
+                To quote a price, first change your status to 'Approved'. Then
+                select your delivery time and enter your quote.
+              </p>
+              <button
+                className="text-blue-600 text-sm"
+                onClick={() => setShowMessage(false)}
+              >
+                dismiss
+              </button>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
       {/* Question details table */}
       <div className="overflow-x-auto">
@@ -120,7 +157,7 @@ const QuestionThreadModal = ({
               <td className="px-3 py-2 font-bold">${question.budget}</td>
               <td className="px-2 py-2">
                 <div className="flex items-center text-yellow-500 ">
-                  Awaiting Response
+                  {status}
                   <svg
                     className="ml-1 w-4 h-4"
                     viewBox="0 0 20 20"
@@ -255,13 +292,14 @@ const QuestionThreadModal = ({
 
           <PricingInput
             initialMode="normal"
-            price={question.budget} // Pass the budget or price
-            status={"approved"} 
-            isPaid={status === "unpaid"} // Disable interactions if the question is paid
+            price={status === "quoted" ? 30 : question.budget}
+            status={status}
+            role={role}
+            priceRange="$25-$35"
             onPriceChange={(newPrice) =>
               console.log("Price updated:", newPrice)
-            } // Handle price changes
-            onDone={() => console.log("Done clicked")} // Handle "Done" button click
+            }
+            onDone={() => console.log("Done clicked")}
           />
         </div>
 
@@ -269,37 +307,112 @@ const QuestionThreadModal = ({
         <div className="mt-8">
           <h2 className="font-semibold text-lg mb-3">Answer</h2>
           <div className="  rounded-lg">
-            {/* <LexicalEditor
-              showDescription={false}
-              value=""
-              initialEditorState={null}
-              onChange={() => {}}
-              placeholder="Type your answer…"
-              height={50}
-              hideSubmitButton={true}
-              autoFocus={false}
-            /> */}
-
+          
             <LexicalEditor
-              value="hi lets this this questions thing"
-            //   initialEditorState={editorStateString}
-              initialEditorState={null}
-              showDescription={false}
-              onChange={() => {}}
-              placeholder=""
-              height={50}
-              hideSubmitButton={true}
-              autoFocus={false}
-              readOnly={true}
-              disabled={true}
-            />
+          value={null}
+          initialEditorState={null}
+          onChange={() => {}}
+          placeholder=""
+          height={50}
+          hideSubmitButton={true}
+          autoFocus={false}
+          readOnly={false}
+        />
             <div className="flex justify-end mt-4">
-              <button className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+              <button
+                className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                onClick={() => setAnswer(editorValue)}
+                disabled={!editorValue}
+              >
                 Send
               </button>
             </div>
           </div>
+          {answer && (
+            <div className="mt-6">
+              <LexicalEditor
+                initialEditorState={answer}
+                readOnly={true}
+                disabled={true}
+                showDescription={false}
+                hideSubmitButton={true}
+                height={120}
+              />
+            </div>
+          )}
         </div>
+        <h2 className="font-semibold text-lg mb-3">Activity</h2>
+        {question.feedback && (
+          <div className="w-full flex flex-col items-center mb-6">
+            <div className="bg-white rounded-lg  p-3 w-full max-w-xl mx-auto">
+              <div className="flex justify-center items-center mb-2 text-center gap-4">
+                <span className="font-semibold text-gray-700">
+                  {question.feedback.user}
+                </span>
+                <span className="text-xs text-gray-400">
+                  {question.feedback.date}
+                </span>
+              </div>
+              <div className="flex items-center justify-center mb-2">
+                {/* Star rating */}
+                {Array.from({ length: 5 }).map((_, i) => {
+                  const full = i + 1 <= Math.floor(question.feedback.rating);
+                  const half = !full && i + 0.5 <= question.feedback.rating;
+                  return (
+                    <svg
+                      key={i}
+                      className={`w-5 h-5 ${
+                        full
+                          ? "text-yellow-400"
+                          : half
+                          ? "text-yellow-400"
+                          : "text-gray-300"
+                      }`}
+                      fill={
+                        full
+                          ? "currentColor"
+                          : half
+                          ? "url(#half)"
+                          : "currentColor"
+                      }
+                      viewBox="0 0 20 20"
+                    >
+                      {half ? (
+                        <>
+                          <defs>
+                            <linearGradient id="half">
+                              <stop offset="50%" stopColor="#FACC15" />
+                              <stop offset="50%" stopColor="#D1D5DB" />
+                            </linearGradient>
+                          </defs>
+                          <path
+                            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.966a1 1 0 00.95.69h4.175c.969 0 1.371 1.24.588 1.81l-3.38 2.455a1 1 0 00-.364 1.118l1.287 3.966c.3.921-.755 1.688-1.54 1.118l-3.38-2.455a1 1 0 00-1.175 0l-3.38 2.455c-.784.57-1.838-.197-1.539-1.118l1.287-3.966a1 1 0 00-.364-1.118L2.174 9.393c-.783-.57-.38-1.81.588-1.81h4.175a1 1 0 00.95-.69l1.286-3.966z"
+                            fill="url(#half)"
+                          />
+                        </>
+                      ) : (
+                        <path
+                          d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.966a1 1 0 00.95.69h4.175c.969 0 1.371 1.24.588 1.81l-3.38 2.455a1 1 0 00-.364 1.118l1.287 3.966c.3.921-.755 1.688-1.54 1.118l-3.38-2.455a1 1 0 00-1.175 0l-3.38 2.455c-.784.57-1.838-.197-1.539-1.118l1.287-3.966a1 1 0 00-.364-1.118L2.174 9.393c-.783-.57-.38-1.81.588-1.81h4.175a1 1 0 00.95-.69l1.286-3.966z"
+                          fill={full ? "#FACC15" : "#D1D5DB"}
+                        />
+                      )}
+                    </svg>
+                  );
+                })}
+              </div>
+              <div className="mb-2 text-gray-700 text-center text-sm">
+                {question.feedback.text}
+              </div>
+              <div className="flex items-center justify-center my-2 w-full">
+                <hr className="flex-grow border-gray-300" />
+                <span className="mx-2 text-xs text-gray-500 font-semibold">
+                  Thread Closed
+                </span>
+                <hr className="flex-grow border-gray-300" />
+              </div>
+            </div>
+          </div>
+        )}
         <div className="mt-4 flex justify-center">
           <button className="px-4 py-2 bg-gray-200 rounded-full text-sm">
             Close question thread
@@ -308,22 +421,77 @@ const QuestionThreadModal = ({
 
         {/* Activity section */}
         <div className="mt-8">
-          <h2 className="font-semibold text-lg mb-3">Activity</h2>
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <span className="text-sm">
-              Status: <span className="text-yellow-500">Awaiting Response</span>
-            </span>
-            <p className="text-sm mt-1">
-              Your question has been received by the professional. You'll
-              receive a response or custom quote soon.
-            </p>
+          {/* <h2 className="font-semibold text-lg mb-3">Activity</h2> */}
+          <div className="flex flex-col gap-3">
+            {getActivityFeed().map((item) => (
+              <div>
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-sm font-semibold text-gray-700">
+                    {item.type === "timeline" ? "AskMeDirect" : item.sender}
+                  </span>
+                  <span className="text-xs text-gray-400">
+                    {item.at ? new Date(item.at).toLocaleDateString() : ""}
+                  </span>
+                </div>
+
+                <div
+                  key={item._id}
+                  className="bg-gray-100 rounded-lg px-4 py-3"
+                >
+                  <div>
+                    {item.type === "timeline" ? (
+                      <>
+                        <span
+                          className={`block text-xs mb-1 ${
+                            item.status === "answered" || item.status === "paid"
+                              ? "text-blue-600"
+                              : item.status === "submitted"
+                              ? "text-yellow-600"
+                              : item.status === "approved_and_quoted"
+                              ? "text-green-600"
+                              : item.status === "payment_awaiting"
+                              ? "text-orange-500"
+                              : "text-gray-600"
+                          }`}
+                        >
+                          Status:{" "}
+                          {item.status === "submitted"
+                            ? "Awaiting Response"
+                            : item.status === "approved_and_quoted"
+                            ? "Approved"
+                            : item.status === "answered"
+                            ? "Completed"
+                            : item.status === "paid"
+                            ? "Completed"
+                            : item.status === "payment_awaiting"
+                            ? "Pending"
+                            : item.status}
+                        </span>
+                        <p className="text-sm text-gray-700">{item.note}</p>
+                      </>
+                    ) : (
+                      <>
+                        <span className="block text-xs mb-1 text-gray-600">
+                          Status:{" "}
+                          {item.isFollowUp
+                            ? "Follow up · Question asked"
+                            : item.role === "professional"
+                            ? "Completed"
+                            : "Question asked"}
+                        </span>
+                        <p className="text-sm text-gray-700">{item.body}</p>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
     </div>
   );
 
-  // UI for asker viewing a submitted question (example)
   const AskerSubmittedView = () => (
     <div className="p-8">
       <div className="flex items-center justify-between mb-2">
@@ -335,14 +503,14 @@ const QuestionThreadModal = ({
       </div>
       <div className="mb-4">
         <LexicalEditor
-          value={question.description}
+          value={null}
           initialEditorState={null}
           onChange={() => {}}
           placeholder=""
           height={50}
           hideSubmitButton={true}
           autoFocus={false}
-          readOnly={true}
+          readOnly={false}
         />
       </div>
       <div className="mb-4">
@@ -352,7 +520,7 @@ const QuestionThreadModal = ({
       <div className="mt-6">
         <span className="font-semibold text-base">Activity</span>
         <div className="mt-2 bg-gray-50 rounded p-3 text-sm text-gray-700">
-          Status: <span className="text-yellow-600">Awaiting Response</span>
+          Status: <span className="text-yellow-600">{status}</span>
           <br />
           You'll receive a response or custom quote soon.
         </div>
@@ -360,11 +528,12 @@ const QuestionThreadModal = ({
     </div>
   );
 
-  // Add more views for other status/role combinations as needed...
-
   // Main render logic
   let content;
-  if (role === "professional" && status === "submitted") {
+  // if (role === "professional" && status === "submitted") {
+  //   content = <ProfessionalSubmittedView />;
+  // }
+  if (role === "professional" || role === "user") {
     content = <ProfessionalSubmittedView />;
   } else if (role === "asker" && status === "submitted") {
     content = <AskerSubmittedView />;
@@ -380,7 +549,7 @@ const QuestionThreadModal = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 w-full">
-      <div className="bg-white rounded-xl shadow-lg w-full max-w-4xl p-0 relative overflow-y-auto max-h-[95vh]">
+      <div className="bg-white rounded-xl shadow-lg w-full max-w-4xl p-0 relative overflow-y-auto max-h-[95vh]" onClick={e => e.stopPropagation()}>
         <button
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-700"
           onClick={onClose}
