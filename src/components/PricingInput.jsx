@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import PaymentModal from "./PaymentModal";
 
 const PricingInput = ({
   initialMode = "normal",
@@ -6,12 +7,17 @@ const PricingInput = ({
   price,
   priceRange = "$25-$35",
   settledPrice,
+  onQuote,
+  answerBy,
+  onPayNow,
   role,
+  questionId,
   onPriceChange,
   onDone,
 }) => {
   const [mode, setMode] = useState(initialMode);
   const [inputPrice, setInputPrice] = useState("");
+  const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   // Determine UI state based on status and role
@@ -21,19 +27,19 @@ const PricingInput = ({
   let showInput = false;
   let showPriceRange = false;
 
-  if (status === "awaiting_response") {
+  if (status === "awaiting_response" || status === "submitted") {
     isEditable = false;
     isDisabled = true;
     buttonText = "Done";
     showInput = false;
     showPriceRange = true;
-  } else if (status === "approved") {
+  } else if (status === "approved" && role === "professional") {
     isEditable = true;
     isDisabled = false;
     buttonText = "Done";
     showInput = true;
     showPriceRange = false;
-  } else if (status === "payment_awaiting") {
+  } else if (status === "awaiting_payment" || status === "quoted") {
     if (role === "professional") {
       isEditable = false;
       isDisabled = true;
@@ -41,7 +47,7 @@ const PricingInput = ({
       showInput = false;
       showPriceRange = false;
     } else if (role === "asker") {
-      isEditable = true;
+      isEditable = false;
       isDisabled = false;
       buttonText = "Pay Now";
       showInput = false;
@@ -69,6 +75,15 @@ const PricingInput = ({
   const handleDoneClick = () => {
     setIsSubmitted(true);
     if (onDone) onDone();
+    if (
+      status === "approved" &&
+      role === "professional" &&
+      onQuote &&
+      inputPrice &&
+      answerBy
+    ) {
+      onQuote({ amount: inputPrice, answerBy });
+    }
   };
 
   return (
@@ -175,6 +190,21 @@ const PricingInput = ({
             ${price}
           </p>
         )}
+        {/* <button
+          className={`w-full py-2 mt-3 rounded-full font-medium ${
+            isDisabled || (showInput && !inputPrice)
+              ? "bg-gray-400 text-gray-600 cursor-not-allowed"
+              : "bg-blue-600 text-white hover:bg-blue-700"
+          }`}
+          disabled={isDisabled || (showInput && !inputPrice)}
+          onClick={
+    buttonText === "Pay Now" 
+      ? () => setIsPaymentOpen(true)
+      : handleDoneClick
+  }
+        >
+          {buttonText}
+        </button> */}
         <button
           className={`w-full py-2 mt-3 rounded-full font-medium ${
             isDisabled || (showInput && !inputPrice)
@@ -182,11 +212,21 @@ const PricingInput = ({
               : "bg-blue-600 text-white hover:bg-blue-700"
           }`}
           disabled={isDisabled || (showInput && !inputPrice)}
-          onClick={handleDoneClick}
+          onClick={() => {
+            console.log("Pay Now clicked", { isDisabled, buttonText });
+            if (buttonText === "Pay Now" && !isDisabled) setIsPaymentOpen(true);
+            else handleDoneClick();
+          }}
         >
           {buttonText}
         </button>
       </div>
+      <PaymentModal
+        isOpen={isPaymentOpen}
+        onRequestClose={() => setIsPaymentOpen(false)}
+        amount={price}
+        questionId={questionId}
+      />
     </div>
   );
 };

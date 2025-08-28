@@ -1,26 +1,164 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import LexicalEditor from "./RichTextEditor";
 import PricingInput from "./PricingInput";
-import { useEffect } from "react";
+import {
+  useGetQuestion,
+  useUpdateQuestionStatus,
+} from "../hooks/useQuestionsAndAnswers";
+import { useAuth } from "../contextProvider/AuthContextProvider";
+import FollowUpModal from "./FollowUpModal";
+import DateTimePicker from "./DateTimePicker";
+import {
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Button,
+} from "@mui/material"; // Import MUI components
+import dayjs from "dayjs"; // If not installed, use new Date().toISOString()
+import PaymentModal from "./PaymentModal";
 
-const QuestionThreadModal = ({
-  open,
-  onClose,
-  role,
-  status,
-  question,
-}) => {
+const QuestionThreadModal = ({ open, onClose, questionId }) => {
   const [showMessage, setShowMessage] = useState(true);
   const [editorContent, setEditorContent] = useState(null);
   const [answer, setAnswer] = useState(null);
+  const [quoteDate, setQuoteDate] = useState(null); // Date object
+  const [quoteTime, setQuoteTime] = useState(null); // String "HH:mm"
+  const [quoteAnswerBy, setQuoteAnswerBy] = useState(""); // ISO string
   const editorContentRef = useRef({
     html: null,
-    plainText: null
-  }); // Modified to store both formats
-  
+    plainText: null,
+  });
+
+  const [isPaymentOpen, setIsPaymentOpen] = useState(true);
+  const [paymentAmount, setPaymentAmount] = useState(null);
+
+  const [followUpOpen, setFollowUpOpen] = useState(false); // added state
+  const [datePickerOpen, setDatePickerOpen] = useState(false); // for testing DateTimePicker
+  const [confirmationOpen, setConfirmationOpen] = useState(false); // State for confirmation modal
+  const [actionType, setActionType] = useState(""); // State for dynamic action type
+
+  // Get current user from context
+  const { user } = useAuth();
+  console.log("Current question:", questionId);
+  //its coming here 68adfd138541677930e780d2 perfectly
+
+  // Fetch question data using the ID
+  const { data: questionData, isLoading, error } = useGetQuestion(questionId);
+  const updateQuestionStatus = useUpdateQuestionStatus(); // Hook for updating question status
+
+  // Determine role and status based on user and question data
+  const role = user?.activeRole;
+  const status = questionData?.status;
+
+  // Create a formatted question object from API data
+  const question = questionData
+    ? {
+        id: questionData._id,
+        submittedDate: new Date(questionData.createdAt).toLocaleDateString(),
+        payment: questionData.payment?.paid ? "Paid" : "Unpaid",
+        asker: questionData.asker?.firstName || "Unknown",
+        budget: questionData.price || questionData.proposedBudget || 0,
+        priceRangeLow: questionData.professional.priceRangeLow,
+        priceRangeHigh: questionData.professional.priceRangeHigh,
+        proposedBudget: questionData.proposedBudget || 0,
+        price: questionData.price,
+        deliveryTime: questionData.deliveryType === "fast" ? "Fast" : "Normal",
+        fastDelivery: questionData.deliveryType === "fast" ? "Fast" : "Normal",
+        images: questionData.attachments || [],
+        timeline: questionData.timeline || [],
+        thread: questionData.thread || { messages: [] },
+        description: questionData.body,
+        feedback: questionData.feedback,
+      }
+    : null;
+
+  // Combine date and time to ISO string
+  useEffect(() => {
+    if (quoteDate && quoteTime) {
+      const combined = dayjs(quoteDate)
+        .hour(Number(quoteTime.split(":")[0]))
+        .minute(Number(quoteTime.split(":")[1]))
+        .second(0)
+        .millisecond(0)
+        .utc()
+        .format(); // "2025-08-27T13:00:00.000Z"
+      setQuoteAnswerBy(combined);
+    }
+  }, [quoteDate, quoteTime]);
+
+  const handleAction = (action) => {
+    setActionType(action); // Set the action type dynamically
+    setConfirmationOpen(true); // Open the confirmation modal
+  };
+  const handlePayNow = () => {
+    setPaymentAmount(question.price); // or settledPrice, as needed
+    setIsPaymentOpen(true);
+  };
+
+  const confirmAction = () => {
+    updateQuestionStatus.mutate(
+      { id: questionId, action: actionType, payload: {} },
+      {
+        onSuccess: () => {
+          console.log(`${actionType} action completed successfully`);
+          setConfirmationOpen(false); // Close the modal on success
+        },
+        onError: (error) => {
+          console.error(`Failed to perform ${actionType} action:`, error);
+          setConfirmationOpen(false); // Close the modal on error
+        },
+      }
+    );
+  };
+
+  const handleQuote = ({ amount, answerBy }) => {
+    updateQuestionStatus.mutate(
+      {
+        id: questionId,
+        action: "quote",
+        payload: { amount, answerBy },
+      },
+      {
+        onSuccess: () => {
+          console.log("Quote submitted");
+        },
+        onError: (error) => {
+          console.error("Quote failed:", error);
+        },
+      }
+    );
+  };
+
   if (!open) return null;
 
- 
+  // Handle loading and error states
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 w-full">
+        <div className="bg-white rounded-xl shadow-lg p-8 relative">
+          <p className="text-lg">Loading question data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !question) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 w-full">
+        <div className="bg-white rounded-xl shadow-lg p-8 relative">
+          <p className="text-lg text-red-600">Failed to load question data.</p>
+          <button
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded"
+            onClick={onClose}
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   // Helper to render images from src links
   const renderImages = (images) => (
@@ -81,10 +219,7 @@ const QuestionThreadModal = ({
 
   // UI for professional viewing a submitted question
   const ProfessionalSubmittedView = () => (
-    <div
-      className="p-0 w-full
-    "
-    >
+    <div className="p-0 w-full">
       {/* Header with question number and close button */}
       <div className="flex justify-between items-center p-4 border-b">
         <span className="font-semibold text-lg">Qno. {question.id}</span>
@@ -109,6 +244,16 @@ const QuestionThreadModal = ({
             </div>
           </div>
         )}
+      {role === "professional" && status === "submitted" && (
+        <div className="mt-4 flex justify-center">
+          <button
+            className="px-4 py-2 bg-green-600 text-white rounded-full text-sm hover:bg-green-700"
+            onClick={() => handleAction("approve")} // Trigger the confirmation modal
+          >
+            Approve Question
+          </button>
+        </div>
+      )}
 
       {/* Question details table */}
       <div className="overflow-x-auto">
@@ -129,7 +274,9 @@ const QuestionThreadModal = ({
             <tr className="text-sm">
               <td className="px-3 py-2 font-bold">{question.submittedDate}</td>
               <td className="px-3 py-2 font-bold">{question.asker}</td>
-              <td className="px-3 py-2 font-bold">${question.budget}</td>
+              <td className="px-3 py-2 font-bold">
+                ${question.proposedBudget}
+              </td>
               <td className="px-2 py-2">
                 <div className="flex items-center text-yellow-500 ">
                   {status}
@@ -178,7 +325,7 @@ const QuestionThreadModal = ({
                   </svg>
                 </div>
               </td>
-              <td className="px-4 py-2 font-bold">N/A</td>
+              <td className="px-4 py-2 font-bold">{question.payment}</td>
               <td className="px-4 py-2 text-right">
                 <svg
                   className="inline-block w-5 h-5"
@@ -267,64 +414,72 @@ const QuestionThreadModal = ({
 
           <PricingInput
             initialMode="normal"
-            price={status === "quoted" ? 30 : question.budget}
+            price={status === "quoted" ? question.price : 30}
             status={status}
+            questionId={questionId}
             role={role}
-            priceRange="$25-$35"
+            priceRange={`$${question.priceRangeLow} - $${question.priceRangeHigh}`}
             onPriceChange={(newPrice) =>
               console.log("Price updated:", newPrice)
             }
             onDone={() => console.log("Done clicked")}
+            onPayNow={handlePayNow}
           />
+          
         </div>
 
         {/* Response area */}
-        <div className="mt-8">
-          <h2 className="font-semibold text-lg mb-3">Answer</h2>
-          <div className="rounded-lg">
-            <LexicalEditor
-              value={""}
-              initialEditorState={null}
-              onChange={(editorData) => {
-                
-                editorContentRef.current = {
-                  html: editorData.html,
-                  plainText: editorData.plainText
-                };
-              }}
-              placeholder="Type your answer here..."
-              height={150}
-              hideSubmitButton={true}
-              autoFocus={false}
-              readOnly={false}
-            />
-            <div className="flex justify-end mt-4">
-              <button
-                className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                onClick={() => { 
-                  // Use both formats from the ref
-                  setAnswer(editorContentRef.current.html);
-                  console.log("Answer submitted (HTML):", editorContentRef.current.html);
-                  console.log("Answer submitted (Plain text):", editorContentRef.current.plainText);
-                  
-                  // You can now use the plainText for other purposes
-                  // For example, send both formats to your API
-                  // submitAnswer({
-                  //   html: editorContentRef.current.html,
-                  //   text: editorContentRef.current.plainText
-                  // });
+
+        {user.activeRole === "professional" && (
+          <div className="mt-8">
+            <h2 className="font-semibold text-lg mb-3">Answer</h2>
+            {answer && (
+              <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                <div
+                  className="text-sm text-gray-700"
+                  dangerouslySetInnerHTML={{ __html: answer }}
+                ></div>
+              </div>
+            )}
+            <div className="rounded-lg">
+              <LexicalEditor
+                value={""}
+                initialEditorState={null}
+                onChange={(editorData) => {
+                  editorContentRef.current = {
+                    html: editorData.html,
+                    plainText: editorData.plainText,
+                  };
                 }}
-              >
-                Send
-              </button>
+                placeholder="Type your answer here..."
+                height={150}
+                hideSubmitButton={true}
+                autoFocus={false}
+                readOnly={false}
+              />
+              <div className="flex justify-end mt-4">
+                <button
+                  className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                  onClick={() => {
+                    // Use both formats from the ref
+                    setAnswer(editorContentRef.current.html);
+                    console.log(
+                      "Answer submitted (HTML):",
+                      editorContentRef.current.html
+                    );
+                    console.log(
+                      "Answer submitted (Plain text):",
+                      editorContentRef.current.plainText
+                    );
+                  }}
+                >
+                  Send
+                </button>
+              </div>
             </div>
           </div>
-          {answer && (
-            <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-              <div className="text-sm text-gray-700" dangerouslySetInnerHTML={{ __html: answer }}></div>
-            </div>
-          )}
-        </div>
+        )}
+        {/* </div> */}
         <h2 className="font-semibold text-lg mb-3">Activity</h2>
         {question.feedback && (
           <div className="w-full flex flex-col items-center mb-6">
@@ -397,11 +552,45 @@ const QuestionThreadModal = ({
             </div>
           </div>
         )}
-        <div className="mt-4 flex justify-center">
-          <button className="px-4 py-2 bg-gray-200 rounded-full text-sm">
-            Close question thread
-          </button>
-        </div>
+        {user.activeRole === "professional" ? (
+          <div className="mt-4 flex justify-center">
+            <button
+              className={`px-4 py-2 ${
+                question.status === "paid"
+                  ? " bg-blue-600 text-white"
+                  : "bg-gray-400 text-white"
+              } rounded-full text-sm`}
+              disabled={question.status !== "paid"}
+            >
+              Close question thread
+            </button>
+          </div>
+        ) : (
+          <div className="mt-4 flex justify-center">
+            {/* quoted will be removed soon  */}
+            {(() => {
+              const allowFollowUp = ["paid", "in_thread"].includes(
+                (question?.status || "").toLowerCase()
+              );
+              return (
+                <button
+                  className={`px-4 py-2 ${
+                    allowFollowUp
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-400 text-white"
+                  } rounded-full text-sm`}
+                  disabled={!allowFollowUp}
+                  onClick={() => {
+                    // open DateTimePicker for testing
+                    setDatePickerOpen(true);
+                  }}
+                >
+                  Ask Follow Up Question
+                </button>
+              );
+            })()}
+          </div>
+        )}
 
         {/* Activity section */}
         <div className="mt-8">
@@ -433,6 +622,8 @@ const QuestionThreadModal = ({
                               ? "text-yellow-600"
                               : item.status === "approved_and_quoted"
                               ? "text-green-600"
+                              : item.status === "approved"
+                              ? "text-green-600"
                               : item.status === "payment_awaiting"
                               ? "text-orange-500"
                               : "text-gray-600"
@@ -441,8 +632,10 @@ const QuestionThreadModal = ({
                           Status:{" "}
                           {item.status === "submitted"
                             ? "Awaiting Response"
-                            : item.status === "approved_and_quoted"
+                            : item.status === "approved"
                             ? "Approved"
+                            : item.status === "approved_and_quoted"
+                            ? "quoted"
                             : item.status === "answered"
                             ? "Completed"
                             : item.status === "paid"
@@ -476,51 +669,11 @@ const QuestionThreadModal = ({
     </div>
   );
 
-  const AskerSubmittedView = () => (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-2">
-        <span className="font-semibold text-lg">Qno. {question.id}</span>
-        <span className="text-xs text-gray-400">{question.submittedDate}</span>
-      </div>
-      <div className="mb-2 text-gray-700 text-sm bg-gray-50 p-2 rounded">
-        Your question has been submitted. Awaiting professional's response.
-      </div>
-      <div className="mb-4">
-        <LexicalEditor
-          value={null}
-          initialEditorState={null}
-          onChange={() => {}}
-          placeholder=""
-          height={50}
-          hideSubmitButton={true}
-          autoFocus={false}
-          readOnly={false}
-        />
-      </div>
-      <div className="mb-4">
-        <span className="font-medium text-gray-700">Attached Images</span>
-        {renderImages(question.images)}
-      </div>
-      <div className="mt-6">
-        <span className="font-semibold text-base">Activity</span>
-        <div className="mt-2 bg-gray-50 rounded p-3 text-sm text-gray-700">
-          Status: <span className="text-yellow-600">{status}</span>
-          <br />
-          You'll receive a response or custom quote soon.
-        </div>
-      </div>
-    </div>
-  );
-
   // Main render logic
-  let content;
-  // if (role === "professional" && status === "submitted") {
-  //   content = <ProfessionalSubmittedView />;
-  // }
-  if (role === "professional" || role === "user") {
+  let content = null;
+  // show the same detailed view for professional, user and asker so modal isn't empty
+  if (["professional", "user", "asker"].includes(role)) {
     content = <ProfessionalSubmittedView />;
-  } else if (role === "asker" && status === "submitted") {
-    content = <AskerSubmittedView />;
   } else {
     content = (
       <div className="p-8">
@@ -533,16 +686,116 @@ const QuestionThreadModal = ({
 
   return (
     <div
-  className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 w-full"
-  onClick={onClose}  
->
-  <div
-    className="bg-white rounded-xl shadow-lg w-full max-w-4xl p-0 relative overflow-y-auto max-h-[95vh]"
-    onClick={(e) => e.stopPropagation()} 
-  >
-    {content}
-  </div>
-</div>
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 w-full"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-xl shadow-lg w-full max-w-4xl p-0 relative overflow-y-auto max-h-[95vh]"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {content}
+      </div>
+
+      {/* Follow-up modal (separate component) */}
+      <FollowUpModal
+        open={followUpOpen}
+        onClose={() => setFollowUpOpen(false)}
+        questionId={question?.id}
+        onSend={({ questionId, body }) => {
+          // TODO: integrate API call here
+          console.log("Follow-up send:", questionId, body);
+          // FollowUpModal already calls onClose after send; keep any refresh logic here
+        }}
+      />
+      {/* DateTimePicker used for testing when clicking Ask Follow Up */}
+
+      <DateTimePicker
+        open={datePickerOpen}
+        onClose={() => setDatePickerOpen(false)}
+        onApply={({ date, ranges }) => {
+          console.log("DateTimePicker applied:", {
+            questionId: question?.id,
+            date,
+            ranges,
+          });
+          setDatePickerOpen(false);
+        }}
+      />
+
+      {/* Confirmation Modal */}
+      <Dialog
+        open={confirmationOpen}
+        onClose={() => setConfirmationOpen(false)}
+        PaperProps={{
+          sx: {
+            background: "rgba(255, 255, 255, 0.8)", // Slightly opaque background
+            backdropFilter: "blur(10px)", // Blur effect for glassmorphism
+            borderRadius: "12px", // Rounded corners
+            boxShadow: "0 4px 16px rgba(0, 0, 0, 0.2)", // Subtle shadow
+            padding: "16px", // Padding for content
+          },
+        }}
+      >
+        <DialogTitle
+          sx={{
+            fontWeight: "bold",
+            fontSize: "1.25rem",
+            color: "#333",
+            textAlign: "center", // Center-align title
+          }}
+        >
+          Confirm Action
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText
+            sx={{
+              color: "#555",
+              fontSize: "0.95rem",
+              textAlign: "center", // Center-align content
+              marginBottom: "16px", // Space below text
+            }}
+          >
+            Are you sure you want to <strong>{actionType}</strong> this
+            question?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions
+          sx={{
+            justifyContent: "center", // Center-align buttons
+            gap: "8px", // Space between buttons
+          }}
+        >
+          <Button
+            onClick={() => setConfirmationOpen(false)}
+            sx={{
+              color: "#fff",
+              backgroundColor: "#f44336",
+              "&:hover": { backgroundColor: "#d32f2f" },
+              borderRadius: "8px",
+              padding: "6px 16px",
+              fontWeight: "bold",
+              textTransform: "none", // Disable uppercase text
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={confirmAction}
+            sx={{
+              color: "#fff",
+              backgroundColor: "#4caf50",
+              "&:hover": { backgroundColor: "#388e3c" },
+              borderRadius: "8px",
+              padding: "6px 16px",
+              fontWeight: "bold",
+              textTransform: "none", // Disable uppercase text
+            }}
+          >
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </div>
   );
 };
 

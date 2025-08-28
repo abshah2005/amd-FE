@@ -102,11 +102,16 @@ const AskQuestionModal = ({ professional, onClose }) => {
   const handleConfirm = () => {
     if (!state.agreed) return;
 
+    const budgetValue =
+      state.budget !== "" && state.budget !== null && state.budget !== undefined
+        ? Number(state.budget)
+        : professional.priceRangeLow;
+
     const questionData = {
       professionalId: professional._id,
       description: state.description,
       deliveryTime: state.deliveryTime,
-      budget: state.budget || professional.priceRangeLow,
+      budget: budgetValue,
       images: state.images,
       editorState: state.editorState,
     };
@@ -247,8 +252,12 @@ const AskQuestionModal = ({ professional, onClose }) => {
   };
 
   useEffect(() => {
-    // Reset state whenever a new professional is passed in
+    // Reset state whenever a new professional is passed in and set default budget
     dispatch({ type: "RESET" });
+    dispatch({
+      type: "SET_BUDGET",
+      value: professional?.priceRangeLow ?? "",
+    });
   }, [professional]);
 
   return (
@@ -396,7 +405,10 @@ const AskQuestionModal = ({ professional, onClose }) => {
               <div className="min-w-[120px]">
                 <DropdownSelector
                   options={deliveryOptions.map((opt) => opt.label)}
-                  value={state.deliveryTime}
+                  value={
+                    deliveryOptions.find((opt) => opt.value === state.deliveryTime)
+                      ?.label || deliveryOptions[0].label
+                  }
                   onChange={(label) => {
                     const selected = deliveryOptions.find(
                       (opt) => opt.label === label
@@ -412,7 +424,7 @@ const AskQuestionModal = ({ professional, onClose }) => {
                 />
               </div>
             </div>
-            <div className="flex justify-end mt-8">
+            <div className="mb-4 flex justify-end mt-8">
               <button
                 className="bg-blue-600 text-white px-6 py-2 rounded-full font-semibold text-sm hover:bg-blue-700 transition"
                 onClick={() => dispatch({ type: "SET_STEP", value: 2 })}
@@ -444,9 +456,9 @@ const AskQuestionModal = ({ professional, onClose }) => {
                 <div className="flex items-center justify-end gap-2 ">
                   <select
                     className="border rounded px-2 py-1"
-                    value={professional.priceRangeLow}
+                    value={state.budget || professional.priceRangeLow}
                     onChange={(e) =>
-                      dispatch({ type: "SET_BUDGET", value: e.target.value })
+                      dispatch({ type: "SET_BUDGET", value: Number(e.target.value) })
                     }
                   >
                     {budgetOptions.map((price) => (
