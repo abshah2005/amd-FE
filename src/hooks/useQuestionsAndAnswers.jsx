@@ -55,6 +55,77 @@ export function useGetQuestion(id) {
   });
 }
 
+export function usePostAnswer() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ questionId, body }) => {
+      const endpoint = `${API_BASE_URL}/questions/${questionId}/answer`;
+
+      const { data } = await axios.post(
+        endpoint,
+        { body },
+        { headers: getAuthHeaders() }
+      );
+      return data;
+    },
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries(["question", variables.questionId]);
+    },
+    onError: (error) => {
+      console.error("Failed to post answer:", error);
+    },
+  });
+}
+
+export function usePostFollowUp() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ questionId, body }) => {
+      const endpoint = `${API_BASE_URL}/questions/${questionId}/followup`;
+
+      const { data } = await axios.post(
+        endpoint,
+        { body },
+        { headers: getAuthHeaders() }
+      );
+      return data;
+    },
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries(["question", variables.questionId]);
+    },
+    onError: (error) => {
+      console.error("Failed to post follow-up:", error);
+    },
+  });
+}
+
+export function useClose() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ questionId,body }) => {
+      const endpoint = `${API_BASE_URL}/questions/${questionId}/close`;
+
+      const { data } = await axios.post(
+        endpoint,
+        {body},
+        { headers: getAuthHeaders() }
+      );
+      return data;
+    },
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["questions"] });
+      queryClient.invalidateQueries({ queryKey: ["answers"] });
+      queryClient.invalidateQueries(["question", variables.questionId]);
+    },
+    onError: (error) => {
+      console.error("Failed to post follow-up:", error);
+    },
+  });
+}
+
 export function useUpdateQuestionStatus() {
   const queryClient = useQueryClient();
 

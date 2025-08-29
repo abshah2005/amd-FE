@@ -45,6 +45,7 @@ const QuestionsPage = () => {
     "quoted",
     "awaiting_response",
     "awaiting_payment",
+    "answered",
     "paid",
     "in_thread",
   ];
@@ -160,11 +161,6 @@ const QuestionsPage = () => {
           ) : (
             <QuestionsTable
               questions={filteredItems}
-              //               setModalOpen={(id) => {
-              //               handleOpenQuestion(id)
-              // console.log("Question ID passed to setModalOpen:", id);
-              //               }
-              //             }
               setModalOpen={(id) => handleOpenQuestion(id)}
             />
           )}

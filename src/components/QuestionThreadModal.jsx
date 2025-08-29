@@ -2,7 +2,9 @@ import React, { useState, useRef, useEffect } from "react";
 import LexicalEditor from "./RichTextEditor";
 import PricingInput from "./PricingInput";
 import {
+  useClose,
   useGetQuestion,
+  usePostFollowUp,
   useUpdateQuestionStatus,
 } from "../hooks/useQuestionsAndAnswers";
 import { useAuth } from "../contextProvider/AuthContextProvider";
@@ -18,14 +20,18 @@ import {
 } from "@mui/material"; // Import MUI components
 import dayjs from "dayjs"; // If not installed, use new Date().toISOString()
 import PaymentModal from "./PaymentModal";
+import { usePostAnswer } from "../hooks/useQuestionsAndAnswers";
+import ThreadClosureModal from "./ThreadClosureModal";
 
 const QuestionThreadModal = ({ open, onClose, questionId }) => {
   const [showMessage, setShowMessage] = useState(true);
+  const [threadClosureOpen, setThreadClosureOpen] = useState(false);
+  const [message, setMessage] = useState(""); // For final message input
   const [editorContent, setEditorContent] = useState(null);
   const [answer, setAnswer] = useState(null);
   const [quoteDate, setQuoteDate] = useState(null); // Date object
   const [quoteTime, setQuoteTime] = useState(null); // String "HH:mm"
-  const [quoteAnswerBy, setQuoteAnswerBy] = useState(""); // ISO string
+  const [quoteAnswerBy, setQuoteAnswerBy] = useState("");
   const editorContentRef = useRef({
     html: null,
     plainText: null,
@@ -46,8 +52,10 @@ const QuestionThreadModal = ({ open, onClose, questionId }) => {
 
   // Fetch question data using the ID
   const { data: questionData, isLoading, error } = useGetQuestion(questionId);
-  const updateQuestionStatus = useUpdateQuestionStatus(); // Hook for updating question status
-
+  const useCloseHook = useClose();
+  const updateQuestionStatus = useUpdateQuestionStatus();
+  const postFollowUp = usePostFollowUp();
+  const postAnswer = usePostAnswer();
   // Determine role and status based on user and question data
   const role = user?.activeRole;
   const status = questionData?.status;
@@ -112,6 +120,24 @@ const QuestionThreadModal = ({ open, onClose, questionId }) => {
       }
     );
   };
+
+  const handleThreadClosure = () => {
+    useCloseHook.mutate(
+      { questionId, body: message },
+      {
+        onSuccess: () => {
+          console.log("Thread closed successfully");
+          setThreadClosureOpen(false);
+          setMessage(""); // Reset message
+        },
+        onError: (error) => {
+          console.error("Failed to close thread:", error);
+        },
+      }
+    );
+  };
+
+  
 
   const handleQuote = ({ amount, answerBy }) => {
     updateQuestionStatus.mutate(
@@ -182,7 +208,6 @@ const QuestionThreadModal = ({ open, onClose, questionId }) => {
     </div>
   );
 
-  // Helper to combine and sort timeline and thread messages
   const getActivityFeed = () => {
     // Timeline events
     const timelineFeed = (question.timeline || []).map((event) => ({
@@ -206,15 +231,18 @@ const QuestionThreadModal = ({ open, onClose, questionId }) => {
     }));
 
     // Sort timeline and thread separately (latest first)
-    const sortedTimeline = [...timelineFeed].sort(
-      (a, b) => new Date(b.at) - new Date(a.at)
-    );
-    const sortedThread = [...threadFeed].sort(
-      (a, b) => new Date(b.at) - new Date(a.at)
-    );
+    // const sortedTimeline = [...timelineFeed].sort(
+    //   (a, b) => new Date(b.at) - new Date(a.at)
+    // );
+    // const sortedThread = [...threadFeed].sort(
+    //   (a, b) => new Date(b.at) - new Date(a.at)
+    // );
 
+    const combinedFeed = [...timelineFeed, ...threadFeed].sort(
+    (a, b) => new Date(b.at) - new Date(a.at)
+  );
     // Return timeline first, then thread
-    return [...sortedTimeline, ...sortedThread];
+    return combinedFeed;
   };
 
   // UI for professional viewing a submitted question
@@ -226,24 +254,22 @@ const QuestionThreadModal = ({ open, onClose, questionId }) => {
       </div>
 
       {/* Instruction banner */}
-      {question.status === "submitted" &&
-        status !== "approved" &&
-        showMessage && (
-          <div className="w-full bg-gray-200">
-            <div className="bg-gray-200 border-l-4 w-[98%] border-black p-3 flex justify-between items-center m-auto">
-              <p className="text-sm text-gray-700">
-                To quote a price, first change your status to 'Approved'. Then
-                select your delivery time and enter your quote.
-              </p>
-              <button
-                className="text-blue-600 text-sm"
-                onClick={() => setShowMessage(false)}
-              >
-                dismiss
-              </button>
-            </div>
+      {status === "submitted" && status !== "approved" && showMessage && (
+        <div className="w-full bg-gray-200">
+          <div className="bg-gray-200 border-l-4 w-[98%] border-black p-3 flex justify-between items-center m-auto">
+            <p className="text-sm text-gray-700">
+              To quote a price, first change your status to 'Approved'. Then
+              select your delivery time and enter your quote.
+            </p>
+            <button
+              className="text-blue-600 text-sm"
+              onClick={() => setShowMessage(false)}
+            >
+              dismiss
+            </button>
           </div>
-        )}
+        </div>
+      )}
       {role === "professional" && status === "submitted" && (
         <div className="mt-4 flex justify-center">
           <button
@@ -414,7 +440,7 @@ const QuestionThreadModal = ({ open, onClose, questionId }) => {
 
           <PricingInput
             initialMode="normal"
-            price={status === "quoted" ? question.price : 30}
+            price={question.price}
             status={status}
             questionId={questionId}
             role={role}
@@ -425,12 +451,11 @@ const QuestionThreadModal = ({ open, onClose, questionId }) => {
             onDone={() => console.log("Done clicked")}
             onPayNow={handlePayNow}
           />
-          
         </div>
 
         {/* Response area */}
 
-        {user.activeRole === "professional" && (
+        {["in_thread","paid","answered"].includes((status)) && user.activeRole === "professional" &&  (
           <div className="mt-8">
             <h2 className="font-semibold text-lg mb-3">Answer</h2>
             {answer && (
@@ -461,7 +486,6 @@ const QuestionThreadModal = ({ open, onClose, questionId }) => {
                 <button
                   className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
                   onClick={() => {
-                    // Use both formats from the ref
                     setAnswer(editorContentRef.current.html);
                     console.log(
                       "Answer submitted (HTML):",
@@ -471,6 +495,10 @@ const QuestionThreadModal = ({ open, onClose, questionId }) => {
                       "Answer submitted (Plain text):",
                       editorContentRef.current.plainText
                     );
+                    postAnswer.mutate({
+                      questionId: questionId,
+                      body: editorContentRef.current.html,
+                    });
                   }}
                 >
                   Send
@@ -481,7 +509,7 @@ const QuestionThreadModal = ({ open, onClose, questionId }) => {
         )}
         {/* </div> */}
         <h2 className="font-semibold text-lg mb-3">Activity</h2>
-        {question.feedback && (
+        { question.feedback && (
           <div className="w-full flex flex-col items-center mb-6">
             <div className="bg-white rounded-lg  p-3 w-full max-w-xl mx-auto">
               <div className="flex justify-center items-center mb-2 text-center gap-4">
@@ -542,25 +570,33 @@ const QuestionThreadModal = ({ open, onClose, questionId }) => {
               <div className="mb-2 text-gray-700 text-center text-sm">
                 {question.feedback.text}
               </div>
-              <div className="flex items-center justify-center my-2 w-full">
+              
+            </div>
+          </div>
+        )}
+        {
+          status==="closed" && (
+            <div className="flex items-center justify-center my-2 w-full">
                 <hr className="flex-grow border-gray-300" />
                 <span className="mx-2 text-xs text-gray-500 font-semibold">
                   Thread Closed
                 </span>
                 <hr className="flex-grow border-gray-300" />
               </div>
-            </div>
-          </div>
-        )}
+          )
+        }
         {user.activeRole === "professional" ? (
           <div className="mt-4 flex justify-center">
             <button
               className={`px-4 py-2 ${
-                question.status === "paid"
+                ["paid", "in_thread", "answered"].includes(status)
                   ? " bg-blue-600 text-white"
                   : "bg-gray-400 text-white"
               } rounded-full text-sm`}
-              disabled={question.status !== "paid"}
+              disabled={!["paid", "in_thread", "answered"].includes(status)}
+              onClick={() => {
+                setThreadClosureOpen(true);
+              }}
             >
               Close question thread
             </button>
@@ -569,8 +605,8 @@ const QuestionThreadModal = ({ open, onClose, questionId }) => {
           <div className="mt-4 flex justify-center">
             {/* quoted will be removed soon  */}
             {(() => {
-              const allowFollowUp = ["paid", "in_thread"].includes(
-                (question?.status || "").toLowerCase()
+              const allowFollowUp = ["paid", "in_thread", "answered"].includes(
+                status.toLowerCase()
               );
               return (
                 <button
@@ -582,7 +618,8 @@ const QuestionThreadModal = ({ open, onClose, questionId }) => {
                   disabled={!allowFollowUp}
                   onClick={() => {
                     // open DateTimePicker for testing
-                    setDatePickerOpen(true);
+                    // setDatePickerOpen(true);
+                    setFollowUpOpen(true);
                   }}
                 >
                   Ask Follow Up Question
@@ -656,7 +693,16 @@ const QuestionThreadModal = ({ open, onClose, questionId }) => {
                             ? "Completed"
                             : "Question asked"}
                         </span>
-                        <p className="text-sm text-gray-700">{item.body}</p>
+                        <p className="text-sm text-gray-700">
+                          {item.body.includes("<") &&
+                          item.body.includes(">") ? (
+                            <span
+                              dangerouslySetInnerHTML={{ __html: item.body }}
+                            ></span>
+                          ) : (
+                            item.body
+                          )}
+                        </p>
                       </>
                     )}
                   </div>
@@ -702,9 +748,17 @@ const QuestionThreadModal = ({ open, onClose, questionId }) => {
         onClose={() => setFollowUpOpen(false)}
         questionId={question?.id}
         onSend={({ questionId, body }) => {
-          // TODO: integrate API call here
-          console.log("Follow-up send:", questionId, body);
-          // FollowUpModal already calls onClose after send; keep any refresh logic here
+          postFollowUp.mutate(
+            { questionId, body },
+            {
+              onSuccess: () => {
+                console.log("Follow-up posted successfully");
+              },
+              onError: (error) => {
+                console.error("Failed to post follow-up:", error);
+              },
+            }
+          );
         }}
       />
       {/* DateTimePicker used for testing when clicking Ask Follow Up */}
@@ -720,6 +774,14 @@ const QuestionThreadModal = ({ open, onClose, questionId }) => {
           });
           setDatePickerOpen(false);
         }}
+      />
+
+      <ThreadClosureModal 
+      open={threadClosureOpen}
+      onClose={() => setThreadClosureOpen(false)}
+      message={setMessage}
+      loading={useCloseHook.isPending}
+      onConfirm={handleThreadClosure}
       />
 
       {/* Confirmation Modal */}

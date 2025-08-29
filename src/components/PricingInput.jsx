@@ -33,12 +33,21 @@ const PricingInput = ({
     buttonText = "Done";
     showInput = false;
     showPriceRange = true;
-  } else if (status === "approved" && role === "professional") {
-    isEditable = true;
-    isDisabled = false;
-    buttonText = "Done";
-    showInput = true;
-    showPriceRange = false;
+  } else if (status === "approved") {
+    if (role === "professional") {
+      isEditable = true;
+      isDisabled = false;
+      buttonText = "Done";
+      showInput = true;
+      showPriceRange = false;
+    } else {
+      isEditable = false;
+      isDisabled = true;
+      buttonText = "yet to be quoted";
+      showInput = false;
+      showPriceRange = true;
+
+    }
   } else if (status === "awaiting_payment" || status === "quoted") {
     if (role === "professional") {
       isEditable = false;
@@ -164,7 +173,8 @@ const PricingInput = ({
         </div>
       </div>
       {/* Price Input */}
-      <div className="text-center">
+      {
+        (role==="professional" && status==="approved" )?<div className="text-center">
         <p className="text-xs text-gray-500 mb-1">
           {status === "awaiting_response" || status === "approved"
             ? "Quote a price"
@@ -190,21 +200,43 @@ const PricingInput = ({
             ${price}
           </p>
         )}
-        {/* <button
+        
+        <button
           className={`w-full py-2 mt-3 rounded-full font-medium ${
             isDisabled || (showInput && !inputPrice)
               ? "bg-gray-400 text-gray-600 cursor-not-allowed"
               : "bg-blue-600 text-white hover:bg-blue-700"
           }`}
           disabled={isDisabled || (showInput && !inputPrice)}
-          onClick={
-    buttonText === "Pay Now" 
-      ? () => setIsPaymentOpen(true)
-      : handleDoneClick
-  }
+          onClick={() => {
+            console.log("Pay Now clicked", { isDisabled, buttonText });
+            if (buttonText === "Pay Now" && !isDisabled) setIsPaymentOpen(true);
+            else handleDoneClick();
+          }}
         >
           {buttonText}
-        </button> */}
+        </button>
+      </div>:
+      <div className="text-center">
+        <p className="text-xs text-gray-500 mb-1">
+          {status === "awaiting_response" || status === "approved"
+            ? "Quote a price"
+            : "Question Budget"}
+        </p>
+        {showPriceRange ? (
+          <p className="text-xl font-bold text-gray-500">{priceRange}</p>
+        ) : showInput ? (
+          null
+        ) : (
+          <p
+            className={`text-xl font-bold ${
+              isDisabled ? "text-gray-500" : "text-gray-800"
+            }`}
+          >
+            ${price}
+          </p>
+        )}
+        
         <button
           className={`w-full py-2 mt-3 rounded-full font-medium ${
             isDisabled || (showInput && !inputPrice)
@@ -221,6 +253,11 @@ const PricingInput = ({
           {buttonText}
         </button>
       </div>
+      }
+      
+
+
+      
       <PaymentModal
         isOpen={isPaymentOpen}
         onRequestClose={() => setIsPaymentOpen(false)}
