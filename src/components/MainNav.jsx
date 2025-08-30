@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../contextProvider/AuthContextProvider";
-import { useToggleActiveRole } from "../hooks/userhooks";
+import { useToggleActiveRole, useRegisterStep2 } from "../hooks/userhooks";
 import logo from "../assets/logo.svg";
 import searchIcon from "../assets/search.svg";
 import dropdownIcon from "../assets/dropdown.svg";
@@ -39,9 +39,9 @@ const MainNav = ({ isDashboard }) => {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const { user, logout, refreshCurrentUser } = useAuth();
-  const { mutateAsync: toggleActiveRole, isPending:isLoading } =
-    useToggleActiveRole();
-  
+  const { mutateAsync: toggleActiveRole, isPending: isLoading } = useToggleActiveRole();
+  const { mutateAsync: registerStep2 } = useRegisterStep2();
+  const navigate = useNavigate();
 
   // <-- new: use location to determine active route (no extra state)
   const location = useLocation();
@@ -49,8 +49,10 @@ const MainNav = ({ isDashboard }) => {
 
   const canToggleRole =
     Array.isArray(user?.roles) &&
-    user?.roles.includes("professional") &&
-    user?.roles.includes("asker");
+    (
+      (user?.roles.includes("professional") && user?.roles.includes("asker")) ||
+      (user?.roles.length === 1 && user?.roles[0] === "asker")
+    );
 
   const switchLabel =
     user?.activeRole === "professional"
@@ -179,10 +181,23 @@ const MainNav = ({ isDashboard }) => {
                               user?.activeRole === "professional"
                                 ? "asker"
                                 : "professional";
-                            await toggleActiveRole(target); // hook handles PUT + refresh
-                            // ensure context is up-to-date (safe no-op if hook already refreshes)
-                            // if (typeof refreshCurrentUser === "function")
-                            //   await refreshCurrentUser();
+                            // If user only has "asker" role and wants to switch to professional
+                            if (
+                              Array.isArray(user?.roles) &&
+                              user?.roles.length === 1 &&
+                              user?.roles[0] === "asker" &&
+                              target === "professional"
+                            ) {
+                              // Use hook to add professional role
+                              await registerStep2({ email: user.email, role: "professional" });
+                              if (typeof refreshCurrentUser === "function") {
+                                await refreshCurrentUser();
+                              }
+                              // Use react-router navigation
+                              navigate("/pofon", { state: { user } });
+                              return;
+                            }
+                            await toggleActiveRole(target);
                             setShowProfileModal(false);
                           } catch (err) {
                             console.error("Role toggle failed", err);

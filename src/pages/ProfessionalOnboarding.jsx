@@ -41,6 +41,9 @@ const ProfessionalOnboarding = () => {
   const [payment, setPayment] = useState(initialPayment);
   const [payloadData, setPayloadData] = useState({});
   initialPersonal.email = user?.email;
+  initialPersonal.firstName = user?.firstName;
+  initialPersonal.lastName = user?.lastName;
+  initialPersonal.profileImage=user.profilePic;
   // For completed steps
   const completedSteps = step;
 
