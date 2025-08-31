@@ -540,10 +540,10 @@ const QuestionThreadModal = ({ open, onClose, questionId }) => {
             <div className="bg-white rounded-lg  p-3 w-full max-w-xl mx-auto">
               <div className="flex justify-center items-center mb-2 text-center gap-4">
                 <span className="font-semibold text-gray-700">
-                  {question.feedback.user}
+                  {question.asker.firstName}{" "}{question.asker.lastName}.
                 </span>
                 <span className="text-xs text-gray-400">
-                  {question.feedback.date}
+                  {question.feedback.createdAt}
                 </span>
               </div>
               <div className="flex items-center justify-center mb-2">
@@ -594,7 +594,7 @@ const QuestionThreadModal = ({ open, onClose, questionId }) => {
                 })}
               </div>
               <div className="mb-2 text-gray-700 text-center text-sm">
-                {question.feedback.text}
+                {question.feedback.comment}
               </div>
             </div>
           </div>
@@ -734,6 +734,24 @@ const QuestionThreadModal = ({ open, onClose, questionId }) => {
             ))}
           </div>
         </div>
+        <FeedbackModal
+  open={feedbackOpen}
+  onClose={() => setFeedbackOpen(false)}
+  loading={leaveFeedback.isPending}
+  onSubmit={({ rating, comment }) => {
+    leaveFeedback.mutate(
+      { questionId: question.id, rating, comment },
+      {
+        onSuccess: () => {
+          setFeedbackOpen(false);
+        },
+        onError: (error) => {
+          console.error("Failed to leave feedback:", error);
+        },
+      }
+    );
+  }}
+/>
       </div>
     </div>
   );
@@ -763,26 +781,6 @@ const QuestionThreadModal = ({ open, onClose, questionId }) => {
       >
         {content}
       </div>
-
-      {/* Follow-up modal (separate component) */}
-      <FollowUpModal
-        open={followUpOpen}
-        onClose={() => setFollowUpOpen(false)}
-        questionId={question?.id}
-        onSend={({ questionId, body }) => {
-          postFollowUp.mutate(
-            { questionId, body },
-            {
-              onSuccess: () => {
-                console.log("Follow-up posted successfully");
-              },
-              onError: (error) => {
-                console.error("Failed to post follow-up:", error);
-              },
-            }
-          );
-        }}
-      />
 
        
       <DateTimePicker
