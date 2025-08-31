@@ -18,7 +18,7 @@ const stripeElementStyles = {
   },
 };
 
-const PaymentModal = ({ isOpen, onRequestClose, amount, questionId }) => {
+const PaymentModal = ({ isOpen, onRequestClose, amount, questionId, deliveryType }) => {
   const [clientSecret, setClientSecret] = useState("");
   const [saveCard, setSaveCard] = useState(false);
   const [cardholderName, setCardholderName] = useState("");
@@ -40,7 +40,7 @@ const PaymentModal = ({ isOpen, onRequestClose, amount, questionId }) => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ amount }),
+          body: JSON.stringify({ amount, deliveryType }), // Pass deliveryType here
         });
         const data = await res.json();
         if (data?.data?.clientSecret) {
@@ -51,7 +51,7 @@ const PaymentModal = ({ isOpen, onRequestClose, amount, questionId }) => {
       };
       handlePay();
     }
-  }, [isOpen, clientSecret, amount, questionId]);
+  }, [isOpen, clientSecret, amount, questionId, deliveryType]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

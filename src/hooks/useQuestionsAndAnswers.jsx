@@ -23,6 +23,29 @@ export function useQuestions({ page = 1, limit = 10, status } = {}) {
   });
 }
 
+export function useLeaveFeedback() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ questionId, rating, comment }) => {
+      const endpoint = `${API_BASE_URL}/questions/${questionId}/feedback`;
+      const { data } = await axios.post(
+        endpoint,
+        { rating, comment },
+        { headers: getAuthHeaders() }
+      );
+      return data;
+    },
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries(["question", variables.questionId]);
+      queryClient.invalidateQueries({ queryKey: ["questions"] });
+    },
+    onError: (error) => {
+      console.error("Failed to leave feedback:", error);
+    },
+  });
+}
+
 export function useAnswers({ page = 1, limit = 10, status } = {}) {
   return useQuery({
     queryKey: ["answers", page, limit, status],

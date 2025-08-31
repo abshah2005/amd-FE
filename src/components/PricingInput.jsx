@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import PaymentModal from "./PaymentModal";
 
 const PricingInput = ({
-  initialMode = "normal",
+  initialMode,
   status,
   price,
   priceRange = "$25-$35",
@@ -13,12 +13,14 @@ const PricingInput = ({
   role,
   questionId,
   onPriceChange,
+  quote,
   onDone,
 }) => {
   const [mode, setMode] = useState(initialMode);
   const [inputPrice, setInputPrice] = useState("");
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [selectedDeliveryType, setSelectedDeliveryType] = useState("normal");
 
   // Determine UI state based on status and role
   let isEditable = false;
@@ -46,7 +48,6 @@ const PricingInput = ({
       buttonText = "yet to be quoted";
       showInput = false;
       showPriceRange = true;
-
     }
   } else if (status === "awaiting_payment" || status === "quoted") {
     if (role === "professional") {
@@ -56,7 +57,7 @@ const PricingInput = ({
       showInput = false;
       showPriceRange = false;
     } else if (role === "asker") {
-      isEditable = false;
+      isEditable = true;
       isDisabled = false;
       buttonText = "Pay Now";
       showInput = false;
@@ -95,6 +96,18 @@ const PricingInput = ({
     }
   };
 
+  // Helper to get price from quote
+  const getPriceForMode = (mode) => {
+    if (!quote) return 0;
+    if (mode === "normal") return quote.normal?.amount || 0;
+    if (mode === "fast") return quote.fast?.amount || 0;
+    return 0;
+  };
+
+  const handlePayNowClick = () => {
+    setIsPaymentOpen(true);
+  };
+
   return (
     <div className="w-48 rounded-lg shadow-md p-3 bg-gray-200">
       {/* Mode Selection */}
@@ -102,9 +115,9 @@ const PricingInput = ({
         <div className="flex justify-between mb-4">
           <button
             className={`flex-1 flex flex-col items-center justify-center p-2 rounded ${
-              mode === "normal" ? "bg-white" : "bg-gray-200"
+              selectedDeliveryType === "normal" ? "bg-white" : "bg-gray-200"
             }`}
-            onClick={() => toggleMode("normal")}
+            onClick={() => setSelectedDeliveryType("normal")}
             disabled={!isEditable}
           >
             <svg
@@ -135,7 +148,9 @@ const PricingInput = ({
             </svg>
             <span
               className={`text-xs ${
-                mode === "normal" ? "text-gray-700" : "text-gray-400"
+                selectedDeliveryType === "normal"
+                  ? "text-gray-700"
+                  : "text-gray-400"
               }`}
             >
               Normal
@@ -143,9 +158,9 @@ const PricingInput = ({
           </button>
           <button
             className={`flex-1 flex flex-col items-center justify-center p-2 rounded ${
-              mode === "fast" ? "bg-white" : "bg-gray-200"
+              selectedDeliveryType === "fast" ? "bg-white" : "bg-gray-200"
             }`}
-            onClick={() => toggleMode("fast")}
+            onClick={() => setSelectedDeliveryType("fast")}
             disabled={!isEditable}
           >
             <svg
@@ -164,7 +179,9 @@ const PricingInput = ({
             </svg>
             <span
               className={`text-xs ${
-                mode === "fast" ? "text-yellow-600" : "text-gray-400"
+                selectedDeliveryType === "fast"
+                  ? "text-yellow-600"
+                  : "text-gray-400"
               }`}
             >
               Fast
@@ -172,97 +189,175 @@ const PricingInput = ({
           </button>
         </div>
       </div>
-      {/* Price Input */}
-      {
-        (role==="professional" && status==="approved" )?<div className="text-center">
-        <p className="text-xs text-gray-500 mb-1">
-          {status === "awaiting_response" || status === "approved"
-            ? "Quote a price"
-            : "Question Budget"}
-        </p>
-        {showPriceRange ? (
-          <p className="text-xl font-bold text-gray-500">{priceRange}</p>
-        ) : showInput ? (
-          <input
-            type="number"
-            value={inputPrice}
-            onChange={handlePriceChange}
-            className="text-xl font-bold text-gray-500 border bg-gray-200 rounded w-full text-center"
-            placeholder="Enter price"
-            disabled={isDisabled}
-          />
-        ) : (
-          <p
-            className={`text-xl font-bold ${
-              isDisabled ? "text-gray-500" : "text-gray-800"
-            }`}
-          >
-            ${price}
+      {/* Price Display for Asker */}
+      {(role === "asker" || role==='professional') && (status==="submitted" || status==='rejected') && (
+        <div className="text-center">
+          <p className="text-xs text-gray-500 mb-1">
+            {initialMode === "normal"
+              ? "Normal Delivery Price"
+              : "Fast Delivery Price"}
           </p>
-        )}
-        
-        <button
-          className={`w-full py-2 mt-3 rounded-full font-medium ${
-            isDisabled || (showInput && !inputPrice)
-              ? "bg-gray-400 text-gray-600 cursor-not-allowed"
-              : "bg-blue-600 text-white hover:bg-blue-700"
-          }`}
-          disabled={isDisabled || (showInput && !inputPrice)}
-          onClick={() => {
-            console.log("Pay Now clicked", { isDisabled, buttonText });
-            if (buttonText === "Pay Now" && !isDisabled) setIsPaymentOpen(true);
-            else handleDoneClick();
-          }}
-        >
-          {buttonText}
-        </button>
-      </div>:
-      <div className="text-center">
-        <p className="text-xs text-gray-500 mb-1">
-          {status === "awaiting_response" || status === "approved"
-            ? "Quote a price"
-            : "Question Budget"}
-        </p>
-        {showPriceRange ? (
-          <p className="text-xl font-bold text-gray-500">{priceRange}</p>
-        ) : showInput ? (
-          null
-        ) : (
-          <p
-            className={`text-xl font-bold ${
-              isDisabled ? "text-gray-500" : "text-gray-800"
-            }`}
-          >
-            ${price}
+          <p className="text-xl font-bold text-gray-800">{priceRange}</p>
+          <p className="text-xs text-gray-600 mt-2">
+            Delivery Mode:{" "}
+            <span className="font-semibold">
+              {initialMode?.charAt(0).toUpperCase() + initialMode?.slice(1)}
+            </span>
           </p>
+          <button
+            className="w-full py-2 mt-3 rounded-full font-medium bg-gray-400 text-gray-600 cursor-not-allowed"
+            disabled
+          >
+            {status==="submitted"?"yet to be quoted":"rejected"}
+          </button>
+        </div>
+      )}
+      {(role === "asker" || role==='professional') && (status==="paid" || status==="closed")&& (
+        <div className="text-center">
+          <p className="text-xs text-gray-500 mb-1">
+            {initialMode === "normal"
+              ? "Normal Delivery Price"
+              : "Fast Delivery Price"}
+          </p>
+          <p className="text-xl font-bold text-gray-800">${price}</p>
+          <p className="text-xs text-gray-600 mt-2">
+            Delivery Mode:{" "}
+            <span className="font-semibold">
+              {initialMode?.charAt(0).toUpperCase() + initialMode?.slice(1)}
+            </span>
+          </p>
+          <button
+            className="w-full py-2 mt-3 rounded-full font-medium bg-gray-400 text-gray-600 cursor-not-allowed"
+            disabled
+          >
+            Paid
+          </button>
+        </div>
+      )}
+      {role === "asker" &&
+        (status === "awaiting_payment" || status === "quoted") && (
+          <div className="text-center">
+            <p className="text-xs text-gray-500 mb-1">
+              {selectedDeliveryType === "normal"
+                ? "Normal Delivery Price"
+                : "Fast Delivery Price"}
+            </p>
+            <p className="text-xl font-bold text-gray-800">
+              ${getPriceForMode(selectedDeliveryType)}
+            </p>
+            <button
+              className={`w-full py-2 mt-3 rounded-full font-medium ${
+                isDisabled
+                  ? "bg-gray-400 text-gray-600 cursor-not-allowed"
+                  : "bg-blue-600 text-white hover:bg-blue-700"
+              }`}
+              disabled={isDisabled}
+              onClick={handlePayNowClick}
+            >
+              {buttonText}
+            </button>
+          </div>
         )}
-        
-        <button
-          className={`w-full py-2 mt-3 rounded-full font-medium ${
-            isDisabled || (showInput && !inputPrice)
-              ? "bg-gray-400 text-gray-600 cursor-not-allowed"
-              : "bg-blue-600 text-white hover:bg-blue-700"
-          }`}
-          disabled={isDisabled || (showInput && !inputPrice)}
-          onClick={() => {
-            console.log("Pay Now clicked", { isDisabled, buttonText });
-            if (buttonText === "Pay Now" && !isDisabled) setIsPaymentOpen(true);
-            else handleDoneClick();
-          }}
-        >
-          {buttonText}
-        </button>
-      </div>
-      }
-      
+      {/* Professional Pricing Input */}
+      {role === "asker" && status === "approved" && (
+        <div className="text-center">
+          <p className="text-xs text-gray-500 mb-1">
+            {status === "awaiting_response" || status === "approved"
+              ? "Yet to be quoted"
+              : "Question Budget"}
+          </p>
+          {showPriceRange ? (
+            <p className="text-xl font-bold text-gray-500">{priceRange}</p>
+          ) : showInput ? (
+            <input
+              type="number"
+              value={inputPrice}
+              onChange={handlePriceChange}
+              className="text-xl font-bold text-gray-500 border bg-gray-200 rounded w-full text-center"
+              placeholder="Enter price"
+              disabled={isDisabled}
+            />
+          ) : (
+            <p
+              className={`text-xl font-bold ${
+                isDisabled ? "text-gray-500" : "text-gray-800"
+              }`}
+            >
+              ${price}
+            </p>
+          )}
 
+          <button
+            className={`w-full py-2 mt-3 rounded-full font-medium ${
+              isDisabled || (showInput && !inputPrice)
+                ? "bg-gray-400 text-gray-600 cursor-not-allowed"
+                : "bg-blue-600 text-white hover:bg-blue-700"
+            }`}
+            disabled={isDisabled || (showInput && !inputPrice)}
+            onClick={() => {
+              console.log("Pay Now clicked", { isDisabled, buttonText });
+              if (buttonText === "Pay Now" && !isDisabled)
+                setIsPaymentOpen(true);
+              else handleDoneClick();
+            }}
+          >
+            {buttonText}
+          </button>
+        </div>
+      )}
 
-      
+      {role === "professional" && status === "approved" && (
+        <div className="text-center">
+          <p className="text-xs text-gray-500 mb-1">
+            {status === "awaiting_response" || status === "approved"
+              ? "Quote a price"
+              : "Question Budget"}
+          </p>
+          {showPriceRange ? (
+            <p className="text-xl font-bold text-gray-500">{priceRange}</p>
+          ) : showInput ? (
+            <input
+              type="number"
+              value={inputPrice}
+              onChange={handlePriceChange}
+              className="text-xl font-bold text-gray-500 border bg-gray-200 rounded w-full text-center"
+              placeholder="Enter price"
+              disabled={isDisabled}
+            />
+          ) : (
+            <p
+              className={`text-xl font-bold ${
+                isDisabled ? "text-gray-500" : "text-gray-800"
+              }`}
+            >
+              ${price}
+            </p>
+          )}
+
+          <button
+            className={`w-full py-2 mt-3 rounded-full font-medium ${
+              isDisabled || (showInput && !inputPrice)
+                ? "bg-gray-400 text-gray-600 cursor-not-allowed"
+                : "bg-blue-600 text-white hover:bg-blue-700"
+            }`}
+            disabled={isDisabled || (showInput && !inputPrice)}
+            onClick={() => {
+              console.log("Pay Now clicked", { isDisabled, buttonText });
+              if (buttonText === "Pay Now" && !isDisabled)
+                setIsPaymentOpen(true);
+              else handleDoneClick();
+            }}
+          >
+            {buttonText}
+          </button>
+        </div>
+      )}
       <PaymentModal
         isOpen={isPaymentOpen}
         onRequestClose={() => setIsPaymentOpen(false)}
-        amount={price}
+        amount={getPriceForMode(selectedDeliveryType) * 100}
         questionId={questionId}
+        deliveryType={selectedDeliveryType} // Pass deliveryType to modal
       />
     </div>
   );
