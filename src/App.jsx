@@ -21,6 +21,7 @@ import DashboardPage from "./pages/DashboardPage";
 import AppSkeleton from "./pages/AppSkeleton";
 import QuestionsPage from "./pages/QuestionsPage";
 import TestPayQuestion from "./pages/TestPayQuestion";
+import PublicProfilePage from "./components/PublicProfilePage";
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -129,6 +130,7 @@ function App() {
         <Route path="/signupfi" element={<SignupFi />} />
         <Route path="/editor" element={<RichEditor />} />
         <Route path="/stripe" element={<TestPayQuestion />} />
+        <Route path="/profile/:name" element={<PublicProfilePage />} />
         <Route path="/auth/linkedin/callback" element={<LinkedInCallback />} />
         <Route path="/resetSuccess" element={<PasswordResetSuccess />} />
       </Routes>
