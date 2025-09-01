@@ -25,7 +25,7 @@ import ThreadClosureModal from "./ThreadClosureModal";
 import FeedbackModal from "./FeedbackModal";
 import { useLeaveFeedback } from "../hooks/useQuestionsAndAnswers";
 
-const QuestionThreadModal = ({ open, onClose, questionId }) => {
+const QuestionThreadModal = ({ open, onClose, questionId,questionLabel }) => {
   const [showMessage, setShowMessage] = useState(true);
   const [threadClosureOpen, setThreadClosureOpen] = useState(false);
   const [message, setMessage] = useState(""); // For final message input
@@ -68,6 +68,7 @@ const QuestionThreadModal = ({ open, onClose, questionId }) => {
   const question = questionData
     ? {
         id: questionData._id,
+        label: questionLabel,
         submittedDate: new Date(questionData.createdAt).toLocaleDateString(),
         payment: questionData.payment?.paid ? "Paid" : "Unpaid",
         asker: questionData.asker?.firstName || "Unknown",
@@ -255,7 +256,7 @@ const QuestionThreadModal = ({ open, onClose, questionId }) => {
     <div className="p-0 w-full">
       {/* Header with question number and close button */}
       <div className="flex justify-between items-center p-4 border-b">
-        <span className="font-semibold text-lg">Qno. {question.id}</span>
+        <span className="font-semibold text-lg">{question.label}</span>
       </div>
 
       {/* Instruction banner */}

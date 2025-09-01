@@ -11,8 +11,9 @@ import { getStatusLabel } from "../utils/StatusUtil";
 import QuestionThreadModal from "../components/QuestionThreadModal";
 
 const mappedQuestions = (questions) =>
-  questions.map((q) => ({
+  questions.map((q,i) => ({
     id: q._id,
+    label:`Qno.${i+1}`,
     submittedDate: new Date(q.createdAt).toISOString().slice(0, 10),
     question: q.title,
     professional: { name: q.professional?.user?.fullName || "Professional" },
@@ -22,8 +23,9 @@ const mappedQuestions = (questions) =>
   }));
 
 const mappedAnswers = (answers) =>
-  answers.map((a) => ({
+  answers.map((a,i) => ({
     id: a._id,
+    label:`Qno.${i+1}`,
     submittedDate: new Date(a.createdAt).toISOString().slice(0, 10),
     question: a.title,
     asker: { name: a.asker?.fullName || "Asker" },
@@ -180,6 +182,7 @@ const QuestionsPage = () => {
           setSelectedQuestionId(null);
         }}
         questionId={selectedQuestionId}
+        questionLabel={selectedQuestionId ? items.find(i => i.id === selectedQuestionId)?.label : null}
       />
     </div>
   );

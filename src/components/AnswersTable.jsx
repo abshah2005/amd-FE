@@ -59,7 +59,7 @@ const AnswersTable = ({ answers, setModalOpen }) => {
                   <input type="checkbox" className="rounded border-gray-300" />
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 font-medium" onClick={() => setModalOpen(a.id)}  style={{cursor: 'pointer'}}>
-                  {a.id}
+                  {a.label}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {a.submittedDate}

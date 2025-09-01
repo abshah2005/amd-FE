@@ -14,22 +14,86 @@ function StatsCard({ title, value }) {
     </div>
   );
 }
-
 function ShareBox({ url }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    if (!url) return;
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(url);
+      } else {
+        const ta = document.createElement("textarea");
+        ta.value = url;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        ta.remove();
+      }
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Copy failed", err);
+    }
+  };
+
   return (
-    <div className="bg-white border rounded-lg p-4 shadow-sm flex flex-col justify-between">
-      <div className="text-sm font-medium text-gray-800">
-        Sharable Profile Link
+    <div className="relative bg-white border rounded-lg p-4 shadow-sm">
+      {/* info icon top-right */}
+      <div className="absolute top-3 right-3">
+        <div
+          title="Shareable profile link"
+          className="w-7 h-7 flex items-center justify-center rounded-full border text-gray-500 bg-white"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-4 h-4"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fillRule="evenodd"
+              d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zm-9-1a1 1 0 112 0v3a1 1 0 11-2 0V9zm1-4a1.25 1.25 0 100 2.5A1.25 1.25 0 0010 5z"
+              clipRule="evenodd"
+            />
+          </svg>
+        </div>
       </div>
-      <div className="mt-3 text-xs text-gray-500 break-words">{url}</div>
-      <div className="mt-4 flex justify-end">
-        <button className="text-sm px-3 py-1 border rounded-md text-blue-600 hover:bg-blue-50">
-          Copy URL
+
+      <div className="text-sm font-medium text-gray-800">Sharable Profile Link</div>
+
+      
+
+      <div className="mt-4 flex gap-4 justify-around items-center">
+        <div className=" text-xs text-black font-bold break-words">
+        {url || "—"}
+      </div>
+        <button
+          onClick={handleCopy}
+          className="inline-flex items-center gap-2 text-sm px-3 py-1 border rounded-full text-blue-600 hover:bg-blue-50"
+          aria-label={copied ? "URL copied" : "Copy URL"}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-4 h-4"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+          <span className="font-medium">{copied ? "Copied" : "Copy URL"}</span>
         </button>
       </div>
     </div>
   );
 }
+
 
 function SidebarList({ items }) {
   return (
@@ -153,7 +217,7 @@ export default function ProfessionalDashboard() {
           <main className="col-span-9 pl-8 p-4">
             <div className="flex justify-between items-start mb-8">
               <h1 className="text-2xl font-semibold mt-4">Dashboard</h1>
-              <div className="w-80 ">
+              <div className="w-[45%] ">
                 <ShareBox url={stats?.shareUrl || ""} />
               </div>
             </div>

@@ -60,7 +60,7 @@ export const QuestionsTable = ({ questions,setModalOpen }) => {
                   <input type="checkbox" className="rounded border-gray-300" />
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 font-medium" onClick={() => setModalOpen(question.id)} style={{cursor: 'pointer'}}>
-                  {question.id}
+                  {question.label}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {question.submittedDate}

@@ -247,7 +247,7 @@ const PersonalInfoBox = ({
           <div className="flex gap-3">
             <input
               name="firstName"
-              value={formData.firstName || ""}
+              value={user.professional.firstName || ""}
               onChange={(e) =>
                 setFormData((prev) => ({ ...prev, firstName: e.target.value }))
               }
@@ -255,7 +255,7 @@ const PersonalInfoBox = ({
             />
             <input
               name="lastName"
-              value={formData.lastName || ""}
+              value={user.professional.lastName || ""}
               onChange={(e) =>
                 setFormData((prev) => ({ ...prev, lastName: e.target.value }))
               }
@@ -267,13 +267,13 @@ const PersonalInfoBox = ({
             <input
               type="text"
               className="w-1/2 text-sm rounded border p-2 bg-gray-100 text-gray-600 border-gray-200"
-              value={user?.firstName || ""}
+              value={user?.professional?.firstName || ""}
               disabled
             />
             <input
               type="text"
               className="w-1/2 text-sm rounded border p-2 bg-gray-100 text-gray-600 border-gray-200"
-              value={user?.lastName || ""}
+              value={user?.professional?.lastName || ""}
               disabled
             />
           </div>
@@ -453,94 +453,104 @@ const ProfessionalInfoBox = ({
   setFormData = () => {},
 }) => {
   const prof = user?.professional || {};
-  const { specializations: specList = [], loading: specsLoading } =
-    useSpecializations();
-  const [openSpecs, setOpenSpecs] = useState({});
-  const [openTags, setOpenTags] = useState(true); 
-const [newTag, setNewTag] = useState("");
-  const normalizeProfSelected = () => {
-    const sel = prof.selectedSpecializations || [];
-    return sel
-      .map((s) => {
-        if (!s) return null;
-        if (typeof s === "string")
-          return { specialization: s, subCategory: null };
-        if (typeof s === "object")
-          return {
-            specialization: s.specialization || "",
-            subCategory: s.subCategory ?? null,
-          };
-        return null;
-      })
-      .filter(Boolean);
-  };
-
+  const { specializations: categories = [], loading: specsLoading } = useSpecializations();
+  const [openTags, setOpenTags] = useState(true);
+  const [added, setAdded] = useState([]);
+  const [currentCategoryId, setCurrentCategoryId] = useState("");
+  const [currentSubSelected, setCurrentSubSelected] = useState([]);
+  const [newTag, setNewTag] = useState("");
+  const [tags, setTags] = useState([]);
+  // Prepopulate from profile on mount
   useEffect(() => {
-    // initialize formData.selectedSpecializations only once when professional data becomes available
-    if (!formData.selectedSpecializations) {
-      const initial = normalizeProfSelected();
-      setFormData((prev) => ({ ...prev, selectedSpecializations: initial }));
+    if (prof.selectedSpecializations && prof.selectedSpecializations.length > 0) {
+      setAdded(
+        prof.selectedSpecializations.map((s) =>
+          typeof s === "string"
+            ? { specialization: s, subCategories: [] }
+            : {
+                specialization: s.specialization,
+                subCategories: Array.isArray(s.subCategories) ? s.subCategories : [],
+              }
+        )
+      );
+      // Also prepopulate tags from subcategories
+      const subs = prof.selectedSpecializations.flatMap((s) =>
+        Array.isArray(s.subCategories) ? s.subCategories : []
+      );
+      setTags(Array.from(new Set(subs)));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.professional?._id]);
+  }, [prof.selectedSpecializations]);
 
-  // helpers
-  const getSelectedForSpec = (specName) =>
-    (formData.selectedSpecializations || []).filter(
-      (s) => (s?.specialization || "") === specName
+  // Sync tags to formData.tags
+  useEffect(() => {
+    setFormData((prev) => ({ ...prev, tags }));
+  }, [tags, setFormData]);
+
+  // Sync added to formData.selectedSpecializations
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      selectedSpecializations: added.map((a) => ({
+        specialization: a.specialization,
+        subCategories: a.subCategories || [],
+      })),
+    }));
+  }, [added, setFormData]);
+
+  // Helpers
+  const categoryById = (id) => categories.find((c) => c._id === id);
+
+  const handleToggleSub = (sub) => {
+    setCurrentSubSelected((prev) =>
+      prev.includes(sub) ? prev.filter((s) => s !== sub) : [...prev, sub]
     );
-
-  const isSpecSelected = (specName) => getSelectedForSpec(specName).length > 0;
-  const isSubSelected = (specName, sub) =>
-    (formData.selectedSpecializations || []).some(
-      (s) =>
-        (s?.specialization || "") === specName &&
-        (s?.subCategory ?? null) === sub
-    );
-
-  const toggleSpec = (specName) => {
-    const prev = Array.isArray(formData.selectedSpecializations)
-      ? [...formData.selectedSpecializations]
-      : [];
-    const has = prev.some((s) => (s?.specialization || "") === specName);
-    const next = has
-      ? prev.filter((s) => (s?.specialization || "") !== specName)
-      : [...prev, { specialization: specName, subCategory: null }];
-    setFormData((p) => ({ ...p, selectedSpecializations: next }));
-    console.log({ field: "selectedSpecializations", old: prev, new: next });
-    if (!has) setOpenSpecs((o) => ({ ...o, [specName]: true }));
   };
 
-  const toggleSub = (specName, sub) => {
-    const prev = Array.isArray(formData.selectedSpecializations)
-      ? [...formData.selectedSpecializations]
-      : [];
-    // if sub already selected -> remove specific entry
-    const existsIdx = prev.findIndex(
-      (s) =>
-        (s?.specialization || "") === specName &&
-        (s?.subCategory ?? null) === sub
-    );
-    let next;
-    if (existsIdx >= 0) {
-      next = prev.filter((_, i) => i !== existsIdx);
-      // if removing last sub and there is an entry {spec, subCategory:null} keep none
-    } else {
-      next = [...prev, { specialization: specName, subCategory: sub }];
-    }
-    setFormData((p) => ({ ...p, selectedSpecializations: next }));
-    console.log({ field: "selectedSpecializations", old: prev, new: next });
-    setOpenSpecs((o) => ({ ...o, [specName]: true }));
+  const canAddCurrent = () =>
+    currentCategoryId &&
+    currentSubSelected.length >= 2 &&
+    !added.some((a) => String(a.specialization) === String(currentCategoryId));
+
+  const handleAddCurrent = () => {
+    if (!canAddCurrent()) return;
+    setAdded((prev) => [
+      ...prev,
+      {
+        specialization: currentCategoryId,
+        subCategories: [...currentSubSelected],
+      },
+    ]);
+    setTags((prevTags) => {
+      const newSubs = currentSubSelected.filter((s) => !prevTags.includes(s));
+      return Array.from(new Set([...prevTags, ...newSubs]));
+    });
+    setCurrentCategoryId("");
+    setCurrentSubSelected([]);
   };
 
-  const removeSpec = (specName) => {
-    const prev = Array.isArray(formData.selectedSpecializations)
-      ? [...formData.selectedSpecializations]
-      : [];
-    const next = prev.filter((s) => (s?.specialization || "") !== specName);
-    setFormData((p) => ({ ...p, selectedSpecializations: next }));
-    console.log({ field: "selectedSpecializations", old: prev, new: next });
-    setOpenSpecs((o) => ({ ...o, [specName]: false }));
+  const handleRemoveAdded = (specId) => {
+    const removed = added.find((a) => String(a.specialization) === String(specId));
+    setAdded((prev) => prev.filter((a) => String(a.specialization) !== String(specId)));
+    if (removed && Array.isArray(removed.subCategories)) {
+      setTags((prevTags) => prevTags.filter((t) => !removed.subCategories.includes(t)));
+    }
+  };
+
+  // Handler to remove a subcategory from a category
+  const handleRemoveSubCat = (specId, sub) => {
+    setAdded((prev) =>
+      prev
+        .map((item) =>
+          item.specialization === specId
+            ? {
+                ...item,
+                subCategories: item.subCategories.filter((s) => s !== sub),
+              }
+            : item
+        )
+        .filter((item) => item.subCategories.length > 0)
+    );
+    setTags((prevTags) => prevTags.filter((t) => t !== sub));
   };
 
   return (
@@ -551,296 +561,209 @@ const [newTag, setNewTag] = useState("");
         areas of knowledge so askers know why you’re the right fit.
       </p>
 
+      {/* --- Inserted Category/Subcategory UI --- */}
       <div className="mb-4">
-        <label className="block text-sm text-gray-700 font-medium mb-1">
+        <label className="font-medium text-sm text-gray-700 block mb-2">
           Select up-to one category.
         </label>
-
-        {specsLoading ? (
-          <div className="text-sm text-gray-500">Loading specializations…</div>
-        ) : (
-          <>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 p-4 bg-gray-50 rounded">
-              {specList.map((spec) => {
-                const specName =
-                  spec?.name || spec?.specialization || String(spec);
-                const checked = isSpecSelected(specName);
-                return (
-                  <label
-                    key={specName}
-                    className="flex items-center gap-2 cursor-pointer"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={checked}
-                      disabled={!editing}
-                      onChange={() => toggleSpec(specName)}
-                      className="w-4 h-4"
-                    />
-                    <span
-                      className={`text-sm ${
-                        checked ? "font-medium text-gray-800" : "text-gray-700"
-                      }`}
-                    >
-                      {specName}
-                    </span>
-                  </label>
-                );
-              })}
-            </div>
-
-            {/* Selected categories -> show panels like onboarding UI */}
-            <div className="mt-4 space-y-4">
-              {(specList || [])
-                .filter((s) =>
-                  isSpecSelected(s?.name || s?.specialization || String(s))
-                )
-                .map((spec) => {
-                  const specName =
-                    spec?.name || spec?.specialization || String(spec);
-                  const subCats = Array.isArray(spec.subCategories)
-                    ? spec.subCategories
-                    : [];
-                  const expanded = !!openSpecs[specName];
-                  return (
-                    <div key={"panel-" + specName} className="border rounded">
-                      <div className="flex items-center justify-between p-3">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setOpenSpecs((o) => ({
-                              ...o,
-                              [specName]: !o[specName],
-                            }))
-                          }
-                          className="flex items-center gap-2 text-sm"
-                        >
-                          <span className="font-medium">{specName}</span>
-                          <span className="text-xs text-gray-500">
-                            {expanded ? "▾" : "▸"}
-                          </span>
-                        </button>
-                        <div className="flex items-center gap-3">
-                          <button
-                            type="button"
-                            onClick={() => removeSpec(specName)}
-                            className="text-red-500 text-sm px-2 py-1"
-                            aria-label={`Remove ${specName}`}
-                          >
-                            ✕
-                          </button>
-                        </div>
-                      </div>
-
-                      {expanded && (
-                        <div className="p-3 bg-gray-50">
-                          {subCats.length > 0 ? (
-                            <>
-                              <div className="text-xs text-gray-500 mb-2">
-                                Selected sub-categories
-                              </div>
-                              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                                {subCats.map((sub) => (
-                                  <label
-                                    key={specName + "::" + sub}
-                                    className="flex items-center gap-2 cursor-pointer text-sm p-2 border rounded"
-                                  >
-                                    <input
-                                      type="checkbox"
-                                      checked={isSubSelected(specName, sub)}
-                                      disabled={!editing}
-                                      onChange={() => toggleSub(specName, sub)}
-                                      className="w-4 h-4"
-                                    />
-                                    <span>{sub}</span>
-                                  </label>
-                                ))}
-                              </div>
-                            </>
-                          ) : (
-                            <div className="text-sm text-gray-600">
-                              No sub-categories
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-            </div>
-          </>
-        )}
-      </div>
-
-      
-      
-      
-      {/* Tags and other professional fields (unchanged) */}
-      {/* <div className="mb-4">
-        <label className="block text-sm text-gray-700 font-medium mb-1">
-          Tags
-        </label>
-        <div className="flex flex-wrap gap-2 mb-2">
-          {(prof.tags || []).map((tag, idx) => {
-            const active = (formData.tags || prof.tags || []).includes(tag);
-            return (
-              <button
-                key={tag + idx}
-                type="button"
-                disabled={!editing}
-                onClick={() => {
-                  const prev = Array.isArray(formData.tags)
-                    ? [...formData.tags]
-                    : prof.tags || [];
-                  const exists = prev.includes(tag);
-                  const next = exists
-                    ? prev.filter((t) => t !== tag)
-                    : [...prev, tag];
-                  setFormData((p) => ({ ...p, tags: next }));
-                  console.log({ field: "tags", old: prev, new: next });
-                }}
-                className={`px-2 py-1 rounded text-xs border ${
-                  active
-                    ? "bg-blue-50 border-blue-300 text-blue-700"
-                    : "bg-gray-100 text-gray-700"
-                }`}
-              >
-                {tag}
-              </button>
-            );
-          })}
-        </div>
-
-        {editing && (
-          <div className="flex gap-2 mt-2">
-            <input
-              placeholder="Add custom tag"
-              className="flex-1 border rounded p-2 text-sm"
-              value={formData._newTag || ""}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, _newTag: e.target.value }))
-              }
-            />
-            <button
-              type="button"
-              className="px-4 py-1 rounded bg-gray-200 text-sm"
-              onClick={() => {
-                const v = (formData._newTag || "").trim();
-                if (!v) return;
-                const prev = Array.isArray(formData.tags)
-                  ? [...formData.tags]
-                  : prof.tags || [];
-                if (prev.includes(v)) {
-                  setFormData((p) => ({ ...p, _newTag: "" }));
-                  return;
-                }
-                const next = [...prev, v];
-                setFormData((p) => ({ ...p, tags: next, _newTag: "" }));
-                console.log({ field: "tags", old: prev, new: next });
-              }}
-            >
-              Add
-            </button>
-          </div>
-        )}
-      </div> */}
-
-<div className="mb-4">
-  <label className="block text-sm text-gray-700 font-medium mb-1">
-    Tags
-  </label>
-  <div className="border rounded bg-gray-50 p-3">
-    <button
-      type="button"
-      className="flex items-center gap-2 text-sm mb-2"
-      onClick={() => setOpenTags((o) => !o)}
-      disabled={!editing}
-    >
-      <span className="font-medium">Selected Tags</span>
-      <span className="text-xs text-gray-500">{openTags ? "▾" : "▸"}</span>
-    </button>
-    {openTags && (
-      <>
-        {/* Available tags as checkboxes */}
-        <div className="flex flex-wrap gap-2 mb-2">
-          {(prof.tags || []).map((tag) => (
-            <label key={tag} className="flex items-center gap-2 text-xs p-2 border rounded cursor-pointer">
+        <div className="grid grid-cols-2 gap-2 bg-gray-50 p-4 rounded">
+          {categories.map((cat) => (
+            <label key={cat._id} className="flex items-center gap-2 text-sm">
               <input
                 type="checkbox"
-                checked={(formData.tags || prof.tags || []).includes(tag)}
-                disabled={!editing}
+                checked={currentCategoryId === cat._id}
                 onChange={() => {
-                  const prev = Array.isArray(formData.tags) ? [...formData.tags] : prof.tags || [];
-                  const exists = prev.includes(tag);
-                  const next = exists
-                    ? prev.filter((t) => t !== tag)
-                    : [...prev, tag];
-                  setFormData((p) => ({ ...p, tags: next }));
+                  setCurrentCategoryId(cat._id);
+                  setCurrentSubSelected([]);
                 }}
-                className="w-4 h-4"
+                disabled={
+                  added.some((a) => a.specialization === cat._id) ||
+                  (currentCategoryId && currentCategoryId !== cat._id)
+                }
+                className="w-4 h-4 accent-blue-600"
               />
-              <span>{tag}</span>
+              <span className="text-gray-700">{cat.category}</span>
             </label>
           ))}
         </div>
-        {/* Add new tag */}
-        {editing && (
-          <div className="flex gap-2 mt-2">
-            <input
-              placeholder="Add custom tag"
-              className="flex-1 border rounded p-2 text-sm"
-              value={newTag}
-              onChange={(e) => setNewTag(e.target.value)}
-            />
-            <button
-              type="button"
-              className="px-4 py-1 rounded bg-gray-200 text-sm"
-              onClick={() => {
-                const v = newTag.trim();
-                if (!v) return;
-                const prev = Array.isArray(formData.tags) ? [...formData.tags] : prof.tags || [];
-                if (prev.includes(v)) {
-                  setNewTag("");
-                  return;
-                }
-                const next = [...prev, v];
-                setFormData((p) => ({ ...p, tags: next }));
-                setNewTag("");
-              }}
-            >
-              Add
-            </button>
+      </div>
+
+      {/* Subcategories for selected category */}
+      {currentCategoryId && !added.some((a) => a.specialization === currentCategoryId) && (
+        <div className="border border-gray-200 rounded-md p-2 bg-gray-50 mb-4">
+          <div className="text-xs text-gray-500 mb-2">
+            Choose subcategories (min 2)
           </div>
-        )}
-        {/* Selected tags panel */}
-        <div className="mt-2 flex flex-wrap gap-2">
-          {(formData.tags || []).map((tag, idx) => (
-            <span
-              key={tag + idx}
-              className="bg-blue-50 text-blue-700 px-2 py-1 rounded text-xs flex items-center border border-blue-300"
-            >
-              {tag}
-              {editing && (
-                <button
-                  type="button"
-                  className="ml-1 text-gray-400 hover:text-red-500"
-                  onClick={() => {
-                    const next = (formData.tags || []).filter((_, i) => i !== idx);
-                    setFormData((p) => ({ ...p, tags: next }));
-                  }}
-                >
-                  ×
-                </button>
-              )}
-            </span>
-          ))}
+          <div className="grid grid-cols-2 gap-2">
+            {categoryById(currentCategoryId)?.subCategories.map((sub) => (
+              <label key={sub} className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={currentSubSelected.includes(sub)}
+                  onChange={() => handleToggleSub(sub)}
+                  className="w-4 h-4 accent-blue-600"
+                />
+                <span className="text-gray-700">{sub}</span>
+              </label>
+            ))}
+          </div>
+          {currentSubSelected.length < 2 && (
+            <div className="text-red-500 text-xs mt-2">
+              Select at least 2 subcategories to add.
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={handleAddCurrent}
+            disabled={!canAddCurrent()}
+            className={`mt-2 px-4 py-2 rounded ${
+              canAddCurrent()
+                ? "bg-blue-600 text-white"
+                : "bg-gray-200 text-gray-400 cursor-not-allowed"
+            }`}
+          >
+            Add
+          </button>
         </div>
-      </>
-    )}
-  </div>
-</div>
+      )}
 
+      {/* Selected categories and subcategories */}
+      <div className="mt-2">
+        <div className="text-xs text-gray-500 mb-2">
+          Selected categories
+        </div>
+        <div className="space-y-3">
+          {added.length === 0 && (
+            <div className="text-sm text-gray-500">
+              No categories added yet.
+            </div>
+          )}
+          {added.map((a) => {
+            const cat = categoryById(a.specialization) || {
+              category: a.specialization,
+            };
+            return (
+              <div
+                key={String(a.specialization)}
+                className="border border-gray-200 rounded-md p-3 flex items-start justify-between"
+              >
+                <div>
+                  <div className="font-medium text-sm">{cat.category}</div>
+                  <div className="text-xs text-gray-600 mt-2">
+                    {a.subCategories && a.subCategories.length ? (
+                      <div className="flex flex-wrap gap-2">
+                        {a.subCategories.map((s) => (
+                          <span
+                            key={s}
+                            className="bg-gray-100 px-2 py-1 rounded text-xs inline-flex items-center"
+                          >
+                            {s}
+                            <button
+                              type="button"
+                              className="ml-1 text-gray-400 hover:text-red-500"
+                              style={{ fontSize: "12px", lineHeight: "1" }}
+                              onClick={() => handleRemoveSubCat(a.specialization, s)}
+                              aria-label={`Remove ${s}`}
+                            >
+                              ×
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-xs text-red-500">
+                        No subcategories selected
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="ml-4">
+                  <button
+                    type="button"
+                    className="text-sm text-red-500"
+                    onClick={() => handleRemoveAdded(a.specialization)}
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      {/* --- End Category/Subcategory UI --- */}
 
+  
+      <div className="mb-4">
+        <label className="block text-sm text-gray-700 font-medium mb-1">
+          Tags
+        </label>
+        <div className="border rounded bg-gray-50 p-3">
+          <button
+            type="button"
+            className="flex items-center gap-2 text-sm mb-2"
+            onClick={() => setOpenTags((o) => !o)}
+            disabled={!editing}
+          >
+           
+          </button>
+          {openTags && (
+            <>
+              {editing && (
+                <div className="flex gap-2 mt-2">
+                  <input
+                    placeholder="Add custom tag"
+                    className="flex-1 border rounded p-2 text-sm"
+                    value={newTag}
+                    onChange={(e) => setNewTag(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    className="px-4 py-1 rounded bg-gray-200 text-sm"
+                    onClick={() => {
+                      const v = newTag.trim();
+                      if (!v) return;
+                      const prev = Array.isArray(formData.tags) ? [...formData.tags] : prof.tags || [];
+                      if (prev.includes(v)) {
+                        setNewTag("");
+                        return;
+                      }
+                      const next = [...prev, v];
+                      setFormData((p) => ({ ...p, tags: next }));
+                      setNewTag("");
+                    }}
+                  >
+                    Add
+                  </button>
+                </div>
+              )}
+              {/* Selected tags panel */}
+              <div className="mt-2 flex flex-wrap gap-2">
+                {(formData.tags || []).map((tag, idx) => (
+                  <span
+                    key={tag + idx}
+                    className="bg-blue-50 text-blue-700 px-2 py-1 rounded text-xs flex items-center border border-blue-300"
+                  >
+                    {tag}
+                    {editing && (
+                      <button
+                        type="button"
+                        className="ml-1 text-gray-400 hover:text-red-500"
+                        onClick={() => {
+                          const next = (formData.tags || []).filter((_, i) => i !== idx);
+                          setFormData((p) => ({ ...p, tags: next }));
+                        }}
+                      >
+                        ×
+                      </button>
+                    )}
+                  </span>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
 
       {/* other fields (price, entity, example questions) unchanged */}
       <div className="mb-4">

@@ -46,7 +46,7 @@ const CategoriesSlider = ({
         className="flex gap-4 overflow-hidden pb-2 px-2 scrollbar-hide"
         style={{ scrollBehavior: "smooth" }}
       >
-        {categories
+        {categories.slice(0,6)
         .filter(cat => cat._id !== "All")
         .map((cat) => (
           <div

@@ -20,7 +20,7 @@ const PricingInput = ({
   const [inputPrice, setInputPrice] = useState("");
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [selectedDeliveryType, setSelectedDeliveryType] = useState("normal");
+  const [selectedDeliveryType, setSelectedDeliveryType] = useState(initialMode);
 
   // Determine UI state based on status and role
   let isEditable = false;
@@ -234,7 +234,7 @@ const PricingInput = ({
           </button>
         </div>
       )}
-      {role === "asker" &&
+      {role === "asker" || role==='professional' && 
         (status === "awaiting_payment" || status === "quoted") && (
           <div className="text-center">
             <p className="text-xs text-gray-500 mb-1">

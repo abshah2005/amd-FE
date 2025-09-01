@@ -3,6 +3,11 @@ import { useQuery } from "@tanstack/react-query";
 import useDebouncedValue from "./useDebouncedValue";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ;
+function getAuthHeaders() {
+  const token = localStorage.getItem("accessToken");
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
 
 
 export const useProfessionals = (filters = {}, opts = {}) => {
@@ -22,9 +27,8 @@ export const useProfessionals = (filters = {}, opts = {}) => {
           params.set(k, String(v));
         }
       });
-      // API expects /api/public/professionals
       const url = `${API_BASE}/public/professionals?${params.toString()}`;
-      const { data } = await axios.get(url);
+      const { data } = await axios.get(url,{headers:getAuthHeaders()});
       return data && data.data ? data.data : { results: [], page: 1, limit: debouncedFilters.limit || 20, total: 0 };
     },
     staleTime: 1000 * 60 * 2,
