@@ -133,8 +133,8 @@ const FeedbackSlider = ({ feedback }) => {
             }}
           >
             <div className="flex items-center justify-between text-xs text-slate-700 mb-1">
-              <span>{fb.name}</span>
-              <span>{fb.date}</span>
+              <span>{fb.asker.firstName}{fb.asker.lastName}</span>
+              <span>{fb.createdAt}</span>
             </div>
             <div className="flex items-center gap-1 text-yellow-500 text-xs">
               {Array.from({ length: 5 }).map((_, i) => {
@@ -149,7 +149,7 @@ const FeedbackSlider = ({ feedback }) => {
               })}
               <span className="text-slate-500 ml-1">{fb.rating.toFixed(1)}</span>
             </div>
-            <div className="text-sm text-slate-700">{fb.text}</div>
+            <div className="text-sm text-slate-700">{fb.comment}</div>
           </div>
         )).slice(index, index + cardsToShow)}
       </div>

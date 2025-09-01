@@ -44,6 +44,9 @@ export const useToggleActiveRole = () => {
       }
       queryClient.invalidateQueries(["currentUser"]);
       queryClient.invalidateQueries(["registrationState"]);
+      // queryClient.invalidateQueries(["answers"]);
+      // queryClient.invalidateQueries(["questions"]);
+
 
       return latest;
     },

@@ -46,10 +46,11 @@ const dummyData = {
   deliveryTime: "Less than 7 days",
   feedback: [
     {
-      name: "John Doe",
-      date: "2025/02/01",
+      firstName: "John ",
+      lastName: "Doe",
+      createdAt: "2025/02/01",
       rating: 4.0,
-      text: "The answer is insightful and well-explained.",
+      comment: "The answer is insightful and well-explained.",
     },
   ],
 };
@@ -115,7 +116,7 @@ const ProfessionalProfileModal = ({ professional, onClose }) => {
       dummyData.associated,
     socialLinks: professional?.socialLinks ?? dummyData.socialLinks,
     expertise: professional?.tags ?? dummyData.expertise,
-    feedback: professional?.feedback ?? dummyData.feedback,
+    feedback: professional?.feedbacks ?? dummyData.feedback,
     about:
       professional?.about == null
         ? dummyData.about

@@ -19,7 +19,7 @@ export function useQuestions({ page = 1, limit = 10, status } = {}) {
       });
       return data?.data?.questions || [];
     },
-    keepPreviousData: true,
+    // keepPreviousData: true,
   });
 }
 
@@ -58,7 +58,7 @@ export function useAnswers({ page = 1, limit = 10, status } = {}) {
       });
       return data?.data?.questions || [];
     },
-    keepPreviousData: true,
+    // keepPreviousData: true,
   });
 }
 

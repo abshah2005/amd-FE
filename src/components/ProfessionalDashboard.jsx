@@ -100,7 +100,7 @@ function SidebarList({ items }) {
     <div className=" pr-6">
       <h3 className="text-lg font-semibold mb-4">Active Questions</h3>
       <ul className="text-sm space-y-6">
-        {items.map((it, i) => (
+        {items.slice(0,6).map((it, i) => (
           <li key={i} className="flex items-start gap-3">
             <div className="w-2 h-2 rounded-full bg-gray-800 mt-1" />
             <div>
@@ -121,6 +121,7 @@ function SidebarList({ items }) {
             </div>
           </li>
         ))}
+        {items.length-6>0 && <li className="text-sm text-gray-500">and {items.length-6} more...</li>}
       </ul>
     </div>
   );
@@ -291,10 +292,11 @@ export default function ProfessionalDashboard() {
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
-                        {filtered.map((row) => (
+                        {filtered.map((row,i) => (
                           <tr key={row.id} className="hover:bg-gray-50">
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 font-medium">
-                              {row._id}
+                              {/* {row._id} */}
+                              {`Qno.${i+1}`}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                               {new Date(row.createdAt)
