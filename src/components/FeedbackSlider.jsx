@@ -78,7 +78,7 @@ const FeedbackSlider = ({ feedback }) => {
         </div>
       </div>
       <div
-        className="flex gap-4 transition-transform duration-500"
+        className="flex gap-1 transition-transform duration-500"
         style={{
           transform: `translateX(-${index * (100 / cardsToShow)}%)`,
         }}
@@ -101,7 +101,7 @@ const FeedbackSlider = ({ feedback }) => {
                       }`.trim()
                     : `${fb.firstName || ""} ${fb.lastName || ""}`.trim()}
                 </span>
-                <span>{fb.createdAt}</span>
+                <span>{new Date(fb?.createdAt).toLocaleDateString()}</span>
               </div>
               <div className="flex items-center gap-1 text-yellow-500 text-xs">
                 {Array.from({ length: 5 }).map((_, i) => {
@@ -118,8 +118,8 @@ const FeedbackSlider = ({ feedback }) => {
                   {fb.rating.toFixed(1)}
                 </span> */}
                 <span className="text-slate-500 ml-1">
-  {(fb.rating ?? 0).toFixed(1)}
-</span>
+                  {(fb.rating ?? 0).toFixed(1)}
+                </span>
               </div>
               <div className="text-sm text-slate-700">{fb.comment}</div>
             </div>

@@ -6,7 +6,7 @@ import { DiscardModal } from "./DiscardModal";
 import ImageSelectorModal from "./ImageSelectorModal";
 import LexicalEditor from "./RichTextEditor";
 import { useCreateQuestion } from "../hooks/useCreateQuestion";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const deliveryOptions = [
   { label: "Normal", value: "normal" },
@@ -231,7 +231,9 @@ const AskQuestionModal = ({ professional, onClose }) => {
             )}
 
             <span className="text-xs text-blue-800  cursor-pointer pl-2">
+              <Link to={`/profile/${professional.firstName}_${professional.lastName}`}>
               See Profile
+              </Link>
             </span>
           </div>
           <span className="text-xs text-gray-500 pl-2">
