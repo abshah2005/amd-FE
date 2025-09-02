@@ -30,6 +30,11 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
   const [threadClosureOpen, setThreadClosureOpen] = useState(false);
   const [message, setMessage] = useState(""); // For final message input
   const [editorContent, setEditorContent] = useState(null);
+  const [deliveryTimes, setDeliveryTimes] = useState({
+    answerByNormal: null,
+    answerByFast: null,
+  });
+
   const [answer, setAnswer] = useState(null);
   const [quoteDate, setQuoteDate] = useState(null); // Date object
   const [quoteTime, setQuoteTime] = useState(null); // String "HH:mm"
@@ -97,6 +102,27 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
     : null;
 
   const [initialType, setInitialType] = useState("normal");
+
+  // const handleDateTimeApply = ({ date, ranges }) => {
+  //   if (initialType === "normal") {
+  //     const answerByNormal = ranges[0]?.end;
+  //     if (!answerByNormal) {
+  //       alert("Please select a valid normal delivery time.");
+  //       return;
+  //     }
+  //     setDeliveryTimes((prev) => ({ ...prev, answerByNormal }));
+  //     console.log("Normal Delivery Time applied:", { answerByNormal });
+  //   } else if (initialType === "fast") {
+  //     const answerByFast = ranges[0]?.end;
+  //     if (!answerByFast) {
+  //       alert("Please select a valid fast delivery time.");
+  //       return;
+  //     }
+  //     setDeliveryTimes((prev) => ({ ...prev, answerByFast }));
+  //     console.log("Fast Delivery Time applied:", { answerByFast });
+  //   }
+  //   setDatePickerOpen(false);
+  // };
 
   // Combine date and time to ISO string
   useEffect(() => {
@@ -341,17 +367,23 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
               </td>
               <td className="px-3 py-2">
                 <div className="flex items-center font-bold">
-                  {question.status === "Submitted"
-                    ? question.deliveryTime
+                  {status === "submitted" || status === "approved" || status === "rejected"
+                    ? "N/A"
                     : normalDeliveryTime?.answerByNormal
-                    ? new Date(normalDeliveryTime.answerByNormal).toLocaleDateString()
+                    ? new Date(
+                        normalDeliveryTime?.answerByNormal
+                      ).toLocaleDateString()
+                    : question.deliveryTime
+                    ? new Date(question.deliveryTime).toLocaleDateString()
                     : "N/A"}
 
                   <svg
                     className="ml-1 w-4 h-4"
                     onClick={() => {
-                      setInitialType("normal");
-                      setDatePickerOpen(true);
+                      if (status === "approved" && role === "professional") {
+                        setInitialType("normal");
+                        setDatePickerOpen(true);
+                      }
                     }}
                     cursor={"pointer"}
                     viewBox="0 0 20 20"
@@ -367,16 +399,31 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
               </td>
               <td className="px-3 py-2">
                 <div className="flex items-center font-bold font-bold">
-                  {question.status === "Submitted"
+                  {/* {status === "submitted"
                     ? question.fastDelivery
                     : fastDeliveryTime?.answerByFast
-                    ? new Date(fastDeliveryTime.answerByFast).toLocaleDateString()
+                    ? new Date(
+                        fastDeliveryTime?.answerByFast
+                      ).toLocaleDateString()
+                    : "N/A"} */}
+                  {status === "submitted" || status === "approved" || status === "rejected"
+                    ? "N/A"
+                    : fastDeliveryTime?.answerByFast
+                    ? new Date(
+                        fastDeliveryTime?.answerByFast
+                      ).toLocaleDateString()
+                    : question.fastDelivery
+                    ? new Date(question.fastDelivery).toLocaleDateString()
                     : "N/A"}
                   <svg
                     className="ml-1 w-4 h-4"
                     onClick={() => {
-                      setInitialType("fast");
-                      setDatePickerOpen(true);
+                      console.log("Status on fast click:", status);
+                      if (status === "approved" && role === "professional") {
+                        setInitialType("fast");
+                        setDatePickerOpen(true);
+                        console.log("Fast delivery time picker opened");
+                      }
                     }}
                     cursor={"pointer"}
                     viewBox="0 0 20 20"
@@ -479,6 +526,8 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
 
           <PricingInput
             quote={question.quote}
+            normalDeliveryTime={normalDeliveryTime}
+            fastDeliveryTime={fastDeliveryTime}
             initialMode={question.deliveryType}
             price={question.price}
             status={status}
@@ -492,7 +541,6 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
             onPayNow={handlePayNow}
           />
         </div>
-
         {!question.feedback && status === "closed" && role === "asker" && (
           <div className="flex justify-center mt-4">
             <button
@@ -503,9 +551,7 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
             </button>
           </div>
         )}
-
         {/* Response area */}
-
         {["in_thread", "paid", "answered"].includes(status) &&
           user.activeRole === "professional" && (
             <div className="mt-8">
@@ -677,7 +723,6 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
             })()}
           </div>
         )}
-
         {/* Activity section */}
         <div className="mt-8">
           {/* <h2 className="font-semibold text-lg mb-3">Activity</h2> */}
@@ -760,7 +805,6 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
             ))}
           </div>
         </div>
-
         <DateTimePicker
           open={datePickerOpen}
           onClose={() => setDatePickerOpen(false)}
@@ -779,6 +823,12 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
             setDatePickerOpen(false);
           }}
         />
+        {/* <DateTimePicker
+          open={datePickerOpen}
+          onClose={() => setDatePickerOpen(false)}
+          onApply={handleDateTimeApply}
+        /> */}
+
         <FeedbackModal
           open={feedbackOpen}
           onClose={() => setFeedbackOpen(false)}

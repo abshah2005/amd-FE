@@ -1,9 +1,12 @@
 import React, { useState } from "react";
 import PaymentModal from "./PaymentModal";
+import { useUpdateQuestionStatus } from "../hooks/useQuestionsAndAnswers";
 
 const PricingInput = ({
   initialMode,
   status,
+  normalDeliveryTime,
+  fastDeliveryTime,
   price,
   priceRange = "$25-$35",
   settledPrice,
@@ -26,6 +29,8 @@ const PricingInput = ({
     fastAmount: "",
   });
 
+  const updateQuestionStatus=useUpdateQuestionStatus()
+
   const handleNormalAmountChange = (e) => {
     const value = e.target.value;
     setQuoteState((prevState) => ({
@@ -43,8 +48,34 @@ const PricingInput = ({
   };
 
   const handleQuoteSubmit = () => {
-    console.log("Quote Submitted:", quoteState);
-    // Add any additional logic for submitting the quote here
+    if (!normalDeliveryTime?.answerByNormal) {
+      alert("Please provide a valid Normal Delivery Time.");
+      return;
+    }
+
+    if (!fastDeliveryTime?.answerByFast) {
+      alert("Please provide a valid Fast Delivery Time.");
+      return;
+    }
+
+    // Check if both amounts are provided
+    if (!quoteState.normalAmount || !quoteState.fastAmount) {
+      alert("Please provide both Normal and Fast delivery prices.");
+      return;
+    }
+    const quoteData = {
+      answerByNormal: normalDeliveryTime.answerByNormal,
+      answerByFast: fastDeliveryTime.answerByFast,
+      normalAmount: parseInt(quoteState.normalAmount),
+      fastAmount: parseInt(quoteState.fastAmount),
+    };
+
+    updateQuestionStatus.mutate({
+      id: questionId,
+      action: "quote",
+      payload: quoteData,
+    });
+    console.log("Quote Submitted:", quoteData);
   };
 
   // Determine UI state based on status and role
@@ -76,7 +107,7 @@ const PricingInput = ({
     }
   } else if (status === "awaiting_payment" || status === "quoted") {
     if (role === "professional") {
-      isEditable = false;
+      isEditable = true;
       isDisabled = true;
       buttonText = "Pay Now";
       showInput = false;
@@ -215,74 +246,125 @@ const PricingInput = ({
         </div>
       </div>
       {/* Price Display for Asker */}
-      {(role === "asker" || role==='professional') && (status==="submitted" || status==='rejected') && (
-        <div className="text-center">
-          <p className="text-xs text-gray-500 mb-1">
-            {initialMode === "normal"
-              ? "Normal Delivery Price"
-              : "Fast Delivery Price"}
-          </p>
-          <p className="text-xl font-bold text-gray-800">{priceRange}</p>
-          <p className="text-xs text-gray-600 mt-2">
-            Delivery Mode:{" "}
-            <span className="font-semibold">
-              {initialMode?.charAt(0).toUpperCase() + initialMode?.slice(1)}
-            </span>
-          </p>
-          <button
-            className="w-full py-2 mt-3 rounded-full font-medium bg-gray-400 text-gray-600 cursor-not-allowed"
-            disabled
-          >
-            {status==="submitted"?"yet to be quoted":"rejected"}
-          </button>
-        </div>
-      )}
-      {(role === "asker" || role==='professional') && (status==="paid" || status==="closed")&& (
-        <div className="text-center">
-          <p className="text-xs text-gray-500 mb-1">
-            {initialMode === "normal"
-              ? "Normal Delivery Price"
-              : "Fast Delivery Price"}
-          </p>
-          <p className="text-xl font-bold text-gray-800">${price}</p>
-          <p className="text-xs text-gray-600 mt-2">
-            Delivery Mode:{" "}
-            <span className="font-semibold">
-              {initialMode?.charAt(0).toUpperCase() + initialMode?.slice(1)}
-            </span>
-          </p>
-          <button
-            className="w-full py-2 mt-3 rounded-full font-medium bg-gray-400 text-gray-600 cursor-not-allowed"
-            disabled
-          >
-            Paid
-          </button>
-        </div>
-      )}
-      {role === "asker" || role==='professional' && 
-        (status === "awaiting_payment" || status === "quoted") && (
+      {(role === "asker" || role === "professional") &&
+        (status === "submitted" || status === "rejected") && (
           <div className="text-center">
             <p className="text-xs text-gray-500 mb-1">
-              {selectedDeliveryType === "normal"
+              {initialMode === "normal"
                 ? "Normal Delivery Price"
                 : "Fast Delivery Price"}
             </p>
-            <p className="text-xl font-bold text-gray-800">
-              ${getPriceForMode(selectedDeliveryType)}
+            <p className="text-xl font-bold text-gray-800">{priceRange}</p>
+            <p className="text-xs text-gray-600 mt-2">
+              Delivery Mode:{" "}
+              <span className="font-semibold">
+                {initialMode?.charAt(0).toUpperCase() + initialMode?.slice(1)}
+              </span>
             </p>
             <button
-              className={`w-full py-2 mt-3 rounded-full font-medium ${
-                isDisabled
-                  ? "bg-gray-400 text-gray-600 cursor-not-allowed"
-                  : "bg-blue-600 text-white hover:bg-blue-700"
-              }`}
-              disabled={isDisabled}
-              onClick={handlePayNowClick}
+              className="w-full py-2 mt-3 rounded-full font-medium bg-gray-400 text-gray-600 cursor-not-allowed"
+              disabled
             >
-              {buttonText}
+              {status === "submitted" ? "yet to be quoted" : "rejected"}
             </button>
           </div>
         )}
+      {(role === "asker" || role === "professional") &&
+        (status === "paid" || status === "closed") && (
+          <div className="text-center">
+            <p className="text-xs text-gray-500 mb-1">
+              {initialMode === "normal"
+                ? "Normal Delivery Price"
+                : "Fast Delivery Price"}
+            </p>
+            <p className="text-xl font-bold text-gray-800">${price}</p>
+            <p className="text-xs text-gray-600 mt-2">
+              Delivery Mode:{" "}
+              <span className="font-semibold">
+                {initialMode?.charAt(0).toUpperCase() + initialMode?.slice(1)}
+              </span>
+            </p>
+            <button
+              className="w-full py-2 mt-3 rounded-full font-medium bg-gray-400 text-gray-600 cursor-not-allowed"
+              disabled
+            >
+              Paid
+            </button>
+          </div>
+        )}
+
+      {/* {role === "asker" ||
+        (role === "professional" &&
+          (status === "awaiting_payment" || status === "quoted") && (
+            <div className="text-center">
+              <p className="text-xs text-gray-500 mb-1">
+                {selectedDeliveryType === "normal"
+                  ? "Normal Delivery Price"
+                  : "Fast Delivery Price"}
+              </p>
+              <p className="text-xl font-bold text-gray-800">
+                ${getPriceForMode(selectedDeliveryType)}
+              </p>
+              <button
+                className={`w-full py-2 mt-3 rounded-full font-medium ${
+                  isDisabled
+                    ? "bg-gray-400 text-gray-600 cursor-not-allowed"
+                    : "bg-blue-600 text-white hover:bg-blue-700"
+                }`}
+                disabled={isDisabled}
+                onClick={handlePayNowClick}
+              >
+                {buttonText}
+              </button>
+            </div>
+          ))} */}
+          {role === "asker" && (status === "awaiting_payment" || status === "quoted") && (
+  <div className="text-center">
+    <p className="text-xs text-gray-500 mb-1">
+      {selectedDeliveryType === "normal"
+        ? "Normal Delivery Price"
+        : "Fast Delivery Price"}
+    </p>
+    <p className="text-xl font-bold text-gray-800">
+      ${getPriceForMode(selectedDeliveryType)}
+    </p>
+    <button
+      className={`w-full py-2 mt-3 rounded-full font-medium ${
+        isDisabled
+          ? "bg-gray-400 text-gray-600 cursor-not-allowed"
+          : "bg-blue-600 text-white hover:bg-blue-700"
+      }`}
+      disabled={isDisabled}
+      onClick={handlePayNowClick}
+    >
+      {buttonText}
+    </button>
+  </div>
+)}
+
+{role === "professional" && (status === "awaiting_payment" || status === "quoted") && (
+  <div className="text-center">
+    <p className="text-xs text-gray-500 mb-1">
+      {selectedDeliveryType === "normal"
+        ? "Normal Delivery Price"
+        : "Fast Delivery Price"}
+    </p>
+    <p className="text-xl font-bold text-gray-800">
+      ${getPriceForMode(selectedDeliveryType)}
+    </p>
+    <button
+      className={`w-full py-2 mt-3 rounded-full font-medium ${
+        isDisabled
+          ? "bg-gray-400 text-gray-600 cursor-not-allowed"
+          : "bg-blue-600 text-white hover:bg-blue-700"
+      }`}
+      disabled={isDisabled}
+      onClick={handlePayNowClick}
+    >
+      {buttonText}
+    </button>
+  </div>
+)}
       {/* Professional Pricing Input */}
       {role === "asker" && status === "approved" && (
         <div className="text-center">
@@ -378,47 +460,46 @@ const PricingInput = ({
         </div>
       )} */}
       {role === "professional" && status === "approved" && (
-  <div className="text-center">
-    <p className="text-xs text-gray-500 mb-1">
-      {selectedDeliveryType === "normal"
-        ? "Enter Normal Delivery Price"
-        : "Enter Fast Delivery Price"}
-    </p>
-    <div className="mb-4">
-      {selectedDeliveryType === "normal" ? (
-        <input
-          type="number"
-          value={quoteState.normalAmount}
-          onChange={handleNormalAmountChange}
-          className="text-xl font-bold text-gray-500 border bg-gray-200 rounded w-full text-center"
-          // placeholder="Enter Normal Delivery Price"
-        />
-      ) : (
-        <input
-          type="number"
-          value={quoteState.fastAmount}
-          onChange={handleFastAmountChange}
-          className="text-xl font-bold text-gray-500 border bg-gray-200 rounded w-full text-center"
-          // placeholder="Enter Fast Delivery Price"
-        />
+        <div className="text-center">
+          <p className="text-xs text-gray-500 mb-1">
+            {selectedDeliveryType === "normal"
+              ? "Enter Normal Delivery Price"
+              : "Enter Fast Delivery Price"}
+          </p>
+          <div className="mb-4">
+            {selectedDeliveryType === "normal" ? (
+              <input
+                type="number"
+                value={quoteState.normalAmount}
+                onChange={handleNormalAmountChange}
+                className="text-xl font-bold text-gray-500 border bg-gray-200 rounded w-full text-center"
+                // placeholder="Enter Normal Delivery Price"
+              />
+            ) : (
+              <input
+                type="number"
+                value={quoteState.fastAmount}
+                onChange={handleFastAmountChange}
+                className="text-xl font-bold text-gray-500 border bg-gray-200 rounded w-full text-center"
+                // placeholder="Enter Fast Delivery Price"
+              />
+            )}
+          </div>
+
+          <button
+            className={`w-full py-2 mt-3 rounded-full font-medium ${
+              quoteState.normalAmount && quoteState.fastAmount
+                ? "bg-blue-600 text-white hover:bg-blue-700"
+                : "bg-gray-400 text-gray-600 cursor-not-allowed"
+            }`}
+            disabled={!quoteState.normalAmount || !quoteState.fastAmount}
+            onClick={handleQuoteSubmit}
+          >
+            {updateQuestionStatus.isPending ? "Submitting..." : "Submit Quote"}
+          </button>
+        </div>
       )}
-    </div>
-    
-    <button
-      className={`w-full py-2 mt-3 rounded-full font-medium ${
-        quoteState.normalAmount && quoteState.fastAmount
-          ? "bg-blue-600 text-white hover:bg-blue-700"
-          : "bg-gray-400 text-gray-600 cursor-not-allowed"
-      }`}
-      disabled={!quoteState.normalAmount || !quoteState.fastAmount}
-      onClick={handleQuoteSubmit}
-    >
-      Submit Quote
-    </button>
-  </div>
-)}
-    
-      
+
       <PaymentModal
         isOpen={isPaymentOpen}
         onRequestClose={() => setIsPaymentOpen(false)}
