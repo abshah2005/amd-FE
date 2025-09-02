@@ -21,6 +21,31 @@ const PricingInput = ({
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [selectedDeliveryType, setSelectedDeliveryType] = useState(initialMode);
+  const [quoteState, setQuoteState] = useState({
+    normalAmount: "",
+    fastAmount: "",
+  });
+
+  const handleNormalAmountChange = (e) => {
+    const value = e.target.value;
+    setQuoteState((prevState) => ({
+      ...prevState,
+      normalAmount: value,
+    }));
+  };
+
+  const handleFastAmountChange = (e) => {
+    const value = e.target.value;
+    setQuoteState((prevState) => ({
+      ...prevState,
+      fastAmount: value,
+    }));
+  };
+
+  const handleQuoteSubmit = () => {
+    console.log("Quote Submitted:", quoteState);
+    // Add any additional logic for submitting the quote here
+  };
 
   // Determine UI state based on status and role
   let isEditable = false;
@@ -306,7 +331,7 @@ const PricingInput = ({
         </div>
       )}
 
-      {role === "professional" && status === "approved" && (
+      {/* {role === "professional" && status === "approved" && (
         <div className="text-center">
           <p className="text-xs text-gray-500 mb-1">
             {status === "awaiting_response" || status === "approved"
@@ -351,7 +376,49 @@ const PricingInput = ({
             {buttonText}
           </button>
         </div>
+      )} */}
+      {role === "professional" && status === "approved" && (
+  <div className="text-center">
+    <p className="text-xs text-gray-500 mb-1">
+      {selectedDeliveryType === "normal"
+        ? "Enter Normal Delivery Price"
+        : "Enter Fast Delivery Price"}
+    </p>
+    <div className="mb-4">
+      {selectedDeliveryType === "normal" ? (
+        <input
+          type="number"
+          value={quoteState.normalAmount}
+          onChange={handleNormalAmountChange}
+          className="text-xl font-bold text-gray-500 border bg-gray-200 rounded w-full text-center"
+          // placeholder="Enter Normal Delivery Price"
+        />
+      ) : (
+        <input
+          type="number"
+          value={quoteState.fastAmount}
+          onChange={handleFastAmountChange}
+          className="text-xl font-bold text-gray-500 border bg-gray-200 rounded w-full text-center"
+          // placeholder="Enter Fast Delivery Price"
+        />
       )}
+    </div>
+    
+    <button
+      className={`w-full py-2 mt-3 rounded-full font-medium ${
+        quoteState.normalAmount && quoteState.fastAmount
+          ? "bg-blue-600 text-white hover:bg-blue-700"
+          : "bg-gray-400 text-gray-600 cursor-not-allowed"
+      }`}
+      disabled={!quoteState.normalAmount || !quoteState.fastAmount}
+      onClick={handleQuoteSubmit}
+    >
+      Submit Quote
+    </button>
+  </div>
+)}
+    
+      
       <PaymentModal
         isOpen={isPaymentOpen}
         onRequestClose={() => setIsPaymentOpen(false)}

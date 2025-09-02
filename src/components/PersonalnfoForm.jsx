@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { allLanguages, allLocations } from "../utils/Constant";
 
 // Custom input with add button for multi-value fields
 const MultiAddInput = ({
@@ -67,10 +68,7 @@ const PersonalInfoForm = ({
   onNext,
   loading,
 }) => {
-  // For demo, static options
-  const languageOptions = ["English", "French", "Spanish", "German"];
-  const countryOptions = ["UK", "USA", "France", "Germany"];
-
+  
   // Validation for mandatory fields
   const isValid =
     values.profileImage || values.profileImageFile
@@ -180,7 +178,7 @@ const PersonalInfoForm = ({
           <MultiAddInput
             label="Language"
             placeholder="Language"
-            options={languageOptions}
+            options={allLanguages}
             onAdd={lang => onChange("languages", [...(values.languages || []), lang])}
             items={values.languages || []}
             disabled={false}
@@ -218,7 +216,7 @@ const PersonalInfoForm = ({
           <MultiAddInput
             label="Country"
             placeholder="Country"
-            options={countryOptions}
+            options={allLocations}
             onAdd={country => onChange("locations", [...(values.locations || []), country])}
             items={values.locations || []}
             disabled={false}

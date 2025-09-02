@@ -183,7 +183,7 @@ export default function DateTimePicker({ open, onApply, onClose, initialDate = n
                   />
                 </div>
 
-                <div className="ml-auto flex items-center gap-2">
+                {/* <div className="ml-auto flex items-center gap-2">
                   <button
                     title="Remove"
                     onClick={() => removeRange(idx)}
@@ -191,12 +191,12 @@ export default function DateTimePicker({ open, onApply, onClose, initialDate = n
                   >
                     ×
                   </button>
-                </div>
+                </div> */}
               </div>
             ))}
 
             <div className="flex items-center justify-between mt-2">
-              <button
+              {/* <button
                 type="button"
                 onClick={addRange}
                 className="flex items-center gap-2 text-sm text-blue-600 hover:underline"
@@ -205,7 +205,7 @@ export default function DateTimePicker({ open, onApply, onClose, initialDate = n
                   <path d="M12 5v14M5 12h14" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
                 Add
-              </button>
+              </button> */}
 
               <div className="flex gap-3">
                 <button

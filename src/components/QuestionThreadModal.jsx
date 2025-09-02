@@ -25,7 +25,7 @@ import ThreadClosureModal from "./ThreadClosureModal";
 import FeedbackModal from "./FeedbackModal";
 import { useLeaveFeedback } from "../hooks/useQuestionsAndAnswers";
 
-const QuestionThreadModal = ({ open, onClose, questionId,questionLabel }) => {
+const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
   const [showMessage, setShowMessage] = useState(true);
   const [threadClosureOpen, setThreadClosureOpen] = useState(false);
   const [message, setMessage] = useState(""); // For final message input
@@ -57,7 +57,10 @@ const QuestionThreadModal = ({ open, onClose, questionId,questionLabel }) => {
   // Fetch question data using the ID
   const { data: questionData, isLoading, error } = useGetQuestion(questionId);
   const useCloseHook = useClose();
+
   const updateQuestionStatus = useUpdateQuestionStatus();
+  const [normalDeliveryTime, setNormalDeliveryTime] = useState(null);
+  const [fastDeliveryTime, setFastDeliveryTime] = useState(null);
   const postFollowUp = usePostFollowUp();
   const postAnswer = usePostAnswer();
   // Determine role and status based on user and question data
@@ -92,6 +95,8 @@ const QuestionThreadModal = ({ open, onClose, questionId,questionLabel }) => {
         quote: questionData.quote || null,
       }
     : null;
+
+  const [initialType, setInitialType] = useState("normal");
 
   // Combine date and time to ISO string
   useEffect(() => {
@@ -260,24 +265,26 @@ const QuestionThreadModal = ({ open, onClose, questionId,questionLabel }) => {
       </div>
 
       {/* Instruction banner */}
-      {role==="professional" && status === "submitted" && status !== "approved" && showMessage && (
-        <div className="w-full bg-gray-200">
-          <div className="bg-gray-200 border-l-4 w-[98%] border-black p-3 flex justify-between items-center m-auto">
-            <p className="text-sm text-gray-700">
-              To quote a price, first change your status to 'Approved'. Then
-              select your delivery time and enter your quote.
-            </p>
-            <button
-              className="text-blue-600 text-sm"
-              onClick={() => setShowMessage(false)}
-            >
-              dismiss
-            </button>
+      {role === "professional" &&
+        status === "submitted" &&
+        status !== "approved" &&
+        showMessage && (
+          <div className="w-full bg-gray-200">
+            <div className="bg-gray-200 border-l-4 w-[98%] border-black p-3 flex justify-between items-center m-auto">
+              <p className="text-sm text-gray-700">
+                To quote a price, first change your status to 'Approved'. Then
+                select your delivery time and enter your quote.
+              </p>
+              <button
+                className="text-blue-600 text-sm"
+                onClick={() => setShowMessage(false)}
+              >
+                dismiss
+              </button>
+            </div>
           </div>
-        </div>
-      )}
+        )}
       {role === "professional" && status === "submitted" && (
-        
         <div className="mt-4 flex justify-center">
           <button
             className="px-4 py-2 bg-green-600 text-white rounded-full text-sm hover:bg-green-700"
@@ -287,12 +294,11 @@ const QuestionThreadModal = ({ open, onClose, questionId,questionLabel }) => {
           </button>
           <button
             className="px-4 py-2 bg-red-600 text-white rounded-full text-sm hover:bg-red-700"
-            onClick={() => handleAction("reject")} 
+            onClick={() => handleAction("reject")}
           >
             Reject Question
           </button>
         </div>
-        
       )}
 
       {/* Question details table */}
@@ -304,7 +310,7 @@ const QuestionThreadModal = ({ open, onClose, questionId,questionLabel }) => {
               <th className="px-3 py-2  font-bold">Asker</th>
               <th className="px-3 py-2 font-bold">Proposed budget</th>
               <th className="px-3 py-2 font-bold">Status</th>
-              <th className="px-3 py-2 font-bold">Delivery Time</th>
+              <th className="px-3 py-2 font-bold">Normal Delivery </th>
               <th className="px-3 py-2 font-bold">Fast Delivery</th>
               <th className="px-3 py-2 font-bold">Payment Status</th>
               <th className="px-3 py-2 font-bold text-right">More</th>
@@ -335,9 +341,19 @@ const QuestionThreadModal = ({ open, onClose, questionId,questionLabel }) => {
               </td>
               <td className="px-3 py-2">
                 <div className="flex items-center font-bold">
-                  {question.deliveryTime}
+                  {question.status === "Submitted"
+                    ? question.deliveryTime
+                    : normalDeliveryTime?.answerByNormal
+                    ? new Date(normalDeliveryTime.answerByNormal).toLocaleDateString()
+                    : "N/A"}
+
                   <svg
                     className="ml-1 w-4 h-4"
+                    onClick={() => {
+                      setInitialType("normal");
+                      setDatePickerOpen(true);
+                    }}
+                    cursor={"pointer"}
                     viewBox="0 0 20 20"
                     fill="currentColor"
                   >
@@ -351,9 +367,18 @@ const QuestionThreadModal = ({ open, onClose, questionId,questionLabel }) => {
               </td>
               <td className="px-3 py-2">
                 <div className="flex items-center font-bold font-bold">
-                  {question.fastDelivery}
+                  {question.status === "Submitted"
+                    ? question.fastDelivery
+                    : fastDeliveryTime?.answerByFast
+                    ? new Date(fastDeliveryTime.answerByFast).toLocaleDateString()
+                    : "N/A"}
                   <svg
                     className="ml-1 w-4 h-4"
+                    onClick={() => {
+                      setInitialType("fast");
+                      setDatePickerOpen(true);
+                    }}
+                    cursor={"pointer"}
                     viewBox="0 0 20 20"
                     fill="currentColor"
                   >
@@ -541,7 +566,7 @@ const QuestionThreadModal = ({ open, onClose, questionId,questionLabel }) => {
             <div className="bg-white rounded-lg  p-3 w-full max-w-xl mx-auto">
               <div className="flex justify-center items-center mb-2 text-center gap-4">
                 <span className="font-semibold text-gray-700">
-                  {question.asker.firstName}{" "}{question.asker.lastName}.
+                  {question.asker.firstName} {question.asker.lastName}.
                 </span>
                 <span className="text-xs text-gray-400">
                   {question.feedback.createdAt}
@@ -735,24 +760,43 @@ const QuestionThreadModal = ({ open, onClose, questionId,questionLabel }) => {
             ))}
           </div>
         </div>
+
+        <DateTimePicker
+          open={datePickerOpen}
+          onClose={() => setDatePickerOpen(false)}
+          onApply={({ date, ranges }) => {
+            if (initialType === "normal") {
+              setNormalDeliveryTime({ answerByNormal: ranges[0]?.end });
+              console.log("Normal Delivery Time applied:", {
+                answerBy: ranges[0]?.end,
+              });
+            } else if (initialType === "fast") {
+              setFastDeliveryTime({ answerByFast: ranges[0]?.end });
+              console.log("Fast Delivery Time applied:", {
+                answerBy: ranges[0]?.end,
+              });
+            }
+            setDatePickerOpen(false);
+          }}
+        />
         <FeedbackModal
-  open={feedbackOpen}
-  onClose={() => setFeedbackOpen(false)}
-  loading={leaveFeedback.isPending}
-  onSubmit={({ rating, comment }) => {
-    leaveFeedback.mutate(
-      { questionId: question.id, rating, comment },
-      {
-        onSuccess: () => {
-          setFeedbackOpen(false);
-        },
-        onError: (error) => {
-          console.error("Failed to leave feedback:", error);
-        },
-      }
-    );
-  }}
-/>
+          open={feedbackOpen}
+          onClose={() => setFeedbackOpen(false)}
+          loading={leaveFeedback.isPending}
+          onSubmit={({ rating, comment }) => {
+            leaveFeedback.mutate(
+              { questionId: question.id, rating, comment },
+              {
+                onSuccess: () => {
+                  setFeedbackOpen(false);
+                },
+                onError: (error) => {
+                  console.error("Failed to leave feedback:", error);
+                },
+              }
+            );
+          }}
+        />
       </div>
     </div>
   );
@@ -782,20 +826,6 @@ const QuestionThreadModal = ({ open, onClose, questionId,questionLabel }) => {
       >
         {content}
       </div>
-
-       
-      <DateTimePicker
-        open={datePickerOpen}
-        onClose={() => setDatePickerOpen(false)}
-        onApply={({ date, ranges }) => {
-          console.log("DateTimePicker applied:", {
-            questionId: question?.id,
-            date,
-            ranges,
-          });
-          setDatePickerOpen(false);
-        }}
-      />
 
       <ThreadClosureModal
         open={threadClosureOpen}
