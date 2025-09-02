@@ -42,6 +42,9 @@ const ProfessionalDetailsForm = ({
 
   const [tags, setTags] = useState(initialTagList);
   const [tagInput, setTagInput] = useState("");
+  const [professionalExperiences, setProfessionalExperiences] = useState(
+    values.professionalExperiences || []
+  );
 
   // sync parent when added or tags change
   useEffect(() => {
@@ -58,6 +61,9 @@ const ProfessionalDetailsForm = ({
   useEffect(() => {
     onChange("tags", tags);
   }, [tags, onChange]);
+  useEffect(() => {
+    onChange("professionalExperiences", professionalExperiences);
+  }, [professionalExperiences, onChange]);
 
   // helpers
 
@@ -186,6 +192,7 @@ const ProfessionalDetailsForm = ({
               ? [personal.description]
               : [],
             exampleQuestions: values.exampleQuestions || [],
+            professionalExperiences: values.professionalExperiences || [],
             deliveryTime:
               values.deliveryTime ?? values.deliveryTime === 0
                 ? values.deliveryTime
@@ -551,6 +558,17 @@ const ProfessionalDetailsForm = ({
         />
       </div>
 
+      <div className="mb-6">
+        <label className="font-medium text-sm text-gray-700 block mb-2">
+          Professional Experiences{" "}
+          <span className="text-xs text-gray-400">(max 5)</span>
+        </label>
+        <ProfessionalExperienceInput
+          experiences={values.professionalExperiences || []}
+          setExperiences={(es) => onChange("professionalExperiences", es)}
+        />
+      </div>
+
       <button
         type="submit"
         className="bg-blue-600 text-white px-6 py-2 rounded-full font-semibold mt-4"
@@ -559,6 +577,62 @@ const ProfessionalDetailsForm = ({
         {registerStep4Mutation.isPending ? "Saving..." : "Save & Continue"}
       </button>
     </form>
+  );
+};
+
+const ProfessionalExperienceInput = ({ experiences, setExperiences }) => {
+  const [input, setInput] = useState("");
+  const addExperience = () => {
+    if (
+      input &&
+      !experiences.includes(input) &&
+      experiences.length < 5 &&
+      input.length <= 200
+    ) {
+      setExperiences([...experiences, input]);
+      setInput("");
+    }
+  };
+  return (
+    <div>
+      <div className="flex items-center gap-2">
+        <input
+          className="border border-gray-300 rounded-md p-2 flex-1 text-sm"
+          placeholder="Describe an experience…"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && addExperience()}
+        />
+        <button
+          type="button"
+          className={`px-4 py-1 rounded-full text-sm font-semibold transition ${
+            input && experiences.length < 5
+              ? "bg-gray-200 text-gray-500"
+              : "bg-gray-200 text-gray-400 cursor-not-allowed"
+          }`}
+          disabled={!input || experiences.length >= 5}
+          onClick={addExperience}
+        >
+          Add
+        </button>
+      </div>
+      <div className="mt-2">
+        {experiences.map((q, idx) => (
+          <div key={q} className="flex items-center gap-2 mb-1">
+            <span className="text-sm text-gray-700 flex-1">
+              {idx + 1}. {q}
+            </span>
+            <button
+              type="button"
+              className="text-gray-400 hover:text-red-500"
+              onClick={() => setExperiences(experiences.filter((_, i) => i !== idx))}
+            >
+              ×
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 };
 
@@ -619,6 +693,10 @@ const ExampleQuestionInput = ({ questions, setQuestions }) => {
       </div>
     </div>
   );
+
+
+
+  
 };
 
 export default ProfessionalDetailsForm;

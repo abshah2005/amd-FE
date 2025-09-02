@@ -108,7 +108,6 @@ const PublicProfilePage = () => {
     ratingCount: professional?.ratingCount ?? dummyData.ratingCount,
     verified: professional?.verified ?? dummyData.verified ?? false,
     featured: professional?.featured ?? dummyData.featured ?? false,
-    // feedback:professional?.feedbacks || [],
     deliveryTime:
       professional?.deliveryTime ??
       professional?.delivery ??

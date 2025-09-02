@@ -149,13 +149,11 @@ const DefaultView = memo(
         <div>
           {/* right: inputs */}
           <div className="md:col-span-1">
-            <label className="block text-sm text-gray-700 font-medium mb-3">
-              Full Name
-            </label>
-
-            <div className="flex gap-3 items-center">
+            <div className="flex gap-3 mt-2 items-center">
               <div className="flex-1">
-                <div className="text-xs text-gray-500 mb-1">First Name</div>
+                <label className="block text-sm text-gray-700 font-medium mb-3">
+                  First Name
+                </label>
                 <input
                   name="firstName"
                   className={`w-full text-sm rounded border p-2 ${
@@ -165,10 +163,13 @@ const DefaultView = memo(
                   onChange={handleInputChange}
                   disabled={!editing}
                 />
+                
               </div>
 
               <div className="flex-1">
-                <div className="text-xs text-gray-500 mb-1">Last Name</div>
+                <label className="block text-sm text-gray-700 font-medium mb-3">
+                  Last Name
+                </label>
                 <input
                   name="lastName"
                   className={`w-full text-sm rounded border p-2 ${
@@ -192,7 +193,10 @@ const PersonalInfoBox = ({
   avatarInitial,
   editing,
   formData,
+  fileInputRef,
+  handleFileChange,
   setFormData,
+  selectedFile,
 }) => {
   const [langInput, setLangInput] = useState("");
   const [locInput, setLocInput] = useState("");
@@ -225,7 +229,7 @@ const PersonalInfoBox = ({
         understand who you are and builds confidence in your expertise.
       </p>
 
-      <div className="flex flex-col items-center mb-6">
+      {/* <div className="flex flex-col items-center mb-6">
         {user?.profilePic ? (
           <img
             src={user.profilePic}
@@ -237,45 +241,107 @@ const PersonalInfoBox = ({
             {avatarInitial}
           </div>
         )}
+      </div> */}
+      <div className="flex flex-col items-center mb-6">
+        {editing && selectedFile ? (
+          <img
+            src={URL.createObjectURL(selectedFile)}
+            alt="Preview"
+            className="w-24 h-24 rounded-full object-cover"
+          />
+        ) : user?.profilePic ? (
+          <img
+            src={user.profilePic}
+            alt="Profile"
+            className="w-24 h-24 rounded-full object-cover"
+          />
+        ) : (
+          <div className="w-24 h-24 rounded-full bg-blue-500 flex items-center justify-center text-white text-2xl font-semibold">
+            {avatarInitial}
+          </div>
+        )}
+
+        {editing && (
+          <button
+            type="button"
+            className="mt-3 inline-flex items-center gap-2 px-3 py-1 rounded border border-gray-200 text-sm text-gray-700"
+            onClick={() => fileInputRef.current.click()}
+          >
+            <svg
+              className="w-4 h-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+            >
+              <path
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 3v12M8 7l4-4 4 4M21 21H3"
+              />
+            </svg>
+            Upload New Picture
+          </button>
+        )}
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          className="hidden"
+          accept="image/*"
+        />
       </div>
 
       <div className="mb-4">
-        <label className="block text-sm text-gray-700 font-medium mb-1">
-          Full Name
-        </label>
         {editing ? (
           <div className="flex gap-3">
-            <input
-              name="firstName"
-              value={user.professional.firstName || ""}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, firstName: e.target.value }))
-              }
-              className="w-1/2 text-sm rounded border p-2"
-            />
-            <input
-              name="lastName"
-              value={user.professional.lastName || ""}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, lastName: e.target.value }))
-              }
-              className="w-1/2 text-sm rounded border p-2"
-            />
+            <div className="flex flex-col w-full">
+              <label className="">First Name</label>
+              <input
+                name="firstName"
+                value={formData.firstName || ""}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    firstName: e.target.value.replace(/\s/g, ""),
+                  }))
+                }
+                className="w-full text-sm rounded border p-2"
+              />
+            </div>
+            <div className="flex flex-col w-full">
+              <label className="">Last Name</label>
+
+              <input
+                name="lastName"
+                value={formData.lastName || ""}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, lastName: e.target.value.replace(/\s/g, "") }))
+                }
+                className="w-full text-sm rounded border p-2"
+              />
+            </div>
           </div>
         ) : (
           <div className="flex gap-3">
-            <input
-              type="text"
-              className="w-1/2 text-sm rounded border p-2 bg-gray-100 text-gray-600 border-gray-200"
-              value={user?.professional?.firstName || ""}
-              disabled
-            />
-            <input
-              type="text"
-              className="w-1/2 text-sm rounded border p-2 bg-gray-100 text-gray-600 border-gray-200"
-              value={user?.professional?.lastName || ""}
-              disabled
-            />
+            <div className="flex flex-col w-full">
+              <label className="block text-sm text-gray-700 font-medium mb-3">First Name</label>
+              <input
+                type="text"
+                className="w-full text-sm rounded border p-2 bg-gray-100 text-gray-600 border-gray-200"
+                value={user?.firstName || ""}
+                disabled
+              />
+            </div>
+            <div className="flex flex-col w-full">
+              <label className="block text-sm text-gray-700 font-medium mb-3">Last Name</label>
+              <input
+                type="text"
+                className="w-full text-sm rounded border p-2 bg-gray-100 text-gray-600 border-gray-200"
+                value={user?.lastName || ""}
+                disabled
+              />
+            </div>
           </div>
         )}
       </div>
@@ -351,6 +417,7 @@ const PersonalInfoBox = ({
                       type="button"
                       className="ml-1 text-gray-400 hover:text-red-500"
                       onClick={() => removeItem("languages", idx)}
+                      disabled={!editing}
                     >
                       ×
                     </button>
@@ -453,7 +520,8 @@ const ProfessionalInfoBox = ({
   setFormData = () => {},
 }) => {
   const prof = user?.professional || {};
-  const { specializations: categories = [], loading: specsLoading } = useSpecializations();
+  const { specializations: categories = [], loading: specsLoading } =
+    useSpecializations();
   const [openTags, setOpenTags] = useState(true);
   const [added, setAdded] = useState([]);
   const [currentCategoryId, setCurrentCategoryId] = useState("");
@@ -462,14 +530,19 @@ const ProfessionalInfoBox = ({
   const [tags, setTags] = useState([]);
   // Prepopulate from profile on mount
   useEffect(() => {
-    if (prof.selectedSpecializations && prof.selectedSpecializations.length > 0) {
+    if (
+      prof.selectedSpecializations &&
+      prof.selectedSpecializations.length > 0
+    ) {
       setAdded(
         prof.selectedSpecializations.map((s) =>
           typeof s === "string"
             ? { specialization: s, subCategories: [] }
             : {
                 specialization: s.specialization,
-                subCategories: Array.isArray(s.subCategories) ? s.subCategories : [],
+                subCategories: Array.isArray(s.subCategories)
+                  ? s.subCategories
+                  : [],
               }
         )
       );
@@ -528,11 +601,33 @@ const ProfessionalInfoBox = ({
     setCurrentSubSelected([]);
   };
 
+  const handleRemoveTag = (tag) => {
+    // Remove tag from tags state
+    setTags((prevTags) => prevTags.filter((t) => t !== tag));
+
+    // Remove tag from subcategories in added state
+    setAdded(
+      (prevAdded) =>
+        prevAdded
+          .map((item) => ({
+            ...item,
+            subCategories: item.subCategories.filter((sub) => sub !== tag),
+          }))
+          .filter((item) => item.subCategories.length > 0) // Remove categories with no subcategories
+    );
+  };
+
   const handleRemoveAdded = (specId) => {
-    const removed = added.find((a) => String(a.specialization) === String(specId));
-    setAdded((prev) => prev.filter((a) => String(a.specialization) !== String(specId)));
+    const removed = added.find(
+      (a) => String(a.specialization) === String(specId)
+    );
+    setAdded((prev) =>
+      prev.filter((a) => String(a.specialization) !== String(specId))
+    );
     if (removed && Array.isArray(removed.subCategories)) {
-      setTags((prevTags) => prevTags.filter((t) => !removed.subCategories.includes(t)));
+      setTags((prevTags) =>
+        prevTags.filter((t) => !removed.subCategories.includes(t))
+      );
     }
   };
 
@@ -576,7 +671,12 @@ const ProfessionalInfoBox = ({
                   setCurrentCategoryId(cat._id);
                   setCurrentSubSelected([]);
                 }}
+                // disabled={
+                //   added.some((a) => a.specialization === cat._id) ||
+                //   (currentCategoryId && currentCategoryId !== cat._id)
+                // }
                 disabled={
+                  !editing || // Disable if editing is false
                   added.some((a) => a.specialization === cat._id) ||
                   (currentCategoryId && currentCategoryId !== cat._id)
                 }
@@ -589,49 +689,52 @@ const ProfessionalInfoBox = ({
       </div>
 
       {/* Subcategories for selected category */}
-      {currentCategoryId && !added.some((a) => a.specialization === currentCategoryId) && (
-        <div className="border border-gray-200 rounded-md p-2 bg-gray-50 mb-4">
-          <div className="text-xs text-gray-500 mb-2">
-            Choose subcategories (min 2)
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            {categoryById(currentCategoryId)?.subCategories.map((sub) => (
-              <label key={sub} className="flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  checked={currentSubSelected.includes(sub)}
-                  onChange={() => handleToggleSub(sub)}
-                  className="w-4 h-4 accent-blue-600"
-                />
-                <span className="text-gray-700">{sub}</span>
-              </label>
-            ))}
-          </div>
-          {currentSubSelected.length < 2 && (
-            <div className="text-red-500 text-xs mt-2">
-              Select at least 2 subcategories to add.
+      {currentCategoryId &&
+        !added.some((a) => a.specialization === currentCategoryId) && (
+          <div className="border border-gray-200 rounded-md p-2 bg-gray-50 mb-4">
+            <div className="text-xs text-gray-500 mb-2">
+              Choose subcategories (min 2)
             </div>
-          )}
-          <button
-            type="button"
-            onClick={handleAddCurrent}
-            disabled={!canAddCurrent()}
-            className={`mt-2 px-4 py-2 rounded ${
-              canAddCurrent()
-                ? "bg-blue-600 text-white"
-                : "bg-gray-200 text-gray-400 cursor-not-allowed"
-            }`}
-          >
-            Add
-          </button>
-        </div>
-      )}
+            <div className="grid grid-cols-2 gap-2">
+              {categoryById(currentCategoryId)?.subCategories.map((sub) => (
+                <label key={sub} className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={currentSubSelected.includes(sub)}
+                    onChange={() => handleToggleSub(sub)}
+                    className="w-4 h-4 accent-blue-600"
+                    disabled={!editing}
+                  />
+                  <span className="text-gray-700">{sub}</span>
+                </label>
+              ))}
+            </div>
+            {currentSubSelected.length < 2 && (
+              <div className="text-red-500 text-xs mt-2">
+                Select at least 2 subcategories to add.
+              </div>
+            )}
+            {/* { !editing ? &&()} */}
+            {editing && (
+              <button
+                type="button"
+                onClick={handleAddCurrent}
+                disabled={!canAddCurrent()}
+                className={`mt-2 px-4 py-2 rounded ${
+                  canAddCurrent()
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                }`}
+              >
+                Add
+              </button>
+            )}
+          </div>
+        )}
 
       {/* Selected categories and subcategories */}
-      <div className="mt-2">
-        <div className="text-xs text-gray-500 mb-2">
-          Selected categories
-        </div>
+      {/* <div className="mt-2">
+        <div className="text-xs text-gray-500 mb-2">Selected categories</div>
         <div className="space-y-3">
           {added.length === 0 && (
             <div className="text-sm text-gray-500">
@@ -662,8 +765,11 @@ const ProfessionalInfoBox = ({
                               type="button"
                               className="ml-1 text-gray-400 hover:text-red-500"
                               style={{ fontSize: "12px", lineHeight: "1" }}
-                              onClick={() => handleRemoveSubCat(a.specialization, s)}
+                              onClick={() =>
+                                handleRemoveSubCat(a.specialization, s)
+                              }
                               aria-label={`Remove ${s}`}
+                              disabled={!editing}
                             >
                               ×
                             </button>
@@ -682,6 +788,72 @@ const ProfessionalInfoBox = ({
                     type="button"
                     className="text-sm text-red-500"
                     onClick={() => handleRemoveAdded(a.specialization)}
+                    disabled={!editing}
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div> */}
+      <div className="mt-2">
+        <div className="text-xs text-gray-500 mb-2">Selected categories</div>
+        <div className="space-y-3">
+          {added.length === 0 && (
+            <div className="text-sm text-gray-500">
+              No categories added yet.
+            </div>
+          )}
+          {added.map((a) => {
+            const cat = categoryById(a.specialization) || {
+              category: a.specialization,
+            };
+            return (
+              <div
+                key={String(a.specialization)}
+                className="border border-gray-200 rounded-md p-3 flex items-start justify-between"
+              >
+                <div>
+                  <div className="font-medium text-sm">{cat.category}</div>
+                  <div className="text-xs text-gray-600 mt-2">
+                    {a.subCategories && a.subCategories.length ? (
+                      <div className="flex flex-wrap gap-2">
+                        {a.subCategories.map((s) => (
+                          <span
+                            key={s}
+                            className="bg-gray-100 px-2 py-1 rounded text-xs inline-flex items-center"
+                          >
+                            {s}
+                            <button
+                              type="button"
+                              className="ml-1 text-gray-400 hover:text-red-500"
+                              style={{ fontSize: "12px", lineHeight: "1" }}
+                              onClick={() =>
+                                handleRemoveSubCat(a.specialization, s)
+                              }
+                              aria-label={`Remove ${s}`}
+                              disabled={!editing}
+                            >
+                              ×
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-xs text-red-500">
+                        No subcategories selected
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="ml-4">
+                  <button
+                    type="button"
+                    className="text-sm text-red-500"
+                    onClick={() => handleRemoveAdded(a.specialization)}
+                    disabled={!editing}
                   >
                     Remove
                   </button>
@@ -691,9 +863,7 @@ const ProfessionalInfoBox = ({
           })}
         </div>
       </div>
-      {/* --- End Category/Subcategory UI --- */}
 
-  
       <div className="mb-4">
         <label className="block text-sm text-gray-700 font-medium mb-1">
           Tags
@@ -704,9 +874,7 @@ const ProfessionalInfoBox = ({
             className="flex items-center gap-2 text-sm mb-2"
             onClick={() => setOpenTags((o) => !o)}
             disabled={!editing}
-          >
-           
-          </button>
+          ></button>
           {openTags && (
             <>
               {editing && (
@@ -716,6 +884,7 @@ const ProfessionalInfoBox = ({
                     className="flex-1 border rounded p-2 text-sm"
                     value={newTag}
                     onChange={(e) => setNewTag(e.target.value)}
+                    disabled={(formData.tags || []).length >= 5} // Disable input if 5 tags are already added
                   />
                   <button
                     type="button"
@@ -723,21 +892,52 @@ const ProfessionalInfoBox = ({
                     onClick={() => {
                       const v = newTag.trim();
                       if (!v) return;
-                      const prev = Array.isArray(formData.tags) ? [...formData.tags] : prof.tags || [];
+                      const prev = Array.isArray(formData.tags)
+                        ? [...formData.tags]
+                        : prof.tags || [];
                       if (prev.includes(v)) {
                         setNewTag("");
+                        return;
+                      }
+                      if (prev.length >= 5) {
+                        alert("You can only add up to 5 tags.");
                         return;
                       }
                       const next = [...prev, v];
                       setFormData((p) => ({ ...p, tags: next }));
                       setNewTag("");
                     }}
+                    disabled={(formData.tags || []).length >= 5} // Disable button if 5 tags are already added
                   >
                     Add
                   </button>
                 </div>
               )}
               {/* Selected tags panel */}
+              {/* <div className="mt-2 flex flex-wrap gap-2">
+          {(formData.tags || []).map((tag, idx) => (
+            <span
+              key={tag + idx}
+              className="bg-blue-50 text-blue-700 px-2 py-1 rounded text-xs flex items-center border border-blue-300"
+            >
+              {tag}
+              {editing && (
+                <button
+                  type="button"
+                  className="ml-1 text-gray-400 hover:text-red-500"
+                  onClick={() => {
+                    const next = (formData.tags || []).filter(
+                      (_, i) => i !== idx
+                    );
+                    setFormData((p) => ({ ...p, tags: next }));
+                  }}
+                >
+                  ×
+                </button>
+              )}
+            </span>
+          ))}
+        </div> */}
               <div className="mt-2 flex flex-wrap gap-2">
                 {(formData.tags || []).map((tag, idx) => (
                   <span
@@ -749,10 +949,7 @@ const ProfessionalInfoBox = ({
                       <button
                         type="button"
                         className="ml-1 text-gray-400 hover:text-red-500"
-                        onClick={() => {
-                          const next = (formData.tags || []).filter((_, i) => i !== idx);
-                          setFormData((p) => ({ ...p, tags: next }));
-                        }}
+                        onClick={() => handleRemoveTag(tag)}
                       >
                         ×
                       </button>
@@ -760,6 +957,12 @@ const ProfessionalInfoBox = ({
                   </span>
                 ))}
               </div>
+              {/* Warning message if tags exceed 5 */}
+              {(formData.tags || []).length > 5 && (
+                <div className="text-red-500 text-sm mt-2">
+                  You cannot proceed with more than 5 tags.
+                </div>
+              )}
             </>
           )}
         </div>
@@ -799,14 +1002,6 @@ const ProfessionalInfoBox = ({
             className={`w-1/3 text-sm rounded border p-2 ${
               editing ? "" : "bg-gray-100 text-gray-600"
             }`}
-          />
-          <input
-            value={formData.currency ?? prof.currency ?? "$"}
-            disabled={!editing}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, currency: e.target.value }))
-            }
-            className="ml-2 w-20 text-sm rounded border p-2"
           />
         </div>
       </div>
@@ -913,6 +1108,62 @@ const ProfessionalInfoBox = ({
           </div>
         )}
       </div>
+
+      {/* <div className="mb-4">
+        <label className="block text-sm text-gray-700 font-medium mb-1">
+          Profesional Experiences
+        </label>
+        <ul className="list-decimal ml-6 mb-2">
+          {(formData.professionalExperiences &&
+          formData.professionalExperiences.length > 0
+            ? formData.professionalExperiences
+            : prof.professionalExperiences || []
+          ).map((q, idx) => (
+            <li key={idx} className="text-sm text-gray-700 mb-1">
+              {q}
+            </li>
+          ))}
+        </ul>
+        {editing && (
+          <div className="flex gap-2">
+            <input
+              placeholder="Add Professional Experience"
+              className="flex-1 border rounded p-2 text-sm"
+              value={formData._newProfessionalExperience || ""}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  _newProfessionalExperience: e.target.value,
+                }))
+              }
+            />
+            <button
+              type="button"
+              className="px-4 py-1 rounded bg-gray-200 text-sm"
+              onClick={() => {
+                const v = (formData._newProfessionalExperience || "").trim();
+                if (!v) return;
+                const prev = Array.isArray(formData.professionalExperiences)
+                  ? [...formData.professionalExperiences]
+                  : prof.professionalExperiences || [];
+                const next = [...prev, v];
+                setFormData((prev) => ({
+                  ...prev,
+                  professionalExperiences: next,
+                  _newProfessionalExperience: "",
+                }));
+                console.log({
+                  field: "professionalExperiences",
+                  old: prev,
+                  new: next,
+                });
+              }}
+            >
+              Add
+            </button>
+          </div>
+        )}
+      </div> */}
     </div>
   );
 };
@@ -977,10 +1228,13 @@ const ProfessionalView = memo(
             <div className="w-full">
               <PersonalInfoBox
                 user={user}
+                fileInputRef={fileInputRef}
                 avatarInitial={avatarInitial}
                 editing={editing}
                 formData={formData}
+                handleFileChange={handleFileChange}
                 setFormData={setFormData}
+                selectedFile={selectedFile}
               />
             </div>
             <div className="w-full">
@@ -1005,8 +1259,8 @@ const ProfileView = () => {
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
-    // added professional fields so editing shows existing values and add/remove works
     description: "",
+    professionalExperiences: [],
     languages: [],
     locations: [],
   });
@@ -1055,7 +1309,7 @@ const ProfileView = () => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: value.replace(/\s+/g, ""), 
     }));
   };
 

@@ -35,7 +35,7 @@ const ratingOptions = [
   { label: "5 rating", value: 5 },
 ];
 
-const PAGE_SIZE = 5;
+const PAGE_SIZE = 4;
 
 const initialState = {
   selectedCategory: "All",
@@ -244,7 +244,7 @@ const Professionals = () => {
       </>
     );
   };
-// Helper to get delivery label
+  // Helper to get delivery label
   const getDeliveryLabel = (days) => {
     if (days <= 1) return "Less than 24hr";
     if (days <= 7) return "Less than 7 days";
@@ -280,16 +280,34 @@ const Professionals = () => {
             </span>
           )}
         </div>
-        <div className="flex-1 min-w-0  h-[34vh] ">
+        <div className="flex-1 min-w-0   h-[34vh] ">
           <div className="flex items-center gap-2 mb-1">
             <span className="font-semibold text-lg">
               {`${prof.firstName || ""} ${prof.lastName || ""}`.trim()}
             </span>
             {prof.verified && (
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-  <path d="M20 13C20 18 16.5 20.5 12.34 21.95C12.1222 22.0238 11.8855 22.0202 11.67 21.94C7.5 20.5 4 18 4 13V5.99996C4 5.73474 4.10536 5.48039 4.29289 5.29285C4.48043 5.10532 4.73478 4.99996 5 4.99996C7 4.99996 9.5 3.79996 11.24 2.27996C11.4519 2.09896 11.7214 1.99951 12 1.99951C12.2786 1.99951 12.5481 2.09896 12.76 2.27996C14.51 3.80996 17 4.99996 19 4.99996C19.2652 4.99996 19.5196 5.10532 19.7071 5.29285C19.8946 5.48039 20 5.73474 20 5.99996V13Z" stroke="#36B37E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M9 12L11 14L15 10" stroke="#36B37E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+              >
+                <path
+                  d="M20 13C20 18 16.5 20.5 12.34 21.95C12.1222 22.0238 11.8855 22.0202 11.67 21.94C7.5 20.5 4 18 4 13V5.99996C4 5.73474 4.10536 5.48039 4.29289 5.29285C4.48043 5.10532 4.73478 4.99996 5 4.99996C7 4.99996 9.5 3.79996 11.24 2.27996C11.4519 2.09896 11.7214 1.99951 12 1.99951C12.2786 1.99951 12.5481 2.09896 12.76 2.27996C14.51 3.80996 17 4.99996 19 4.99996C19.2652 4.99996 19.5196 5.10532 19.7071 5.29285C19.8946 5.48039 20 5.73474 20 5.99996V13Z"
+                  stroke="#36B37E"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M9 12L11 14L15 10"
+                  stroke="#36B37E"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
             )}
           </div>
           <div className="text-sm text-gray-600 mb-1 flex flex-wrap gap-2">
@@ -320,12 +338,13 @@ const Professionals = () => {
             {renderTags(prof.tags || [])}
           </div>
           <div className="text-gray-700 text-sm mb-2">
-  {prof.about[0]
-    ? prof.about[0].split(" ").length > 40
-      ? prof.about[0].split(" ").slice(0, 40).join(" ") + " ..."
-      : prof.about[0]
-    : ""}
-</div>
+            {prof.about[0]
+              ? prof.about[0].split(" ").length > 40
+                ? prof.about[0].split(" ").slice(0, 40).join(" ") + " ..."
+                : prof.about[0]
+              : ""}
+            
+          </div>
         </div>
         <div className="flex flex-col items-center gap-3 min-w-[160px]  h-[34vh] justify-between">
           <div>
