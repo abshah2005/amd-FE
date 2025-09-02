@@ -125,11 +125,7 @@ const MainNav = ({ isDashboard }) => {
           <div className="hidden lg:flex flex-1 justify-center gap-2">
             <div className="flex items-center bg-[#F0F1F3] relative rounded-full px-4 py-2 w-[340px] max-w-md">
               <img src={findIcon} alt="Search" className="w-4 h-4 mr-2" />
-              {/* <input
-                type="text"
-                placeholder="Search"
-                className="bg-transparent outline-none flex-1 text-sm"
-              /> */}
+              
               <input
                 type="text"
                 placeholder="Search"
@@ -137,15 +133,7 @@ const MainNav = ({ isDashboard }) => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="bg-transparent outline-none flex-1 text-sm"
               />
-              {/* <img
-                src={dropdownIcon}
-                alt="Dropdown"
-                onClick={() => {
-                  setShowResults((prev) => !prev);
-                
-                }}
-                className="w-4 h-4 ml-2"
-              /> */}
+             
               <img
                 src={dropdownIcon}
                 alt="Dropdown"
