@@ -14,6 +14,8 @@ import Setting from "../icons/Setting";
 import Logout from "../icons/Logout";
 import MessageLogo from "../icons/MessageLogo";
 import ActiveMessageIcon from "../icons/ActiveMessageIcon";
+import useProfessionals from "../hooks/useProfessionals";
+import ProfessionalCard from "./ProfessionalCard";
 
 function RoleSwitchOverlay({ show }) {
   return (
@@ -39,9 +41,31 @@ const MainNav = ({ isDashboard }) => {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const { user, logout, refreshCurrentUser } = useAuth();
-  const { mutateAsync: toggleActiveRole, isPending: isLoading } = useToggleActiveRole();
+  const { mutateAsync: toggleActiveRole, isPending: isLoading } =
+    useToggleActiveRole();
   const { mutateAsync: registerStep2 } = useRegisterStep2();
+  const [searchQuery, setSearchQuery] = useState(""); // State for search input
+  const [page, setPage] = useState(1); // State for pagination
+  const [showResults, setShowResults] = useState(false);
   const navigate = useNavigate();
+
+  const { data, isPending, fetchNextPage } = useProfessionals(
+    searchQuery.trim() ? { name: searchQuery, page, limit: 5 } : null,
+    { keepPreviousData: true }
+  );
+
+  const handleSearch = () => {
+    if (searchQuery.trim()) {
+      setPage(1); // Reset to the first page
+      setShowResults(true); // Show the results section
+    } else {
+      setShowResults(false); // Hide results if input is empty
+    }
+  };
+  const handleShowMore = () => {
+    setPage((prev) => prev + 1); // Increment the page number
+    fetchNextPage(); // Fetch the next set of professionals
+  };
 
   // <-- new: use location to determine active route (no extra state)
   const location = useLocation();
@@ -49,10 +73,8 @@ const MainNav = ({ isDashboard }) => {
 
   const canToggleRole =
     Array.isArray(user?.roles) &&
-    (
-      (user?.roles.includes("professional") && user?.roles.includes("asker")) ||
-      (user?.roles.length === 1 && user?.roles[0] === "asker")
-    );
+    ((user?.roles.includes("professional") && user?.roles.includes("asker")) ||
+      (user?.roles.length === 1 && user?.roles[0] === "asker"));
 
   const switchLabel =
     user?.activeRole === "professional"
@@ -62,7 +84,8 @@ const MainNav = ({ isDashboard }) => {
   const modalRef = useRef(null);
 
   const userProfilePic =
-    user?.profilePic || "https://static.vecteezy.com/system/resources/thumbnails/028/569/170/small_2x/single-man-icon-people-icon-user-profile-symbol-person-symbol-businessman-stock-vector.jpg";
+    user?.profilePic ||
+    "https://static.vecteezy.com/system/resources/thumbnails/028/569/170/small_2x/single-man-icon-people-icon-user-profile-symbol-person-symbol-businessman-stock-vector.jpg";
   const displayName = user?.fullName;
   const email = user?.email;
 
@@ -86,7 +109,7 @@ const MainNav = ({ isDashboard }) => {
 
   return (
     <div>
-      {console.log("isLoading",isLoading)}
+      {console.log("isLoading", isLoading)}
       <RoleSwitchOverlay show={isLoading} />
       <nav className="w-full bg-white px-4 lg:px-8 py-3 flex items-center justify-between shadow-sm border-b border-gray-200">
         {/* Logo */}
@@ -100,16 +123,84 @@ const MainNav = ({ isDashboard }) => {
 
         {user?.activeRole === "asker" && (
           <div className="hidden lg:flex flex-1 justify-center gap-2">
-            <div className="flex items-center bg-[#F0F1F3] rounded-full px-4 py-2 w-[340px] max-w-md">
+            <div className="flex items-center bg-[#F0F1F3] relative rounded-full px-4 py-2 w-[340px] max-w-md">
               <img src={findIcon} alt="Search" className="w-4 h-4 mr-2" />
-              <input
+              {/* <input
                 type="text"
                 placeholder="Search"
                 className="bg-transparent outline-none flex-1 text-sm"
+              /> */}
+              <input
+                type="text"
+                placeholder="Search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="bg-transparent outline-none flex-1 text-sm"
               />
-              <img src={dropdownIcon} alt="Dropdown" className="w-4 h-4 ml-2" />
+              {/* <img
+                src={dropdownIcon}
+                alt="Dropdown"
+                onClick={() => {
+                  setShowResults((prev) => !prev);
+                
+                }}
+                className="w-4 h-4 ml-2"
+              /> */}
+              <img
+                src={dropdownIcon}
+                alt="Dropdown"
+                onClick={() => {
+                  if (searchQuery.trim()) {
+                    setShowResults((prev) => !prev); 
+                  } else {
+                    setShowResults(false); 
+                    alert("Please enter a search query.");
+                  }
+                }}
+                className="w-4 h-4 ml-2"
+              />
+
+              {showResults && (
+                <div className="absolute top-10 left-0 mt-2 w-full bg-white shadow-lg rounded-lg p-4 z-20">
+                  {isPending ? (
+                    <p>Loading...</p>
+                  ) : data?.results?.length > 0 ? (
+                    <div
+                      className="flex flex-col gap-4 overflow-x-hidden overflow-y-auto max-h-[300px] px-2"
+                      style={{
+                        scrollbarWidth: "thin",
+                        scrollbarColor: "#ccc #f0f0f0",
+                      }}
+                    >
+                      {data.results.map((professional) => (
+                        <ProfessionalCard
+                          key={professional._id}
+                          professional={professional}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-center text-gray-500">
+                      No results to show
+                    </p>
+                  )}
+                  {data?.results?.length > 0 &&
+                    data?.results?.length < data?.total && (
+                      <button
+                        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded"
+                        onClick={handleShowMore}
+                        disabled={isPending}
+                      >
+                        {isPending ? "Loading..." : "Show More"}
+                      </button>
+                    )}
+                </div>
+              )}
             </div>
-            <button className="ml-4 bg-blue-600 rounded-full w-9 h-9 flex items-center justify-center">
+            <button
+              className="ml-4 bg-blue-600 rounded-full w-9 h-9 flex items-center justify-center"
+              onClick={handleSearch}
+            >
               <img src={searchIcon} alt="Search" className="w-5 h-5" />
             </button>
             <div className="flex items-center justify-between space-between">
@@ -189,7 +280,10 @@ const MainNav = ({ isDashboard }) => {
                               target === "professional"
                             ) {
                               // Use hook to add professional role
-                              await registerStep2({ email: user.email, role: "professional" });
+                              await registerStep2({
+                                email: user.email,
+                                role: "professional",
+                              });
                               if (typeof refreshCurrentUser === "function") {
                                 await refreshCurrentUser();
                               }
