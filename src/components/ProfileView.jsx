@@ -3,27 +3,8 @@ import { useAuth } from "../contextProvider/AuthContextProvider";
 import Edit from "../icons/Edit";
 import useUpdateProfile from "../hooks/userhooks";
 import useSpecializations from "../hooks/useSpecializations";
+import { allLanguages, allLocations } from "../utils/Constant";
 
-const languageOptions = [
-  "English",
-  "Spanish",
-  "Chinese",
-  "German",
-  "French",
-  "Urdu",
-  "Hindi",
-  "Arabic",
-];
-const locationOptions = [
-  "USA",
-  "UK",
-  "Germany",
-  "France",
-  "Spain",
-  "Pakistan",
-  "India",
-  "UAE",
-];
 
 const DefaultView = memo(
   ({
@@ -383,7 +364,7 @@ const PersonalInfoBox = ({
                 onChange={(e) => setLangInput(e.target.value)}
               >
                 <option value="">Select language</option>
-                {languageOptions.map((lang) => (
+                {allLanguages.map((lang) => (
                   <option key={lang} value={lang}>
                     {lang}
                   </option>
@@ -453,7 +434,7 @@ const PersonalInfoBox = ({
                 onChange={(e) => setLocInput(e.target.value)}
               >
                 <option value="">Select location</option>
-                {locationOptions.map((loc) => (
+                {allLocations.map((loc) => (
                   <option key={loc} value={loc}>
                     {loc}
                   </option>
