@@ -29,7 +29,7 @@ const PricingInput = ({
     fastAmount: "",
   });
 
-  const updateQuestionStatus=useUpdateQuestionStatus()
+  const updateQuestionStatus = useUpdateQuestionStatus();
 
   const handleNormalAmountChange = (e) => {
     const value = e.target.value;
@@ -270,7 +270,7 @@ const PricingInput = ({
           </div>
         )}
       {(role === "asker" || role === "professional") &&
-        (status === "paid" || status === "closed") && (
+        (status === "paid" || status === "closed" || status==="in_thread") && (
           <div className="text-center">
             <p className="text-xs text-gray-500 mb-1">
               {initialMode === "normal"
@@ -318,53 +318,55 @@ const PricingInput = ({
               </button>
             </div>
           ))} */}
-          {role === "asker" && (status === "awaiting_payment" || status === "quoted") && (
-  <div className="text-center">
-    <p className="text-xs text-gray-500 mb-1">
-      {selectedDeliveryType === "normal"
-        ? "Normal Delivery Price"
-        : "Fast Delivery Price"}
-    </p>
-    <p className="text-xl font-bold text-gray-800">
-      ${getPriceForMode(selectedDeliveryType)}
-    </p>
-    <button
-      className={`w-full py-2 mt-3 rounded-full font-medium ${
-        isDisabled
-          ? "bg-gray-400 text-gray-600 cursor-not-allowed"
-          : "bg-blue-600 text-white hover:bg-blue-700"
-      }`}
-      disabled={isDisabled}
-      onClick={handlePayNowClick}
-    >
-      {buttonText}
-    </button>
-  </div>
-)}
+      {role === "asker" &&
+        (status === "awaiting_payment" || status === "quoted" ) && (
+          <div className="text-center">
+            <p className="text-xs text-gray-500 mb-1">
+              {selectedDeliveryType === "normal"
+                ? "Normal Delivery Price"
+                : "Fast Delivery Price"}
+            </p>
+            <p className="text-xl font-bold text-gray-800">
+              ${getPriceForMode(selectedDeliveryType)}
+            </p>
+            <button
+              className={`w-full py-2 mt-3 rounded-full font-medium ${
+                isDisabled
+                  ? "bg-gray-400 text-gray-600 cursor-not-allowed"
+                  : "bg-blue-600 text-white hover:bg-blue-700"
+              }`}
+              disabled={isDisabled}
+              onClick={handlePayNowClick}
+            >
+              {buttonText}
+            </button>
+          </div>
+        )}
 
-{role === "professional" && (status === "awaiting_payment" || status === "quoted") && (
-  <div className="text-center">
-    <p className="text-xs text-gray-500 mb-1">
-      {selectedDeliveryType === "normal"
-        ? "Normal Delivery Price"
-        : "Fast Delivery Price"}
-    </p>
-    <p className="text-xl font-bold text-gray-800">
-      ${getPriceForMode(selectedDeliveryType)}
-    </p>
-    <button
-      className={`w-full py-2 mt-3 rounded-full font-medium ${
-        isDisabled
-          ? "bg-gray-400 text-gray-600 cursor-not-allowed"
-          : "bg-blue-600 text-white hover:bg-blue-700"
-      }`}
-      disabled={isDisabled}
-      onClick={handlePayNowClick}
-    >
-      {buttonText}
-    </button>
-  </div>
-)}
+      {role === "professional" &&
+        (status === "awaiting_payment" || status === "quoted" ) && (
+          <div className="text-center">
+            <p className="text-xs text-gray-500 mb-1">
+              {selectedDeliveryType === "normal"
+                ? "Normal Delivery Price"
+                : "Fast Delivery Price"}
+            </p>
+            <p className="text-xl font-bold text-gray-800">
+              ${getPriceForMode(selectedDeliveryType)}
+            </p>
+            <button
+              className={`w-full py-2 mt-3 rounded-full font-medium ${
+                isDisabled
+                  ? "bg-gray-400 text-gray-600 cursor-not-allowed"
+                  : "bg-blue-600 text-white hover:bg-blue-700"
+              }`}
+              disabled={isDisabled}
+              onClick={handlePayNowClick}
+            >
+              {buttonText}
+            </button>
+          </div>
+        )}
       {/* Professional Pricing Input */}
       {role === "asker" && status === "approved" && (
         <div className="text-center">

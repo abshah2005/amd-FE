@@ -85,6 +85,7 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
         priceRangeLow: questionData.professional.priceRangeLow,
         priceRangeHigh: questionData.professional.priceRangeHigh,
         proposedBudget: questionData.proposedBudget || 0,
+        answerBy: questionData.answerBy || null,
         price: questionData.price,
         deliveryTime: questionData.answerByNormal
           ? questionData.answerByNormal
@@ -145,6 +146,19 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
   const handlePayNow = () => {
     setPaymentAmount(question.price); // or settledPrice, as needed
     setIsPaymentOpen(true);
+  };
+  const handleSendFollowUp = ({ questionId, body }) => {
+    postFollowUp.mutate(
+      { questionId, body },
+      {
+        onSuccess: () => {
+          setFollowUpOpen(false);
+        },
+        onError: (err) => {
+          console.error("Failed to send follow-up", err);
+        },
+      }
+    );
   };
 
   const confirmAction = () => {
@@ -336,8 +350,22 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
               <th className="px-3 py-2  font-bold">Asker</th>
               <th className="px-3 py-2 font-bold">Proposed budget</th>
               <th className="px-3 py-2 font-bold">Status</th>
-              <th className="px-3 py-2 font-bold">Normal Delivery </th>
-              <th className="px-3 py-2 font-bold">Fast Delivery</th>
+              {[
+                "approved",
+                "rejected",
+                "quoted",
+                "awaiting_payment",
+                "payment_awaiting",
+              ].includes(status) && (
+                <>
+                  <th className="px-3 py-2 font-bold">Normal Delivery </th>
+                  <th className="px-3 py-2 font-bold">Fast Delivery</th>
+                </>
+              )}
+
+              {["paid", "in_thread", "answered", "closed"].includes(status) && (
+                <th className="px-3 py-2 font-bold">Delivery Time</th>
+              )}
               <th className="px-3 py-2 font-bold">Payment Status</th>
               <th className="px-3 py-2 font-bold text-right">More</th>
             </tr>
@@ -365,9 +393,20 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
                   </svg>
                 </div>
               </td>
-              <td className="px-3 py-2">
+              
+              {[
+                "approved",
+                "rejected",
+                "quoted",
+                "awaiting_payment",
+                "payment_awaiting",
+              ].includes(status) && (
+                <>
+                  <td className="px-3 py-2">
                 <div className="flex items-center font-bold">
-                  {status === "submitted" || status === "approved" || status === "rejected"
+                  {status === "submitted" ||
+                  status === "approved" ||
+                  status === "rejected"
                     ? "N/A"
                     : normalDeliveryTime?.answerByNormal
                     ? new Date(
@@ -399,14 +438,10 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
               </td>
               <td className="px-3 py-2">
                 <div className="flex items-center font-bold font-bold">
-                  {/* {status === "submitted"
-                    ? question.fastDelivery
-                    : fastDeliveryTime?.answerByFast
-                    ? new Date(
-                        fastDeliveryTime?.answerByFast
-                      ).toLocaleDateString()
-                    : "N/A"} */}
-                  {status === "submitted" || status === "approved" || status === "rejected"
+                  
+                  {status === "submitted" ||
+                  status === "approved" ||
+                  status === "rejected"
                     ? "N/A"
                     : fastDeliveryTime?.answerByFast
                     ? new Date(
@@ -437,6 +472,86 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
                   </svg>
                 </div>
               </td>
+                  
+                </>
+              )}
+
+
+              {/* <td className="px-3 py-2">
+                <div className="flex items-center font-bold">
+                  {status === "submitted" ||
+                  status === "approved" ||
+                  status === "rejected"
+                    ? "N/A"
+                    : normalDeliveryTime?.answerByNormal
+                    ? new Date(
+                        normalDeliveryTime?.answerByNormal
+                      ).toLocaleDateString()
+                    : question.deliveryTime
+                    ? new Date(question.deliveryTime).toLocaleDateString()
+                    : "N/A"}
+
+                  <svg
+                    className="ml-1 w-4 h-4"
+                    onClick={() => {
+                      if (status === "approved" && role === "professional") {
+                        setInitialType("normal");
+                        setDatePickerOpen(true);
+                      }
+                    }}
+                    cursor={"pointer"}
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+              </td>
+              <td className="px-3 py-2">
+                <div className="flex items-center font-bold font-bold">
+                  
+                  {status === "submitted" ||
+                  status === "approved" ||
+                  status === "rejected"
+                    ? "N/A"
+                    : fastDeliveryTime?.answerByFast
+                    ? new Date(
+                        fastDeliveryTime?.answerByFast
+                      ).toLocaleDateString()
+                    : question.fastDelivery
+                    ? new Date(question.fastDelivery).toLocaleDateString()
+                    : "N/A"}
+                  <svg
+                    className="ml-1 w-4 h-4"
+                    onClick={() => {
+                      console.log("Status on fast click:", status);
+                      if (status === "approved" && role === "professional") {
+                        setInitialType("fast");
+                        setDatePickerOpen(true);
+                        console.log("Fast delivery time picker opened");
+                      }
+                    }}
+                    cursor={"pointer"}
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+              </td> */}
+              {["paid", "in_thread", "answered", "closed"].includes(status) && (
+                <th className="px-3 py-2 font-bold">
+                  {new Date(question?.answerBy).toLocaleDateString()}
+                </th>
+              )}
               <td className="px-4 py-2 font-bold">{question.payment}</td>
               <td className="px-4 py-2 text-right">
                 <svg
@@ -615,7 +730,7 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
                   {question.asker.firstName} {question.asker.lastName}.
                 </span>
                 <span className="text-xs text-gray-400">
-                  {question.feedback.createdAt}
+                  {new Date(question.feedback.createdAt).toLocaleDateString()}
                 </span>
               </div>
               <div className="flex items-center justify-center mb-2">
@@ -672,7 +787,7 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
           </div>
         )}
         {status === "closed" && (
-          <div className="flex items-center justify-center my-2 w-full">
+          <div className="flex items-center justify-center my-2 w-1/2 mx-auto">
             <hr className="flex-grow border-gray-300" />
             <span className="mx-2 text-xs text-gray-500 font-semibold">
               Thread Closed
@@ -822,6 +937,12 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
             }
             setDatePickerOpen(false);
           }}
+        />
+        <FollowUpModal
+          open={followUpOpen}
+          onClose={() => setFollowUpOpen(false)}
+          questionId={questionId}
+          onSend={handleSendFollowUp}
         />
         {/* <DateTimePicker
           open={datePickerOpen}

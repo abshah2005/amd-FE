@@ -182,7 +182,7 @@ const PublicProfilePage = () => {
               </span>
               <span className="text-slate-500">{prof.perQuestion}</span>
               <span className="flex items-center gap-1 text-yellow-500 font-medium">
-                {iconMap.star} {prof.rating}
+                {iconMap.star} {(prof.rating).toFixed(2)}
                 <span className="text-slate-500 ml-1">
                   ({prof.ratingCount})
                 </span>
@@ -190,7 +190,7 @@ const PublicProfilePage = () => {
             </div>
             <div className="text-xs text-slate-500 mb-2 text-center">
               {(prof.languages || []).join(", ")}{" "}
-              <span className="text-slate-500">• {prof.country}</span>
+              <span className="text-slate-500">• {prof.country.join(", ")}</span>
             </div>
             <button
               className="w-full bg-blue-600 text-white font-medium text-[15px] rounded-full py-2 mt-2 mb-2"

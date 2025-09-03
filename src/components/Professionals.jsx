@@ -307,7 +307,7 @@ const Professionals = () => {
               <span className="text-gray-500 text-xs">per question</span>
             </span>
             <span className="flex items-center gap-1 text-yellow-500 font-medium">
-              <FaStar size={16} /> {prof.rating ?? 0}
+              <FaStar size={16} /> {(prof.rating).toFixed(2)??0}
               <span className="text-gray-500 text-xs ml-1">
                 ({prof.ratingCount ?? 0})
               </span>
