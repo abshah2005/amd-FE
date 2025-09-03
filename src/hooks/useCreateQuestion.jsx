@@ -30,6 +30,7 @@ export function useCreateQuestion() {
       // Add images
       if (questionData.images && questionData.images.length > 0) {
         questionData.images.forEach((img) => {
+          console.log("Appending image:", img.name);
           formData.append("attachments", img);
         });
       }

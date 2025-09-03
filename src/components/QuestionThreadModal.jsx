@@ -30,6 +30,7 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
   const [threadClosureOpen, setThreadClosureOpen] = useState(false);
   const [message, setMessage] = useState(""); // For final message input
   const [editorContent, setEditorContent] = useState(null);
+  const [previewImg, setPreviewImg] = useState(null);
   const [deliveryTimes, setDeliveryTimes] = useState({
     answerByNormal: null,
     answerByFast: null,
@@ -354,6 +355,7 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
                 "approved",
                 "rejected",
                 "quoted",
+                "submitted",
                 "awaiting_payment",
                 "payment_awaiting",
               ].includes(status) && (
@@ -393,9 +395,10 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
                   </svg>
                 </div>
               </td>
-              
+
               {[
                 "approved",
+                "submitted",
                 "rejected",
                 "quoted",
                 "awaiting_payment",
@@ -403,79 +406,82 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
               ].includes(status) && (
                 <>
                   <td className="px-3 py-2">
-                <div className="flex items-center font-bold">
-                  {status === "submitted" ||
-                  status === "approved" ||
-                  status === "rejected"
-                    ? "N/A"
-                    : normalDeliveryTime?.answerByNormal
-                    ? new Date(
-                        normalDeliveryTime?.answerByNormal
-                      ).toLocaleDateString()
-                    : question.deliveryTime
-                    ? new Date(question.deliveryTime).toLocaleDateString()
-                    : "N/A"}
+                    <div className="flex items-center font-bold">
+                      {status === "submitted" ||
+                      status === "approved" ||
+                      status === "rejected"
+                        ? "N/A"
+                        : normalDeliveryTime?.answerByNormal
+                        ? new Date(
+                            normalDeliveryTime?.answerByNormal
+                          ).toLocaleDateString()
+                        : question.deliveryTime
+                        ? new Date(question.deliveryTime).toLocaleDateString()
+                        : "N/A"}
 
-                  <svg
-                    className="ml-1 w-4 h-4"
-                    onClick={() => {
-                      if (status === "approved" && role === "professional") {
-                        setInitialType("normal");
-                        setDatePickerOpen(true);
-                      }
-                    }}
-                    cursor={"pointer"}
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-              </td>
-              <td className="px-3 py-2">
-                <div className="flex items-center font-bold font-bold">
-                  
-                  {status === "submitted" ||
-                  status === "approved" ||
-                  status === "rejected"
-                    ? "N/A"
-                    : fastDeliveryTime?.answerByFast
-                    ? new Date(
-                        fastDeliveryTime?.answerByFast
-                      ).toLocaleDateString()
-                    : question.fastDelivery
-                    ? new Date(question.fastDelivery).toLocaleDateString()
-                    : "N/A"}
-                  <svg
-                    className="ml-1 w-4 h-4"
-                    onClick={() => {
-                      console.log("Status on fast click:", status);
-                      if (status === "approved" && role === "professional") {
-                        setInitialType("fast");
-                        setDatePickerOpen(true);
-                        console.log("Fast delivery time picker opened");
-                      }
-                    }}
-                    cursor={"pointer"}
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-              </td>
-                  
+                      <svg
+                        className="ml-1 w-4 h-4"
+                        onClick={() => {
+                          if (
+                            status === "approved" &&
+                            role === "professional"
+                          ) {
+                            setInitialType("normal");
+                            setDatePickerOpen(true);
+                          }
+                        }}
+                        cursor={"pointer"}
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                  </td>
+                  <td className="px-3 py-2">
+                    <div className="flex items-center font-bold font-bold">
+                      {status === "submitted" ||
+                      status === "approved" ||
+                      status === "rejected"
+                        ? "N/A"
+                        : fastDeliveryTime?.answerByFast
+                        ? new Date(
+                            fastDeliveryTime?.answerByFast
+                          ).toLocaleDateString()
+                        : question.fastDelivery
+                        ? new Date(question.fastDelivery).toLocaleDateString()
+                        : "N/A"}
+                      <svg
+                        className="ml-1 w-4 h-4"
+                        onClick={() => {
+                          console.log("Status on fast click:", status);
+                          if (
+                            status === "approved" &&
+                            role === "professional"
+                          ) {
+                            setInitialType("fast");
+                            setDatePickerOpen(true);
+                            console.log("Fast delivery time picker opened");
+                          }
+                        }}
+                        cursor={"pointer"}
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                  </td>
                 </>
               )}
-
 
               {/* <td className="px-3 py-2">
                 <div className="flex items-center font-bold">
@@ -598,17 +604,15 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
                 {question.images.map((imgSrc, idx) => (
                   <div key={idx} className="relative">
                     <img
-                      src={
-                        "https://1askmedirect1.s3.amazonaws.com/1755846448746_CJ.jpg"
-                      }
+                      src={imgSrc}
                       alt={`Image ${idx + 1}`}
                       className="w-20 h-20 object-cover rounded"
                     />
                     <div className="mt-1 text-xs text-center text-gray-600">
                       Image {idx + 1}
                     </div>
-                    <div className="flex justify-center gap-1 mt-1">
-                      <button className="p-1" title="Open fullsize">
+                    <div className="flex justify-center gap-1 mt-1" >
+                      <button className="p-1" title="Open fullsize" onClick={() => setPreviewImg(imgSrc)}>
                         <svg
                           className="w-4 h-4 text-gray-500"
                           fill="none"
@@ -997,6 +1001,29 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
       >
         {content}
       </div>
+      {previewImg && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60"
+          onClick={() => setPreviewImg(null)}
+        >
+          <div
+            className="bg-white rounded-lg shadow-lg p-4 relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              src={previewImg}
+              alt="Preview"
+              className="max-w-[80vw] max-h-[80vh] rounded"
+            />
+            <button
+              className="absolute top-2 right-2 text-gray-700 bg-gray-200 rounded-full px-2 py-1"
+              onClick={() => setPreviewImg(null)}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
 
       <ThreadClosureModal
         open={threadClosureOpen}
