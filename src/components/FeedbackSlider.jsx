@@ -11,6 +11,7 @@ const ArrowLeft = () => (
     />
   </svg>
 );
+
 const ArrowRight = () => (
   <svg width="24" height="24" fill="none">
     <path
@@ -50,12 +51,14 @@ const FeedbackSlider = ({ feedback }) => {
   const [index, setIndex] = useState(0);
   const cardsToShow = 2;
 
-  const prev = () => setIndex((i) => Math.max(0, i - cardsToShow));
+  const prev = () =>
+    setIndex((i) => (i === 0 ? feedback.length - cardsToShow : i - 1));
   const next = () =>
-    setIndex((i) => Math.min(feedback.length - cardsToShow, i + cardsToShow));
+    setIndex((i) => (i >= feedback.length - cardsToShow ? 0 : i + 1));
 
   return (
     <div className="bg-white border border-gray-200 rounded-xl mb-4 p-4 overflow-hidden">
+      {/* Header */}
       <div className="flex items-center justify-between mb-2">
         <span className="font-semibold text-base text-slate-900">
           Clients Feedback
@@ -63,42 +66,37 @@ const FeedbackSlider = ({ feedback }) => {
         <div className="flex gap-2">
           <button
             onClick={prev}
-            disabled={index === 0}
-            className="p-1 rounded hover:bg-gray-100 disabled:opacity-40"
+            className="p-1 rounded hover:bg-gray-100"
           >
             <ArrowLeft />
           </button>
           <button
             onClick={next}
-            disabled={index + cardsToShow >= feedback.length}
-            className="p-1 rounded hover:bg-gray-100 disabled:opacity-40"
+            className="p-1 rounded hover:bg-gray-100"
           >
             <ArrowRight />
           </button>
         </div>
       </div>
-      <div
-        className="flex gap-1 transition-transform duration-500"
-        style={{
-          transform: `translateX(-${index * (100 / cardsToShow)}%)`,
-        }}
-      >
-        {feedback
-          .map((fb, idx) => (
+
+      {/* Slider */}
+      <div className=" scrollbar-hide">
+        <div
+          className="flex gap-4 transition-transform duration-500"
+          style={{
+            transform: `translateX(-${index * (100 / cardsToShow)}%)`,
+            width: `${(feedback.length / cardsToShow) * 58}%`,
+          }}
+        >
+          {feedback.map((fb, idx) => (
             <div
               key={idx}
               className="bg-gray-50 border border-gray-200 rounded-xl p-3 min-w-[260px] max-w-[320px] flex-1 flex flex-col gap-2"
-              style={{
-                transition: "transform 0.5s",
-                transform: `translateX(${(idx - index) * 0}%)`,
-              }}
             >
               <div className="flex items-center justify-between text-xs text-slate-700 mb-1">
                 <span>
                   {fb.asker
-                    ? `${fb.asker.firstName || ""} ${
-                        fb.asker.lastName || ""
-                      }`.trim()
+                    ? `${fb.asker.firstName || ""} ${fb.asker.lastName || ""}`.trim()
                     : `${fb.firstName || ""} ${fb.lastName || ""}`.trim()}
                 </span>
                 <span>{new Date(fb?.createdAt).toLocaleDateString()}</span>
@@ -114,17 +112,14 @@ const FeedbackSlider = ({ feedback }) => {
                     return <Star key={i} />;
                   }
                 })}
-                {/* <span className="text-slate-500 ml-1">
-                  {fb.rating.toFixed(1)}
-                </span> */}
                 <span className="text-slate-500 ml-1">
                   {(fb.rating ?? 0).toFixed(1)}
                 </span>
               </div>
               <div className="text-sm text-slate-700">{fb.comment}</div>
             </div>
-          ))
-          .slice(index, index + cardsToShow)}
+          ))}
+        </div>
       </div>
     </div>
   );
