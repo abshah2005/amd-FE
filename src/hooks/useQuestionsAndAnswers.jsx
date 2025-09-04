@@ -7,7 +7,7 @@ function getAuthHeaders() {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-export function useQuestions({ page = 1, limit = 10, status } = {}) {
+export function useQuestions({ page = 1, limit = 10000, status } = {}) {
   return useQuery({
     queryKey: ["questions", page, limit, status],
     queryFn: async () => {
@@ -46,7 +46,7 @@ export function useLeaveFeedback() {
   });
 }
 
-export function useAnswers({ page = 1, limit = 10, status } = {}) {
+export function useAnswers({ page = 1, limit = 10000, status } = {}) {
   return useQuery({
     queryKey: ["answers", page, limit, status],
     queryFn: async () => {

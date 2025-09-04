@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { Tabs } from "../components/Tabs";
 import { SearchBar } from "./SearcBar";
 import { QuestionsTable } from "../components/QuestionsTable";
@@ -11,9 +11,9 @@ import { getStatusLabel } from "../utils/StatusUtil";
 import QuestionThreadModal from "../components/QuestionThreadModal";
 
 const mappedQuestions = (questions) =>
-  questions.map((q,i) => ({
+  questions.map((q, i) => ({
     id: q._id,
-    label:`Qno.${i+1}`,
+    label: `Qno.${i + 1}`,
     submittedDate: new Date(q.createdAt).toISOString().slice(0, 10),
     question: q.title,
     professional: { name: q.professional?.user?.fullName || "Professional" },
@@ -23,9 +23,9 @@ const mappedQuestions = (questions) =>
   }));
 
 const mappedAnswers = (answers) =>
-  answers.map((a,i) => ({
+  answers.map((a, i) => ({
     id: a._id,
-    label:`Qno.${i+1}`,
+    label: `Qno.${i + 1}`,
     submittedDate: new Date(a.createdAt).toISOString().slice(0, 10),
     question: a.title,
     asker: { name: a.asker?.fullName || "Asker" },
@@ -41,6 +41,8 @@ const QuestionsPage = () => {
   const [selectedQuestionId, setSelectedQuestionId] = useState(null); // New state for selected question ID
   const [activeTab, setActiveTab] = useState("Active");
   const [searchTerm, setSearchTerm] = useState("");
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
   const activeStatuses = [
     "approved",
     "submitted",
@@ -51,6 +53,10 @@ const QuestionsPage = () => {
     "paid",
     "in_thread",
   ];
+
+  useEffect(() => {
+    setPage(1);
+  }, [activeTab]);
 
   const archivedStatuses = ["closed", "rejected"];
 
@@ -115,6 +121,13 @@ const QuestionsPage = () => {
     setModalOpen(true);
   };
 
+  // Pagination logic
+  const totalPages = Math.ceil(filteredItems.length / pageSize);
+  const paginatedItems = filteredItems.slice(
+    (page - 1) * pageSize,
+    page * pageSize
+  );
+
   return (
     <div className="min-h-screen bg-white p-6">
       {isProfessional && (
@@ -157,15 +170,36 @@ const QuestionsPage = () => {
             </div>
           ) : isProfessional ? (
             <AnswersTable
-              answers={filteredItems}
+              answers={paginatedItems}
               setModalOpen={(id) => handleOpenQuestion(id)}
             />
           ) : (
             <QuestionsTable
-              questions={filteredItems}
+              questions={paginatedItems}
               setModalOpen={(id) => handleOpenQuestion(id)}
             />
           )}
+
+          {/* Pagination Controls */}
+          <div className="flex justify-between items-center px-4 py-2">
+            <button
+              className="px-4 py-2 rounded bg-gray-200 text-gray-700 font-medium disabled:opacity-50"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+            >
+              Previous
+            </button>
+            <span className="text-sm text-gray-600">
+              Page {page} of {totalPages}
+            </span>
+            <button
+              className="px-4 py-2 rounded bg-gray-200 text-gray-700 font-medium disabled:opacity-50"
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages}
+            >
+              Next
+            </button>
+          </div>
         </div>
 
         <div className="mt-4 flex justify-between items-center">
@@ -182,7 +216,11 @@ const QuestionsPage = () => {
           setSelectedQuestionId(null);
         }}
         questionId={selectedQuestionId}
-        questionLabel={selectedQuestionId ? items.find(i => i.id === selectedQuestionId)?.label : null}
+        questionLabel={
+          selectedQuestionId
+            ? items.find((i) => i.id === selectedQuestionId)?.label
+            : null
+        }
       />
     </div>
   );
