@@ -67,7 +67,7 @@ const iconMap = {
 const ProfessionalProfileModal = ({ professional, onClose }) => {
   const [isQuestionOpen, setIsQuestionOpen] = useState(false);
 
-   const getDeliveryLabel = (days) => {
+  const getDeliveryLabel = (days) => {
     if (days <= 1) return "Less than 24hr";
     if (days <= 7) return "Less than 7 days";
     if (days <= 10) return "Less than 10 days";
@@ -124,11 +124,11 @@ const ProfessionalProfileModal = ({ professional, onClose }) => {
         ? professional.about
         : [String(professional.about)],
     experience:
-      professional?.experience == null
+      professional?.professionalExperiences == null
         ? dummyData.experience
-        : Array.isArray(professional.experience)
-        ? professional.experience
-        : [String(professional.experience)],
+        : Array.isArray(professional.professionalExperiences)
+        ? professional.professionalExperiences
+        : [String(professional.professionalExperiences)],
     exampleQuestions:
       professional?.exampleQuestions == null
         ? dummyData.exampleQuestions
@@ -157,7 +157,9 @@ const ProfessionalProfileModal = ({ professional, onClose }) => {
           <div className="w-[260px] flex-shrink-0 flex flex-col items-center">
             <div className="relative mb-2">
               <img
-             className={`w-[120px] h-[150px] object-cover rounded-xl   ${professional.featured?"border-4 border-yellow-400":""} bg-gray-100`}
+                className={`w-[120px] h-[150px] object-cover rounded-xl   ${
+                  professional.featured ? "border-4 border-yellow-400" : ""
+                } bg-gray-100`}
                 src={prof.profilePicture}
                 alt={prof.name}
               />
@@ -176,7 +178,7 @@ const ProfessionalProfileModal = ({ professional, onClose }) => {
               )}
             </div>
             <div className="text-sm text-slate-700 mb-1 text-center">
-              {prof.tags.slice(0,2).join(", ")}{" "}
+              {prof.tags.slice(0, 2).join(", ")}{" "}
               <span className="text-slate-500">• {prof.associated}</span>
             </div>
             <div className="flex gap-3 items-center mb-1 text-sm">
@@ -187,17 +189,22 @@ const ProfessionalProfileModal = ({ professional, onClose }) => {
               </span>
               <span className="text-slate-500">{prof.perQuestion}</span>
               <span className="flex items-center gap-1 text-yellow-500 font-medium">
-                {iconMap.star} {(prof.rating).toFixed(2)}
+                {iconMap.star} {prof.rating.toFixed(2)}
                 <span className="text-slate-500 ml-1">
-                  ({(prof.ratingCount)})
+                  ({prof.ratingCount})
                 </span>
               </span>
             </div>
             <div className="text-xs text-slate-500 mb-2 text-center">
               {(prof.languages || []).join(", ")}{" "}
-              <span className="text-slate-500">• {prof.country.join(", ")}</span>
+              <span className="text-slate-500">
+                • {prof.country.join(", ")}
+              </span>
             </div>
-            <button className="w-full bg-blue-600 text-white font-medium text-[15px] rounded-full py-2 mt-2 mb-2" onClick={()=>setIsQuestionOpen(true)}>
+            <button
+              className="w-full bg-blue-600 text-white font-medium text-[15px] rounded-full py-2 mt-2 mb-2"
+              onClick={() => setIsQuestionOpen(true)}
+            >
               Ask a question
             </button>
             <div className="w-full mb-3">

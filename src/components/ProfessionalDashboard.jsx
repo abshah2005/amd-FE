@@ -234,7 +234,7 @@ export default function ProfessionalDashboard() {
               />
               <StatsCard
                 title="Avg. Rating"
-                value={statsLoading ? "..." : stats?.avgRating ?? "0"}
+                value={statsLoading ? "..." : (stats?.avgRating).toFixed(2) ?? "0"}
               />
               <StatsCard
                 title="Total Earnings"

@@ -407,13 +407,28 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
                 <>
                   <td className="px-3 py-2">
                     <div className="flex items-center font-bold">
-                      {status === "submitted" ||
+                      {/* {status === "submitted" ||
                       status === "approved" ||
                       status === "rejected"
                         ? "N/A"
                         : normalDeliveryTime?.answerByNormal
                         ? new Date(
                             normalDeliveryTime?.answerByNormal
+                          ).toLocaleDateString()
+                        : question.deliveryTime
+                        ? new Date(question.deliveryTime).toLocaleDateString()
+                        : "N/A"} */}
+                      {status === "approved"
+                        ? normalDeliveryTime?.answerByNormal
+                          ? new Date(
+                              normalDeliveryTime.answerByNormal
+                            ).toLocaleDateString()
+                          : "N/A"
+                        : status === "submitted" || status === "rejected"
+                        ? "N/A"
+                        : normalDeliveryTime?.answerByNormal
+                        ? new Date(
+                            normalDeliveryTime.answerByNormal
                           ).toLocaleDateString()
                         : question.deliveryTime
                         ? new Date(question.deliveryTime).toLocaleDateString()
@@ -444,13 +459,28 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
                   </td>
                   <td className="px-3 py-2">
                     <div className="flex items-center font-bold font-bold">
-                      {status === "submitted" ||
+                      {/* {status === "submitted" ||
                       status === "approved" ||
                       status === "rejected"
                         ? "N/A"
                         : fastDeliveryTime?.answerByFast
                         ? new Date(
                             fastDeliveryTime?.answerByFast
+                          ).toLocaleDateString()
+                        : question.fastDelivery
+                        ? new Date(question.fastDelivery).toLocaleDateString()
+                        : "N/A"} */}
+                      {status === "approved"
+                        ? fastDeliveryTime?.answerByFast
+                          ? new Date(
+                              fastDeliveryTime.answerByFast
+                            ).toLocaleDateString()
+                          : "N/A"
+                        : status === "submitted" || status === "rejected"
+                        ? "N/A"
+                        : fastDeliveryTime?.answerByFast
+                        ? new Date(
+                            fastDeliveryTime.answerByFast
                           ).toLocaleDateString()
                         : question.fastDelivery
                         ? new Date(question.fastDelivery).toLocaleDateString()
@@ -483,76 +513,6 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
                 </>
               )}
 
-              {/* <td className="px-3 py-2">
-                <div className="flex items-center font-bold">
-                  {status === "submitted" ||
-                  status === "approved" ||
-                  status === "rejected"
-                    ? "N/A"
-                    : normalDeliveryTime?.answerByNormal
-                    ? new Date(
-                        normalDeliveryTime?.answerByNormal
-                      ).toLocaleDateString()
-                    : question.deliveryTime
-                    ? new Date(question.deliveryTime).toLocaleDateString()
-                    : "N/A"}
-
-                  <svg
-                    className="ml-1 w-4 h-4"
-                    onClick={() => {
-                      if (status === "approved" && role === "professional") {
-                        setInitialType("normal");
-                        setDatePickerOpen(true);
-                      }
-                    }}
-                    cursor={"pointer"}
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-              </td>
-              <td className="px-3 py-2">
-                <div className="flex items-center font-bold font-bold">
-                  
-                  {status === "submitted" ||
-                  status === "approved" ||
-                  status === "rejected"
-                    ? "N/A"
-                    : fastDeliveryTime?.answerByFast
-                    ? new Date(
-                        fastDeliveryTime?.answerByFast
-                      ).toLocaleDateString()
-                    : question.fastDelivery
-                    ? new Date(question.fastDelivery).toLocaleDateString()
-                    : "N/A"}
-                  <svg
-                    className="ml-1 w-4 h-4"
-                    onClick={() => {
-                      console.log("Status on fast click:", status);
-                      if (status === "approved" && role === "professional") {
-                        setInitialType("fast");
-                        setDatePickerOpen(true);
-                        console.log("Fast delivery time picker opened");
-                      }
-                    }}
-                    cursor={"pointer"}
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-              </td> */}
               {["paid", "in_thread", "answered", "closed"].includes(status) && (
                 <th className="px-3 py-2 font-bold">
                   {new Date(question?.answerBy).toLocaleDateString()}
@@ -611,8 +571,12 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
                     <div className="mt-1 text-xs text-center text-gray-600">
                       Image {idx + 1}
                     </div>
-                    <div className="flex justify-center gap-1 mt-1" >
-                      <button className="p-1" title="Open fullsize" onClick={() => setPreviewImg(imgSrc)}>
+                    <div className="flex justify-center gap-1 mt-1">
+                      <button
+                        className="p-1"
+                        title="Open fullsize"
+                        onClick={() => setPreviewImg(imgSrc)}
+                      >
                         <svg
                           className="w-4 h-4 text-gray-500"
                           fill="none"
