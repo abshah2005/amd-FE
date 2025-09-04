@@ -610,6 +610,7 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
           <PricingInput
             quote={question.quote}
             normalDeliveryTime={normalDeliveryTime}
+            
             fastDeliveryTime={fastDeliveryTime}
             initialMode={question.deliveryType}
             price={question.price}
@@ -767,11 +768,11 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
           <div className="mt-4 flex justify-center">
             <button
               className={`px-4 py-2 ${
-                ["paid", "in_thread", "answered"].includes(status)
+                [ "in_thread", "answered"].includes(status)
                   ? " bg-blue-600 text-white"
                   : "bg-gray-400 text-white"
               } rounded-full text-sm`}
-              disabled={!["paid", "in_thread", "answered"].includes(status)}
+              disabled={![ "in_thread", "answered"].includes(status)}
               onClick={() => {
                 setThreadClosureOpen(true);
               }}
@@ -783,7 +784,7 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
           <div className="mt-4 flex justify-center">
             {/* quoted will be removed soon  */}
             {(() => {
-              const allowFollowUp = ["paid", "in_thread", "answered"].includes(
+              const allowFollowUp = [ "in_thread", "answered"].includes(
                 status.toLowerCase()
               );
               return (

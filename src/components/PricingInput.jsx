@@ -270,7 +270,7 @@ const PricingInput = ({
           </div>
         )}
       {(role === "asker" || role === "professional") &&
-        (status === "paid" || status === "closed" || status==="in_thread") && (
+        (status === "paid" || status === "closed" || status==="in_thread" || status==="answered") && (
           <div className="text-center">
             <p className="text-xs text-gray-500 mb-1">
               {initialMode === "normal"

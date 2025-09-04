@@ -5,7 +5,7 @@ const DashboardStats = ({ stats, loading }) => {
     { label: "Total Users", value: stats?.totalUsers ?? "-" },
     { label: "Active Users", value: stats?.activeUsers ?? "-" },
     { label: "Total Platform Earnings", value:  `$${stats?.totalPlatformEarnings}`  },
-    { label: "Avg. Rating", value: `${(stats?.avgRating).toFixed(2)} ★` },
+    { label: "Avg. Rating", value: `${(stats?.avgRating)} ★` },
   ];
 
   return (
