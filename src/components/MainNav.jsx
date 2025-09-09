@@ -193,7 +193,7 @@ const MainNav = ({ isDashboard }) => {
             </button>
             <div className="flex items-center justify-between space-between">
               <div className="w-[1px] h-6 bg-black mx-2"></div>
-              <button className="flex items-center gap-1 text-blue-600 font-medium text-sm ">
+              <button className="flex items-center gap-1 text-blue-600 font-medium text-sm" disabled={true}>
                 Find a Professional
               </button>
               <div className="flex items-center pl-4">
