@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 
-export default function FollowUpModal({ open, onClose, questionId, onSend }) {
+export default function FollowUpModal({ open, onClose, questionId, onSend, maxWords = 500 }) {
   const [body, setBody] = useState("");
   const [sending, setSending] = useState(false);
   const inputRef = useRef(null);
@@ -19,6 +19,16 @@ export default function FollowUpModal({ open, onClose, questionId, onSend }) {
     window.addEventListener("keydown", handleEsc);
     return () => window.removeEventListener("keydown", handleEsc);
   }, [onClose]);
+
+  const countWords = (text) =>
+    text.trim().split(/\s+/).filter(Boolean).length;
+
+  const handleChange = (e) => {
+    const value = e.target.value;
+    if (countWords(value) <= maxWords) {
+      setBody(value);
+    }
+  };
 
   const handleSend = async () => {
     if (!body.trim()) return;
@@ -67,10 +77,13 @@ export default function FollowUpModal({ open, onClose, questionId, onSend }) {
         <textarea
           ref={inputRef}
           value={body}
-          onChange={(e) => setBody(e.target.value)}
+          onChange={handleChange}
           placeholder="Start typing here...."
           className="w-full border border-gray-300 rounded px-3 py-2 resize-none h-28 focus:outline-none focus:ring-2 focus:ring-blue-200"
         />
+        <div className="text-xs text-gray-500 mt-1 text-right">
+          {countWords(body)} / {maxWords} words
+        </div>
         <hr className="my-4 shadow" />
 
         <div className="flex items-center justify-end gap-4 mt-4">

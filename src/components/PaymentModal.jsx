@@ -6,6 +6,7 @@ import {
   CardExpiryElement,
   CardCvcElement
 } from "@stripe/react-stripe-js";
+import { useQueryClient } from "@tanstack/react-query";
 
 // Stripe element styles to match your design
 const stripeElementStyles = {
@@ -25,6 +26,7 @@ const PaymentModal = ({ isOpen, onRequestClose, amount, questionId, deliveryType
   const [country, setCountry] = useState("US");
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
+  const queryClient = useQueryClient();
 
   const stripe = useStripe();
   const elements = useElements();
@@ -40,7 +42,8 @@ const PaymentModal = ({ isOpen, onRequestClose, amount, questionId, deliveryType
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ amount, deliveryType }), // Pass deliveryType here
+          body: JSON.stringify({ amount, deliveryType }),
+           // Pass deliveryType here
         });
         const data = await res.json();
         if (data?.data?.clientSecret) {
@@ -99,7 +102,8 @@ const PaymentModal = ({ isOpen, onRequestClose, amount, questionId, deliveryType
           body: JSON.stringify({}),
         });
         const data = await res.json();
-        
+        queryClient.invalidateQueries({ queryKey: ["question", questionId] });
+        onRequestClose();
       // You might want to close the modal or redirect after successful payment
     }
     setLoading(false);

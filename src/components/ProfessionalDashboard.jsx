@@ -5,6 +5,7 @@ import {
   usePendingQuestions,
 } from "../hooks/useDashboard";
 import { getStatusLabel } from "../utils/StatusUtil";
+import QuestionThreadModal from "./QuestionThreadModal";
 
 function StatsCard({ title, value }) {
   return (
@@ -42,7 +43,7 @@ function ShareBox({ url }) {
       {/* info icon top-right */}
       <div className="absolute top-3 right-3">
         <div
-          title="Shareable profile link"
+          title="Please feel free to share this link with your own audience and followers to start accepting questions on AskMeDirect.com"
           className="w-7 h-7 flex items-center justify-center rounded-full border text-gray-500 bg-white"
         >
           <svg
@@ -59,6 +60,7 @@ function ShareBox({ url }) {
           </svg>
         </div>
       </div>
+      
 
       <div className="text-sm font-medium text-gray-800">Sharable Profile Link</div>
 
@@ -181,6 +183,8 @@ function StatusCell({ status }) {
 export default function ProfessionalDashboard() {
   const { user } = useAuth();
   const [q, setQ] = useState("");
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedQuestionId, setSelectedQuestionId] = useState(null);
 
   // Fetch stats and pending questions
   const {
@@ -191,7 +195,19 @@ export default function ProfessionalDashboard() {
   const { data: pending, isLoading: loading, error } = usePendingQuestions();
 
   // Only show items whose status is NOT closed or rejected
-  const filtered = (pending || []).filter(
+  // const filtered = (pending || []).filter(
+  //   (it) =>
+  //     it.status !== "closed" &&
+  //     it.status !== "rejected" &&
+  //     (!q ||
+  //       (it.question || "").toLowerCase().includes(q.toLowerCase()) ||
+  //       (it.asker?.user?.firstName || it.asker?.firstName || it.asker || "")
+  //         .toLowerCase()
+  //         .includes(q.toLowerCase()) ||
+  //       (it.id || "").toLowerCase().includes(q.toLowerCase()))
+  // );
+  const filtered = (pending || [])
+  .filter(
     (it) =>
       it.status !== "closed" &&
       it.status !== "rejected" &&
@@ -201,7 +217,16 @@ export default function ProfessionalDashboard() {
           .toLowerCase()
           .includes(q.toLowerCase()) ||
         (it.id || "").toLowerCase().includes(q.toLowerCase()))
-  );
+  )
+  .map((it, index) => ({
+    ...it,
+    label: `Qno.${index + 1}`, // Add a label property
+  }));
+
+  const handleRowClick = (id) => {
+    setSelectedQuestionId(id); // Set the selected question ID
+    setModalOpen(true); // Open the modal
+  };
 
   return (
     <div className=" bg-white pt-0 ">
@@ -293,7 +318,9 @@ export default function ProfessionalDashboard() {
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
                         {filtered.map((row,i) => (
-                          <tr key={row.id} className="hover:bg-gray-50">
+                          <tr key={row._id} className="hover:bg-gray-50 cursor-pointer"
+                          onClick={() => handleRowClick(row._id)}
+                          >
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 font-medium">
                               {/* {row._id} */}
                               {`Qno.${i+1}`}
@@ -341,6 +368,24 @@ export default function ProfessionalDashboard() {
           </main>
         </div>
       </div>
+      <QuestionThreadModal
+        open={modalOpen}
+        onClose={() => {
+          setModalOpen(false);
+          setSelectedQuestionId(null);
+        }}
+        questionId={selectedQuestionId}
+        // questionLabel={
+        //   selectedQuestionId
+        //     ? filtered.find((i) => i._id === selectedQuestionId)?.label
+        //     : null
+        // }
+        questionLabel={
+    selectedQuestionId
+      ? filtered.find((i) => i._id === selectedQuestionId)?.label
+      : null
+  }
+      />
     </div>
   );
 }

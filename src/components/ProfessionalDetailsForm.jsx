@@ -214,6 +214,7 @@ const ProfessionalDetailsForm = ({
               values.priceRangeHigh ?? values.priceMax ?? undefined,
             currency: values.currency || "$",
             tags: values.tags || [],
+            socialLinks:personal.socialLinks||[]
           },
         };
 
@@ -530,7 +531,7 @@ const ProfessionalDetailsForm = ({
       {/* Individual / Firm */}
       <div className="mb-6 flex items-center gap-4">
         <label className="font-medium text-sm text-gray-700 w-56">
-          Individual / Firm
+          Individual / Firm or University
         </label>
         <ToggleSwitch
           checked={values.isFirm}

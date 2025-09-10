@@ -82,6 +82,7 @@ const MainNav = ({ isDashboard }) => {
       : "Switch to Professional";
 
   const modalRef = useRef(null);
+  const resultsRef = useRef(null);
 
   const userProfilePic =
     user?.profilePic ||
@@ -107,6 +108,24 @@ const MainNav = ({ isDashboard }) => {
     };
   }, [showProfileModal]);
 
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (
+        resultsRef.current &&
+        !resultsRef.current.contains(e.target) &&
+        e.target.getAttribute("data-dropdown") !== "true"
+      ) {
+        setShowResults(false);
+      }
+    }
+    if (showResults) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showResults]);
+
   return (
     <div>
       {console.log("isLoading", isLoading)}
@@ -125,31 +144,33 @@ const MainNav = ({ isDashboard }) => {
           <div className="hidden lg:flex flex-1 justify-center gap-2">
             <div className="flex items-center bg-[#F0F1F3] relative rounded-full px-4 py-2 w-[340px] max-w-md">
               <img src={findIcon} alt="Search" className="w-4 h-4 mr-2" />
-              
+
               <input
                 type="text"
                 placeholder="Search"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="bg-transparent outline-none flex-1 text-sm"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && searchQuery.trim()) {
+                    setPage(1);
+                    setShowResults(true);
+                  }
+                }}
               />
-             
               <img
                 src={dropdownIcon}
                 alt="Dropdown"
-                onClick={() => {
-                  if (searchQuery.trim()) {
-                    setShowResults((prev) => !prev); 
-                  } else {
-                    setShowResults(false); 
-                    alert("Please enter a search query.");
-                  }
-                }}
-                className="w-4 h-4 ml-2"
+                data-dropdown="true"
+                onClick={() => setShowResults((prev) => !prev)}
+                className="w-4 h-4 ml-2 cursor-pointer"
               />
 
               {showResults && (
-                <div className="absolute top-10 left-0 mt-2 w-full bg-white shadow-lg rounded-lg p-4 z-20">
+                <div
+                  ref={resultsRef}
+                  className="absolute top-10 left-0 mt-2 w-full bg-white shadow-lg rounded-lg p-4 z-20"
+                >
                   {isPending ? (
                     <p>Loading...</p>
                   ) : data?.results?.length > 0 ? (
@@ -214,7 +235,7 @@ const MainNav = ({ isDashboard }) => {
               {isQuestionsActive ? <ActiveMessageIcon /> : <MessageLogo />}
             </Link>
           )}
-          <img src={bellIcon} alt="Bell" className="w-5 h-5" />
+          {/* <img src={bellIcon} alt="Bell" className="w-5 h-5" /> */}
 
           {/* Profile: clickable avatar opens modal-style card */}
           <div className="relative">

@@ -293,6 +293,7 @@ const AskQuestionModal = ({ professional, onClose }) => {
                 height={50}
                 hideSubmitButton={false}
                 autoFocus={false}
+                maxLength={2500}
               />
             </div>
             <div className="mb-4">
@@ -510,7 +511,7 @@ const AskQuestionModal = ({ professional, onClose }) => {
                 <span className="mr-2 text-md">|</span>
                 Please agree to the
                 <span
-                  className="text-bold cursor-pointer text-red-500"
+                  className="text-bold cursor-pointer text-red-500 mx-1"
                   onClick={() =>
                     dispatch({ type: "SET_SHOW_TERMS", value: true })
                   }
@@ -533,7 +534,7 @@ const AskQuestionModal = ({ professional, onClose }) => {
             {!state.agreed && (
               <div className="mb-2 text-red-500 text-xs  p-2 rounded flex items-center">
                 You must agree to the Terms of Use
-                <span>to submit</span>
+                <span className="mx-1">to submit</span>
               </div>
             )}
             <div className="flex justify-between mt-4">

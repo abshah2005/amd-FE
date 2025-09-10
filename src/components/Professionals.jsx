@@ -589,16 +589,11 @@ const Professionals = () => {
             <label className="block text-sm font-medium mb-1">
               Budget Range
             </label>
-            <div className="flex flex-col gap-2">
+            <div className="flex  md:flex-col gap-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs text-gray-500">
                   ${state.budget[0]}
                 </span>
-                <span className="text-xs text-gray-500">
-                  ${state.budget[1]}
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
                 <input
                   type="range"
                   min={10}
@@ -607,6 +602,12 @@ const Professionals = () => {
                   onChange={(e) => handleBudgetChange(e, 0)}
                   className="flex-1 accent-blue-600"
                 />
+               
+              </div>
+              <div className="flex items-center gap-2">
+                 <span className="text-xs text-gray-500">
+                  ${state.budget[1]}
+                </span>
                 <input
                   type="range"
                   min={10}

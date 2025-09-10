@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -34,18 +34,26 @@ const FeedbackModal = ({
   const [hover, setHover] = useState(0);
   const [comment, setComment] = useState("");
 
+  useEffect(() => {
+    if (!open) {
+      setRating(0);
+      setComment("");
+      setHover(0);
+    }
+  }, [open]);
+
   const handleSubmit = () => {
     if (rating > 0) {
       onSubmit({ rating, comment });
-      setRating(0);
-      setComment("");
+      // setRating(0);
+      // setComment("");
     }
   };
 
   const handleAskLater = () => {
     onClose();
-    setRating(0);
-    setComment("");
+    // setRating(0);
+    // setComment("");
   };
 
   return (

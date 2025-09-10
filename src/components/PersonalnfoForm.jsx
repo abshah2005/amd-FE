@@ -76,7 +76,9 @@ const PersonalInfoForm = ({
     && values.lastName?.trim()
     && values.description?.trim()?.length > 0
     && Array.isArray(values.languages) && values.languages.length > 0
-    && Array.isArray(values.locations) && values.locations.length > 0;
+    && Array.isArray(values.locations) && values.locations.length > 0
+    && Array.isArray(values.socialLinks) && values.socialLinks.length > 0;
+
 
   return (
     <form
@@ -243,6 +245,57 @@ const PersonalInfoForm = ({
               </span>
             ))}
           </div>
+        </div>
+      </div>
+      <div className="flex items-center mb-4">
+        <label className="w-40 font-medium text-sm text-gray-700 flex-shrink-0">
+          Social Links
+        </label>
+        <div className="w-full flex flex-col gap-2">
+          <input
+            type="url"
+            className="border border-gray-300 rounded-md p-2 w-full text-sm"
+            placeholder="LinkedIn URL"
+            value={values.socialLinks?.[0] || ""}
+            onChange={e => {
+              const arr = [...(values.socialLinks || ["", "", ""])];
+              arr[0] = e.target.value;
+              onChange("socialLinks", arr);
+            }}
+          />
+          <input
+            type="url"
+            className="border border-gray-300 rounded-md p-2 w-full text-sm"
+            placeholder="Facebook URL"
+            value={values.socialLinks?.[1] || ""}
+            onChange={e => {
+              const arr = [...(values.socialLinks || ["", "", ""])];
+              arr[1] = e.target.value;
+              onChange("socialLinks", arr);
+            }}
+          />
+          <input
+            type="url"
+            className="border border-gray-300 rounded-md p-2 w-full text-sm"
+            placeholder="Instagram URL"
+            value={values.socialLinks?.[2] || ""}
+            onChange={e => {
+              const arr = [...(values.socialLinks || ["", "", ""])];
+              arr[2] = e.target.value;
+              onChange("socialLinks", arr);
+            }}
+          />
+          <input
+            type="url"
+            className="border border-gray-300 rounded-md p-2 w-full text-sm"
+            placeholder="Website URL"
+            value={values.socialLinks?.[3] || ""}
+            onChange={e => {
+              const arr = [...(values.socialLinks || ["", "", ""])];
+              arr[2] = e.target.value;
+              onChange("socialLinks", arr);
+            }}
+          />
         </div>
       </div>
       {/* Save & Continue Button */}

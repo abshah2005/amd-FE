@@ -19,6 +19,7 @@ const initialPersonal = {
 const initialProfessional = {
   selectedSpecializations: [],
   tags: [],
+  socialLinks:[],
   priceMin: "",
   priceMax: "",
   isFirm: false,

@@ -27,12 +27,7 @@ const dummyData = {
   country: "Spain",
   profilePicture: "https://randomuser.me/api/portraits/men/23.jpg",
   verified: true,
-  socialLinks: [
-    { type: "linkedin", url: "#" },
-    { type: "facebook", url: "#" },
-    { type: "instagram", url: "#" },
-    { type: "website", url: "#" },
-  ],
+  socialLinks: ["#", "#", "#", "#"],
   about: [
     "How should I structure my consulting agreement to protect my IP?",
     "How should I structure my consulting agreement to protect my IP?",
@@ -65,8 +60,10 @@ const iconMap = {
   star: <Star />,
 };
 
+const iconList = [<Linkedin />, <Facebook />, <Instagram />, <Website />];
+
 const PublicProfilePage = () => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
   const { name } = useParams();
   const { data: professional, isLoading, error } = useProfessionalProfile(name);
   const [isQuestionOpen, setIsQuestionOpen] = useState(false);
@@ -78,10 +75,13 @@ const PublicProfilePage = () => {
     return `Within ${days} days`;
   };
 
-  if (isLoading)
-    return <SkeletonProfile />;
+  if (isLoading) return <SkeletonProfile />;
   if (error || !professional)
-    return <div className="flex justify-center items-center h-screen">Professional not found.</div>;
+    return (
+      <div className="flex justify-center items-center h-screen">
+        Professional not found.
+      </div>
+    );
 
   const prof = {
     ...dummyData,
@@ -92,7 +92,9 @@ const PublicProfilePage = () => {
       dummyData.profilePicture,
     name:
       professional?.fullName ||
-      `${professional?.firstName || ""} ${professional?.lastName || ""}`.trim() ||
+      `${professional?.firstName || ""} ${
+        professional?.lastName || ""
+      }`.trim() ||
       professional?.name ||
       dummyData.name,
     priceRangeLow:
@@ -131,17 +133,23 @@ const PublicProfilePage = () => {
         ? professional.about
         : [String(professional.about)],
     experience:
-      professional?.experience == null
+      professional?.professionalExperiences == null
         ? dummyData.experience
-        : Array.isArray(professional.experience)
-        ? professional.experience
-        : [String(professional.experience)],
+        : Array.isArray(professional.professionalExperiences)
+        ? professional.professionalExperiences
+        : [String(professional.professionalExperiences)],
     exampleQuestions:
       professional?.exampleQuestions == null
         ? dummyData.exampleQuestions
         : Array.isArray(professional.exampleQuestions)
         ? professional.exampleQuestions
         : [String(professional.exampleQuestions)],
+    // socialLinks:
+    //   professional?.socialLinks == null
+    //     ? dummyData.exampleQuestions
+    //     : Array.isArray(professional.socialLinks)
+    //     ? professional.socialLinks
+    //     : [String(professional.socialLinks)],
   };
 
   return (
@@ -152,7 +160,9 @@ const PublicProfilePage = () => {
           <div className="w-full md:w-[260px] flex-shrink-0 flex flex-col items-center">
             <div className="relative mb-2">
               <img
-                className={`w-[120px] h-[150px] object-cover rounded-xl ${prof.featured ? "border-4 border-yellow-400" : ""} bg-gray-100`}
+                className={`w-[120px] h-[150px] object-cover rounded-xl ${
+                  prof.featured ? "border-4 border-yellow-400" : ""
+                } bg-gray-100`}
                 src={prof.profilePicture}
                 alt={prof.name}
               />
@@ -182,7 +192,7 @@ const PublicProfilePage = () => {
               </span>
               <span className="text-slate-500">{prof.perQuestion}</span>
               <span className="flex items-center gap-1 text-yellow-500 font-medium">
-                {iconMap.star} {(prof.rating).toFixed(2)}
+                {iconMap.star} {prof.rating.toFixed(2)}
                 <span className="text-slate-500 ml-1">
                   ({prof.ratingCount})
                 </span>
@@ -190,30 +200,38 @@ const PublicProfilePage = () => {
             </div>
             <div className="text-xs text-slate-500 mb-2 text-center">
               {(prof.languages || []).join(", ")}{" "}
-              <span className="text-slate-500">• {prof.country.join(", ")}</span>
+              <span className="text-slate-500">
+                • {prof.country.join(", ")}
+              </span>
             </div>
             <button
               className="w-full bg-blue-600 text-white font-medium text-[15px] rounded-full py-2 mt-2 mb-2"
               onClick={() => {
                 // setIsQuestionOpen(true)
                 navigate("/signup");
-            }}
+              }}
             >
               Ask a question
+            </button>
+            <button
+              className="w-full bg-gray-100 text-blue-700 font-medium text-[15px] rounded-full py-1 mb-2 border border-blue-600"
+              onClick={() => navigate("/")}
+            >
+              Go to App
             </button>
             <div className="w-full mb-3">
               <span className="text-xs text-slate-500 block mb-1">
                 Social Links
               </span>
               <div className="flex  items-center justify-between gap-6">
-                {prof.socialLinks.map((link) => (
+                {prof.socialLinks.map((link, i) => (
                   <a
-                    key={link.type}
-                    href={link.url}
+                    // key={link.type}
+                    href={link}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    {iconMap[link.type]}
+                    {iconList[i]}
                   </a>
                 ))}
               </div>

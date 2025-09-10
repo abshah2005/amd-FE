@@ -62,7 +62,7 @@ const DefaultView = memo(
                 <Edit />
               </button>
             )}
-            <div className="text-xs text-gray-400 mt-1">* Mandatory fields</div>
+            {/* <div className="text-xs text-gray-400 mt-1">* Mandatory fields</div> */}
           </div>
         </div>
 
@@ -489,6 +489,63 @@ const PersonalInfoBox = ({
           </div>
         )}
       </div>
+
+      <div className="flex items-center mb-4">
+        <label className="w-40 font-medium text-sm text-gray-700 flex-shrink-0">
+          Social Links
+        </label>
+        <div className="w-full flex flex-col gap-2">
+          <input
+            type="url"
+            className="border border-gray-300 rounded-md p-2 w-full text-sm"
+            placeholder="LinkedIn URL"
+            value={formData.socialLinks?.[0] || ""}
+            disabled={!editing}
+            onChange={e => {
+              const arr = [...(formData.socialLinks || ["", "", "", ""])];
+              arr[0] = e.target.value;
+              setFormData(prev => ({ ...prev, socialLinks: arr }));
+            }}
+          />
+          <input
+            type="url"
+            className="border border-gray-300 rounded-md p-2 w-full text-sm"
+            placeholder="Facebook URL"
+            value={formData.socialLinks?.[1] || ""}
+            disabled={!editing}
+            onChange={e => {
+              const arr = [...(formData.socialLinks || ["", "", "", ""])];
+              arr[1] = e.target.value;
+              setFormData(prev => ({ ...prev, socialLinks: arr }));
+            }}
+          />
+          <input
+            type="url"
+            className="border border-gray-300 rounded-md p-2 w-full text-sm"
+            placeholder="Instagram URL"
+            value={formData.socialLinks?.[2] || ""}
+            disabled={!editing}
+            onChange={e => {
+              const arr = [...(formData.socialLinks || ["", "", "", ""])];
+              arr[2] = e.target.value;
+              setFormData(prev => ({ ...prev, socialLinks: arr }));
+            }}
+          />
+          <input
+            type="url"
+            className="border border-gray-300 rounded-md p-2 w-full text-sm"
+            placeholder="Website URL"
+            value={formData.socialLinks?.[3] || ""}
+            disabled={!editing}
+            onChange={e => {
+              const arr = [...(formData.socialLinks || ["", "", "", ""])];
+              arr[3] = e.target.value;
+              setFormData(prev => ({ ...prev, socialLinks: arr }));
+            }}
+          />
+        </div>
+      </div>
+
     </div>
   );
 };
@@ -894,31 +951,7 @@ const ProfessionalInfoBox = ({
                   </button>
                 </div>
               )}
-              {/* Selected tags panel */}
-              {/* <div className="mt-2 flex flex-wrap gap-2">
-          {(formData.tags || []).map((tag, idx) => (
-            <span
-              key={tag + idx}
-              className="bg-blue-50 text-blue-700 px-2 py-1 rounded text-xs flex items-center border border-blue-300"
-            >
-              {tag}
-              {editing && (
-                <button
-                  type="button"
-                  className="ml-1 text-gray-400 hover:text-red-500"
-                  onClick={() => {
-                    const next = (formData.tags || []).filter(
-                      (_, i) => i !== idx
-                    );
-                    setFormData((p) => ({ ...p, tags: next }));
-                  }}
-                >
-                  ×
-                </button>
-              )}
-            </span>
-          ))}
-        </div> */}
+              
               <div className="mt-2 flex flex-wrap gap-2">
                 {(formData.tags || []).map((tag, idx) => (
                   <span
@@ -989,7 +1022,7 @@ const ProfessionalInfoBox = ({
 
       <div className="mb-4">
         <label className="block text-sm text-gray-700 font-medium mb-1">
-          Individual / Firm
+          Individual / Firm or University
         </label>
         <div className="flex items-center gap-4">
           <label className="flex items-center gap-2">
@@ -1019,7 +1052,7 @@ const ProfessionalInfoBox = ({
                 setFormData((prev) => ({ ...prev, entityType: "firm" }))
               }
             />
-            <span className="text-sm">Firm</span>
+            <span className="text-sm">Firm or University</span>
           </label>
           {(formData.entityType ?? prof.entityType) === "firm" && (
             <input
@@ -1090,7 +1123,7 @@ const ProfessionalInfoBox = ({
         )}
       </div>
 
-      {/* <div className="mb-4">
+      <div className="mb-4">
         <label className="block text-sm text-gray-700 font-medium mb-1">
           Profesional Experiences
         </label>
@@ -1144,7 +1177,8 @@ const ProfessionalInfoBox = ({
             </button>
           </div>
         )}
-      </div> */}
+        
+      </div>
     </div>
   );
 };
@@ -1199,9 +1233,9 @@ const ProfessionalView = memo(
                   <Edit />
                 </button>
               )}
-              <div className="text-xs text-gray-400 mt-1">
+              {/* <div className="text-xs text-gray-400 mt-1">
                 * Mandatory fields
-              </div>
+              </div> */}
             </div>
           </div>
 
@@ -1242,6 +1276,7 @@ const ProfileView = () => {
     lastName: "",
     description: "",
     professionalExperiences: [],
+    socialLinks:[],
     languages: [],
     locations: [],
   });
@@ -1278,6 +1313,9 @@ const ProfileView = () => {
         locations: Array.isArray(user.professional?.country)
           ? [...user.professional.country]
           : [],
+        socialLinks: Array.isArray(user.professional?.socialLinks)
+          ? [...user.professional.socialLinks]
+          : ["", "", "", ""],
       });
     } else {
       // asker/admin flow (unchanged)
@@ -1352,6 +1390,22 @@ const ProfileView = () => {
           formData.exampleQuestions ??
             user?.professional?.exampleQuestions ??
             []
+        )
+      );
+      fd.append(
+        "professionalExperiences",
+        JSON.stringify(
+          formData.professionalExperiences ??
+            user?.professional?.professionalExperiences ??
+            []
+        )
+      );
+      fd.append(
+        "socialLinks",
+        JSON.stringify(
+          formData.socialLinks ??
+            user?.professional?.socialLinks ??
+            ["", "", "", ""]
         )
       );
       if (selectedFile) fd.append("profilePic", selectedFile);

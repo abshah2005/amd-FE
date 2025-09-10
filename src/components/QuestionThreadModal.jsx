@@ -80,7 +80,9 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
         label: questionLabel,
         submittedDate: new Date(questionData.createdAt).toLocaleDateString(),
         payment: questionData.payment?.paid ? "Paid" : "Unpaid",
-        asker: questionData.asker?.firstName || "Unknown",
+        asker:
+          questionData.asker?.firstName + questionData.asker?.lastName ||
+          "Unknown",
         budget: questionData.price || questionData.proposedBudget || 0,
         deliveryType: questionData.deliveryType,
         priceRangeLow: questionData.professional.priceRangeLow,
@@ -104,6 +106,12 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
     : null;
 
   const [initialType, setInitialType] = useState("normal");
+  const [hasLeftFeedback, setHasLeftFeedback] = useState(!!question?.feedback);
+
+  // Sync with backend data
+  useEffect(() => {
+    setHasLeftFeedback(!!question?.feedback);
+  }, [question?.feedback]);
 
   // const handleDateTimeApply = ({ date, ranges }) => {
   //   if (initialType === "normal") {
@@ -182,7 +190,7 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
         onSuccess: () => {
           console.log("Thread closed successfully");
           setThreadClosureOpen(false);
-          setMessage(""); // Reset message
+          setMessage("");
         },
         onError: (error) => {
           console.error("Failed to close thread:", error);
@@ -325,22 +333,26 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
             </div>
           </div>
         )}
-      {role === "professional" && status === "submitted" && (
-        <div className="mt-4 flex justify-center">
-          <button
-            className="px-4 py-2 bg-green-600 text-white rounded-full text-sm hover:bg-green-700"
-            onClick={() => handleAction("approve")} // Trigger the confirmation modal
-          >
-            Approve Question
-          </button>
-          <button
-            className="px-4 py-2 bg-red-600 text-white rounded-full text-sm hover:bg-red-700"
-            onClick={() => handleAction("reject")}
-          >
-            Reject Question
-          </button>
-        </div>
-      )}
+      {role === "professional" &&
+        (status === "submitted" || status === "approved") && (
+          <div className="mt-4 flex justify-center">
+            {status === "submitted" && (
+              <button
+                className="px-4 py-2 bg-green-600 text-white rounded-full text-sm hover:bg-green-700"
+                onClick={() => handleAction("approve")} 
+              >
+                Approve Question
+              </button>
+            )}
+
+            <button
+              className="px-4 py-2 bg-red-600 text-white rounded-full text-sm hover:bg-red-700"
+              onClick={() => handleAction("reject")}
+            >
+              Reject Question
+            </button>
+          </div>
+        )}
 
       {/* Question details table */}
       <div className="overflow-x-auto">
@@ -610,7 +622,6 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
           <PricingInput
             quote={question.quote}
             normalDeliveryTime={normalDeliveryTime}
-            
             fastDeliveryTime={fastDeliveryTime}
             initialMode={question.deliveryType}
             price={question.price}
@@ -625,11 +636,12 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
             onPayNow={handlePayNow}
           />
         </div>
-        {!question.feedback && status === "closed" && role === "asker" && (
+        {!hasLeftFeedback && status === "closed" && role === "asker" && (
           <div className="flex justify-center mt-4">
             <button
               className="px-4 py-2 bg-blue-600 text-white rounded-full font-semibold"
               onClick={() => setFeedbackOpen(true)}
+              disabled={hasLeftFeedback}
             >
               Leave Feedback
             </button>
@@ -696,7 +708,7 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
             <div className="bg-white rounded-lg  p-3 w-full max-w-xl mx-auto">
               <div className="flex justify-center items-center mb-2 text-center gap-4">
                 <span className="font-semibold text-gray-700">
-                  {question.asker.firstName} {question.asker.lastName}.
+                  {question.asker}
                 </span>
                 <span className="text-xs text-gray-400">
                   {new Date(question.feedback.createdAt).toLocaleDateString()}
@@ -768,11 +780,11 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
           <div className="mt-4 flex justify-center">
             <button
               className={`px-4 py-2 ${
-                [ "in_thread", "answered"].includes(status)
+                ["in_thread", "answered"].includes(status)
                   ? " bg-blue-600 text-white"
                   : "bg-gray-400 text-white"
               } rounded-full text-sm`}
-              disabled={![ "in_thread", "answered"].includes(status)}
+              disabled={!["in_thread", "answered"].includes(status)}
               onClick={() => {
                 setThreadClosureOpen(true);
               }}
@@ -784,7 +796,7 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
           <div className="mt-4 flex justify-center">
             {/* quoted will be removed soon  */}
             {(() => {
-              const allowFollowUp = [ "in_thread", "answered"].includes(
+              const allowFollowUp = ["in_thread", "answered"].includes(
                 status.toLowerCase()
               );
               return (
@@ -929,6 +941,7 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
               {
                 onSuccess: () => {
                   setFeedbackOpen(false);
+                  setHasLeftFeedback(true);
                 },
                 onError: (error) => {
                   console.error("Failed to leave feedback:", error);
@@ -964,6 +977,14 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
         className="bg-white rounded-xl shadow-lg w-full max-w-4xl p-0 relative overflow-y-auto max-h-[95vh]"
         onClick={(e) => e.stopPropagation()}
       >
+        <button
+          className="absolute top-3 right-3 text-gray-500 hover:text-gray-800 text-2xl font-bold z-10"
+          onClick={onClose}
+          aria-label="Close"
+          style={{ lineHeight: 1 }}
+        >
+          &times;
+        </button>
         {content}
       </div>
       {previewImg && (
@@ -1011,6 +1032,7 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
             padding: "16px", // Padding for content
           },
         }}
+        onClick={(e) => e.stopPropagation()}
       >
         <DialogTitle
           sx={{

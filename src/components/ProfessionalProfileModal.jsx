@@ -27,10 +27,7 @@ const dummyData = {
   profilePicture: "https://randomuser.me/api/portraits/men/23.jpg",
   verified: true,
   socialLinks: [
-    { type: "linkedin", url: "#" },
-    { type: "facebook", url: "#" },
-    { type: "instagram", url: "#" },
-    { type: "website", url: "#" },
+   "#","#","#","#"
   ],
   about: [
     "How should I structure my consulting agreement to protect my IP?",
@@ -63,6 +60,8 @@ const iconMap = {
   verified: <Verified />,
   star: <Star />,
 };
+
+const iconsList=[<Linkedin />,<Facebook />,<Instagram />,<Website />]
 
 const ProfessionalProfileModal = ({ professional, onClose }) => {
   const [isQuestionOpen, setIsQuestionOpen] = useState(false);
@@ -140,6 +139,14 @@ const ProfessionalProfileModal = ({ professional, onClose }) => {
   return (
     <div className="fixed inset-0 bg-slate-900/10 z-[1000] flex items-center justify-center">
       <div className="bg-white rounded-2xl shadow-2xl p-6 w-[900px] max-w-[98vw] max-h-[98vh] overflow-y-auto relative">
+        <button
+        className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-2xl font-bold z-10"
+        onClick={onClose}
+        aria-label="Close"
+        style={{ lineHeight: 1 }}
+      >
+        &times;
+      </button>
         <div className=" mb-4">
           <button
             className=" left-6 top-6 text-blue-600 font-medium text-base "
@@ -212,14 +219,14 @@ const ProfessionalProfileModal = ({ professional, onClose }) => {
                 Social Links
               </span>
               <div className="flex  items-center justify-between gap-6">
-                {prof.socialLinks.map((link) => (
+                {prof.socialLinks.map((link,i) => (
                   <a
-                    key={link.type}
-                    href={link.url}
+                    
+                  href={link}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    {iconMap[link.type]}
+                    {iconsList[i]}
                   </a>
                 ))}
               </div>

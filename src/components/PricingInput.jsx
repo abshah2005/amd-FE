@@ -109,7 +109,7 @@ const PricingInput = ({
     if (role === "professional") {
       isEditable = true;
       isDisabled = true;
-      buttonText = "Pay Now";
+      buttonText = "Quoted";
       showInput = false;
       showPriceRange = false;
     } else if (role === "asker") {
@@ -167,7 +167,7 @@ const PricingInput = ({
   return (
     <div className="w-48 rounded-lg shadow-md p-3 bg-gray-200">
       {/* Mode Selection */}
-      <div className="w-full h-auto bg-[#4D5B70]">
+      <div className="w-full h-auto ">
         <div className="flex justify-between mb-4">
           <button
             className={`flex-1 flex flex-col items-center justify-center p-2 rounded ${
