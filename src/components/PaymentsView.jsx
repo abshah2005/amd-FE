@@ -1,5 +1,6 @@
 import React from "react";
 import AddIcon from "../icons/AddIcon";
+import { useOnboardToStripe, useStripeOnboardingStatus } from "../hooks/userhooks";
 
 const FakeCard = ({ last4 = "3321", brand = "Mastercard" }) => (
   <div className="bg-white border border-gray-100 rounded-xl p-3">
@@ -36,7 +37,81 @@ const FakeCard = ({ last4 = "3321", brand = "Mastercard" }) => (
   </div>
 );
 
-const PaymentsView = () => {
+const PaymentsView = ({ user }) => {
+  const onboardToStripe = useOnboardToStripe();
+  const { data: stripeStatus, isLoading: isLoadingStatus } = useStripeOnboardingStatus(
+    user?.professional?._id
+  );
+
+  const handleOnboardToStripe = () => {
+    if (!user?.professional) return;
+    onboardToStripe.mutate(user.professional, {
+      onSuccess: (data) => {
+        if (data?.accountLink) {
+          window.open(data.accountLink, "_blank");
+        }
+      },
+      onError: (err) => {
+        console.error("Onboard failed", err);
+      },
+    });
+  };
+
+  if (user?.activeRole === "professional") {
+    return (
+      <div className="w-full">
+        <div className="bg-white border border-gray-100 rounded-xl p-6 mb-6">
+          <h3 className="font-semibold mb-2">Stripe Account Status</h3>
+          
+          {isLoadingStatus ? (
+            <p className="text-sm text-gray-500">Loading status...</p>
+          ) : !stripeStatus?.stripeAccountId ? (
+            <>
+              <p className="text-xs text-gray-500 mb-4">
+                To receive payments, you need to complete the Stripe onboarding process.
+              </p>
+              <button
+                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition disabled:opacity-60"
+                onClick={handleOnboardToStripe}
+                disabled={onboardToStripe.isPending}
+              >
+                {onboardToStripe.isPending ? "Redirecting..." : "Onboard to Stripe"}
+              </button>
+            </>
+          ) : !stripeStatus?.payoutsEnabled ? (
+            <>
+              <p className="text-sm text-amber-600 mb-2">⚠️ Onboarding incomplete</p>
+              <div className="text-xs text-gray-600 mb-4">
+                <p className="mb-2">Required steps:</p>
+                <ul className="list-disc pl-4">
+                  {stripeStatus?.requirements?.currentlyDue?.map((req) => (
+                    <li key={req}>{req.split("_").join(" ")}</li>
+                  ))}
+                </ul>
+              </div>
+              <button
+                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                onClick={handleOnboardToStripe}
+              >
+                Complete Onboarding
+              </button>
+            </>
+          ) : (
+            <div className="text-sm text-green-600">
+              ✅ Your Stripe account is fully set up and ready to receive payments
+            </div>
+          )}
+
+          {onboardToStripe.isError && (
+            <div className="mt-2 text-sm text-red-600">
+              {onboardToStripe?.error?.message || "Failed to start onboarding"}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full">
       <div className="bg-white border border-gray-100 rounded-xl p-6 mb-6">
@@ -46,10 +121,12 @@ const PaymentsView = () => {
         </p>
 
         <button
-          className="inline-flex items-center gap-2 px-3 py-2 rounded  mb-6"
+          className="inline-flex items-center gap-2 px-3 py-2 rounded mb-6"
           onClick={() => console.log("add payment")}
         >
-          <span className="w-4 h-4"><AddIcon /></span>
+          <span className="w-4 h-4">
+            <AddIcon />
+          </span>
           <span className="text-sm">Add a new payment method</span>
         </button>
 

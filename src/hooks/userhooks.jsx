@@ -118,6 +118,50 @@ export const useLinkedInCallback = () =>
     },
   });
 
+  export const useLinkedInLinkCallback = () =>
+  useMutation({
+    mutationFn: async ({ code, userId }) => {
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/users/auth/linkedin/linkCallback`,
+        { code, userId }
+      );
+      return res.data;
+    },
+  });
+
+
+// ...existing code...
+
+export const useStripeOnboardingStatus = (professionalId) => {
+  return useQuery({
+    queryKey: ['stripeOnboardingStatus', professionalId],
+    queryFn: async () => {
+      if (!professionalId) return null;
+      const { data } = await axios.get(`${API_BASE_URL}/onboarding/status/${professionalId}`);
+      return data;
+    },
+    enabled: !!professionalId,
+    refetchInterval: 5000, // Refresh every 5 seconds while onboarding
+  });
+};
+
+// Hook to initiate Stripe onboarding
+export const useOnboardToStripe = () => {
+  return useMutation({
+    mutationFn: async (professionalId) => {
+      const { data } = await axios.post(`${API_BASE_URL}/onboarding/stripe`, {
+        professionalId,
+      });
+      return data;
+    },
+    onSuccess: (data) => {
+      if (data.accountLink) {
+        window.location.href = data.accountLink; // Redirect to Stripe onboarding
+      }
+    },
+  });
+};
+
 export const useSignIn = () => {
   return useMutation(async ({ email, password }) => {
     const response = await axios.post(
@@ -174,6 +218,28 @@ export const useRegisterStep4 = () => {
         }
       );
       return data;
+    },
+  });
+};
+
+export const useToggleProfessionalStatus = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ professionalId, featured }) => {
+      const token = localStorage.getItem("accessToken");
+      if (!token) throw new Error("Not authenticated");
+
+      const url = `${API_BASE_URL}/users/update/professional/status`;
+      const { data } = await axios.put(
+        url,
+        { professionalId, featured },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["dashboardUsers","professionals"]);
     },
   });
 };

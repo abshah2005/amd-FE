@@ -3,10 +3,12 @@ import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import ProfileView from "../components/ProfileView";
 import PaymentsView from "../components/PaymentsView";
+import { useAuth } from "../contextProvider/AuthContextProvider";
 
 const AccountSettings = () => {
   const [tab, setTab] = useState("profile");
   const navigate = useNavigate();
+  const { user, refreshCurrentUser } = useAuth();
 
   return (
     <div className="min-h-screen  py-8">
@@ -38,7 +40,7 @@ const AccountSettings = () => {
           <div className="flex-1 relative">
             <div className="p-8 h-[70vh] overflow-auto">
               <div className="max-w-[980px] mx-auto">
-                {tab === "profile" ? <ProfileView /> : <PaymentsView />}
+                {tab === "profile" ? <ProfileView  /> : <PaymentsView user={user} />}
               </div>
             </div>
           </div>

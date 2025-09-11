@@ -19,14 +19,13 @@ const DashboardPage = () => {
 
   // Fetch stats and users
   const { data: stats, isLoading: statsLoading } = useDashboardStats();
-  const {
-    data: professionals = [],
-    isLoading: prosLoading,
-  } = useDashboardUsers("professional", page, PAGE_SIZE);
-  const {
-    data: askers = [],
-    isLoading: askersLoading,
-  } = useDashboardUsers("asker", page, PAGE_SIZE);
+  const { data: professionals = [], isLoading: prosLoading } =
+    useDashboardUsers("professional", page, PAGE_SIZE);
+  const { data: askers = [], isLoading: askersLoading } = useDashboardUsers(
+    "asker",
+    page,
+    PAGE_SIZE
+  );
 
   // Pagination controls
   const handlePrev = () => setPage((p) => Math.max(1, p - 1));
@@ -37,11 +36,14 @@ const DashboardPage = () => {
   const data = activeTab === "Professionals" ? professionals : askers;
 
   const mappedProfessionals = professionals.map((row) => ({
+    _id:row._id,
     name: row.name,
     joined: new Date(row.joinedDate).toISOString().slice(0, 10),
     earnings: row.totalEarnings,
     answers: row.questionsAnswered,
-    status: getStatusLabel( row.status),
+    status: getStatusLabel(row.status),
+    featured: row.featured,
+    verified: row.verified,
   }));
 
   const mappedAskers = askers.map((row) => ({
@@ -49,7 +51,7 @@ const DashboardPage = () => {
     joined: new Date(row.joinedDate).toISOString().slice(0, 10),
     spendings: row.totalSpendings,
     questions: row.questionsAsked,
-    status: getStatusLabel( row.status),
+    status: getStatusLabel(row.status),
   }));
 
   return (
@@ -64,13 +66,15 @@ const DashboardPage = () => {
           activeTab={activeTab}
           setActiveTab={(tab) => {
             setActiveTab(tab);
-            setPage(1); 
+            setPage(1);
           }}
         />
         <div className="mt-2">
           <DashboardTable
             type={activeTab}
-            data={activeTab === "Professionals" ? mappedProfessionals : mappedAskers}
+            data={
+              activeTab === "Professionals" ? mappedProfessionals : mappedAskers
+            }
             loading={loading}
             page={page}
             setPage={setPage}

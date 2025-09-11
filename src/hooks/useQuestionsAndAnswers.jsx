@@ -149,6 +149,22 @@ export function useClose() {
   });
 }
 
+export function useDeleteQuestion() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (questionId) => {
+      const endpoint = `${API_BASE_URL}/questions/${questionId}`;
+      await axios.delete(endpoint, { headers: getAuthHeaders() });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["questions"]);
+    },
+    onError: (error) => {
+      console.error("Failed to delete question:", error);
+    },
+  });
+}
+
 export function useUpdateQuestionStatus() {
   const queryClient = useQueryClient();
 

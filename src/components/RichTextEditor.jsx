@@ -385,6 +385,7 @@ export default function LexicalEditor({
   showDescription = true,
   value = "",
   initialValue = "",
+   onInfoClick,
   initialEditorState = null, // Add this new prop
   onChange,
   onSubmit,
@@ -394,10 +395,12 @@ export default function LexicalEditor({
   placeholder = "Type your question...",
   disabled = false,
   maxLength,
+  setInfo = true,
   autoFocus = false,
   showWordCount = false,
   submitButtonText = "Done",
   hideSubmitButton = false,
+  showInfo=true,
   className,
   style,
   height = 150,
@@ -433,9 +436,9 @@ export default function LexicalEditor({
         setPlainTextContent(textContent);
         setHtmlContent(textContent);
         setEditorContent(textContent);
-        setIsEmpty(textContent.trim() === ""); 
-        
-         console.log("Plain text:", textContent);
+        setIsEmpty(textContent.trim() === "");
+
+        console.log("Plain text:", textContent);
         console.log("HTML:", html);
 
         // Calculate counts
@@ -677,11 +680,36 @@ export default function LexicalEditor({
             variant="caption"
             sx={{
               marginLeft: "auto",
+              marginRight: "8px",
               color: characterCount >= maxLength ? "red" : "#999",
             }}
           >
             {characterCount}/{maxLength}
           </Typography>
+        )}
+
+        {showInfo && (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+            onClick={onInfoClick} // Attach the callback here
+          style={{ cursor: "pointer" }} 
+          >
+            <g clip-path="url(#clip0_942_133)">
+              <path
+                d="M8.00016 1.33398C11.6822 1.33398 14.6668 4.31865 14.6668 8.00065C14.6668 11.6827 11.6822 14.6673 8.00016 14.6673C4.31816 14.6673 1.3335 11.6827 1.3335 8.00065C1.3335 4.31865 4.31816 1.33398 8.00016 1.33398ZM8.00016 2.66732C6.58567 2.66732 5.22912 3.22922 4.22893 4.22941C3.22873 5.22961 2.66683 6.58616 2.66683 8.00065C2.66683 9.41514 3.22873 10.7717 4.22893 11.7719C5.22912 12.7721 6.58567 13.334 8.00016 13.334C9.41465 13.334 10.7712 12.7721 11.7714 11.7719C12.7716 10.7717 13.3335 9.41514 13.3335 8.00065C13.3335 6.58616 12.7716 5.22961 11.7714 4.22941C10.7712 3.22922 9.41465 2.66732 8.00016 2.66732ZM7.9935 6.66732C8.3655 6.66732 8.66683 6.96865 8.66683 7.34065V10.7567C8.79392 10.83 8.89324 10.9433 8.94939 11.0789C9.00555 11.2145 9.0154 11.3648 8.97742 11.5065C8.93944 11.6483 8.85574 11.7735 8.73932 11.8629C8.6229 11.9522 8.48025 12.0006 8.3335 12.0007H8.00683C7.91841 12.0007 7.83085 11.9832 7.74916 11.9494C7.66746 11.9156 7.59324 11.866 7.53071 11.8034C7.46819 11.7409 7.41859 11.6667 7.38475 11.585C7.35091 11.5033 7.3335 11.4157 7.3335 11.3273V8.00065C7.15669 8.00065 6.98712 7.93041 6.86209 7.80539C6.73707 7.68036 6.66683 7.5108 6.66683 7.33398C6.66683 7.15717 6.73707 6.9876 6.86209 6.86258C6.98712 6.73756 7.15669 6.66732 7.3335 6.66732H7.9935ZM8.00016 4.66732C8.17697 4.66732 8.34654 4.73756 8.47157 4.86258C8.59659 4.9876 8.66683 5.15717 8.66683 5.33398C8.66683 5.5108 8.59659 5.68036 8.47157 5.80539C8.34654 5.93041 8.17697 6.00065 8.00016 6.00065C7.82335 6.00065 7.65378 5.93041 7.52876 5.80539C7.40373 5.68036 7.3335 5.5108 7.3335 5.33398C7.3335 5.15717 7.40373 4.9876 7.52876 4.86258C7.65378 4.73756 7.82335 4.66732 8.00016 4.66732Z"
+                fill="#2F2E41"
+              />
+            </g>
+            <defs>
+              <clipPath id="clip0_942_133">
+                <rect width="16" height="16" fill="white" />
+              </clipPath>
+            </defs>
+          </svg>
         )}
       </Box>
 

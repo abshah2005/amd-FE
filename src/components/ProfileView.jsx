@@ -3,8 +3,7 @@ import { useAuth } from "../contextProvider/AuthContextProvider";
 import Edit from "../icons/Edit";
 import useUpdateProfile from "../hooks/userhooks";
 import useSpecializations from "../hooks/useSpecializations";
-import { allLanguages, allLocations } from "../utils/Constant";
-
+import { allLanguages, allLocations, currencies } from "../utils/Constant";
 
 const DefaultView = memo(
   ({
@@ -144,7 +143,6 @@ const DefaultView = memo(
                   onChange={handleInputChange}
                   disabled={!editing}
                 />
-                
               </div>
 
               <div className="flex-1">
@@ -297,7 +295,10 @@ const PersonalInfoBox = ({
                 name="lastName"
                 value={formData.lastName || ""}
                 onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, lastName: e.target.value.replace(/\s/g, "") }))
+                  setFormData((prev) => ({
+                    ...prev,
+                    lastName: e.target.value.replace(/\s/g, ""),
+                  }))
                 }
                 className="w-full text-sm rounded border p-2"
               />
@@ -306,7 +307,9 @@ const PersonalInfoBox = ({
         ) : (
           <div className="flex gap-3">
             <div className="flex flex-col w-full">
-              <label className="block text-sm text-gray-700 font-medium mb-3">First Name</label>
+              <label className="block text-sm text-gray-700 font-medium mb-3">
+                First Name
+              </label>
               <input
                 type="text"
                 className="w-full text-sm rounded border p-2 bg-gray-100 text-gray-600 border-gray-200"
@@ -315,7 +318,9 @@ const PersonalInfoBox = ({
               />
             </div>
             <div className="flex flex-col w-full">
-              <label className="block text-sm text-gray-700 font-medium mb-3">Last Name</label>
+              <label className="block text-sm text-gray-700 font-medium mb-3">
+                Last Name
+              </label>
               <input
                 type="text"
                 className="w-full text-sm rounded border p-2 bg-gray-100 text-gray-600 border-gray-200"
@@ -501,10 +506,10 @@ const PersonalInfoBox = ({
             placeholder="LinkedIn URL"
             value={formData.socialLinks?.[0] || ""}
             disabled={!editing}
-            onChange={e => {
+            onChange={(e) => {
               const arr = [...(formData.socialLinks || ["", "", "", ""])];
               arr[0] = e.target.value;
-              setFormData(prev => ({ ...prev, socialLinks: arr }));
+              setFormData((prev) => ({ ...prev, socialLinks: arr }));
             }}
           />
           <input
@@ -513,10 +518,10 @@ const PersonalInfoBox = ({
             placeholder="Facebook URL"
             value={formData.socialLinks?.[1] || ""}
             disabled={!editing}
-            onChange={e => {
+            onChange={(e) => {
               const arr = [...(formData.socialLinks || ["", "", "", ""])];
               arr[1] = e.target.value;
-              setFormData(prev => ({ ...prev, socialLinks: arr }));
+              setFormData((prev) => ({ ...prev, socialLinks: arr }));
             }}
           />
           <input
@@ -525,10 +530,10 @@ const PersonalInfoBox = ({
             placeholder="Instagram URL"
             value={formData.socialLinks?.[2] || ""}
             disabled={!editing}
-            onChange={e => {
+            onChange={(e) => {
               const arr = [...(formData.socialLinks || ["", "", "", ""])];
               arr[2] = e.target.value;
-              setFormData(prev => ({ ...prev, socialLinks: arr }));
+              setFormData((prev) => ({ ...prev, socialLinks: arr }));
             }}
           />
           <input
@@ -537,15 +542,14 @@ const PersonalInfoBox = ({
             placeholder="Website URL"
             value={formData.socialLinks?.[3] || ""}
             disabled={!editing}
-            onChange={e => {
+            onChange={(e) => {
               const arr = [...(formData.socialLinks || ["", "", "", ""])];
               arr[3] = e.target.value;
-              setFormData(prev => ({ ...prev, socialLinks: arr }));
+              setFormData((prev) => ({ ...prev, socialLinks: arr }));
             }}
           />
         </div>
       </div>
-
     </div>
   );
 };
@@ -951,7 +955,7 @@ const ProfessionalInfoBox = ({
                   </button>
                 </div>
               )}
-              
+
               <div className="mt-2 flex flex-wrap gap-2">
                 {(formData.tags || []).map((tag, idx) => (
                   <span
@@ -1017,6 +1021,29 @@ const ProfessionalInfoBox = ({
               editing ? "" : "bg-gray-100 text-gray-600"
             }`}
           />
+          <select
+            value={formData.currency ?? prof.currency ?? ""}
+            disabled={!editing}
+            onChange={(e) =>
+              setFormData((prev) => ({
+                ...prev,
+                currency: e.target.value,
+              }))
+            }
+            className={`w-1/3 text-sm rounded border p-2 ${
+              editing ? "" : "bg-gray-100 text-gray-600"
+            }`}
+          >
+            {currencies.map((currency, index) => (
+              <option
+                key={index}
+                value={currency.sign}
+                title={currency.description}
+              >
+                {currency.sign} - {currency.name}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 
@@ -1177,7 +1204,6 @@ const ProfessionalInfoBox = ({
             </button>
           </div>
         )}
-        
       </div>
     </div>
   );
@@ -1204,6 +1230,7 @@ const ProfessionalView = memo(
       <div className="">
         <div className="relative bg-white border border-gray-100 rounded-xl p-6 mb-6">
           <div className="flex justify-end mb-4">
+            
             <div className="text-right">
               {editing ? (
                 <div className="flex space-x-2">
@@ -1276,7 +1303,7 @@ const ProfileView = () => {
     lastName: "",
     description: "",
     professionalExperiences: [],
-    socialLinks:[],
+    socialLinks: [],
     languages: [],
     locations: [],
   });
@@ -1328,7 +1355,7 @@ const ProfileView = () => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: value.replace(/\s+/g, ""), 
+      [name]: value.replace(/\s+/g, ""),
     }));
   };
 
@@ -1404,8 +1431,7 @@ const ProfileView = () => {
         "socialLinks",
         JSON.stringify(
           formData.socialLinks ??
-            user?.professional?.socialLinks ??
-            ["", "", "", ""]
+            user?.professional?.socialLinks ?? ["", "", "", ""]
         )
       );
       if (selectedFile) fd.append("profilePic", selectedFile);
@@ -1453,10 +1479,33 @@ const ProfileView = () => {
 
   const avatarInitial = (formData.firstName?.trim()[0] || "U").toUpperCase();
 
+ const handleLinkLinkedIn = () => {
+  const userId = user?._id; 
+  if (!userId) {
+    alert("User ID is missing. Please log in again.");
+    return;
+  }
+
+  window.location.href = `${
+    import.meta.env.VITE_API_BASE_URL
+  }/users/auth/linkedin/link?userId=${userId}`;
+};
+
   // Choose view based on activeRole
   const role = user?.activeRole || "asker";
 
   return role === "professional" ? (
+    <>
+    {!user?.professional?.verified && (
+        <div className="mb-4">
+          <button
+            onClick={handleLinkLinkedIn}
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            Link LinkedIn to Verify
+          </button>
+        </div>
+      )}
     <ProfessionalView
       formData={formData}
       handleInputChange={handleInputChange}
@@ -1472,6 +1521,8 @@ const ProfileView = () => {
       isUpdating={updateProfile.isPending}
       selectedFile={selectedFile}
     />
+    </>
+    
   ) : (
     <DefaultView
       formData={formData}

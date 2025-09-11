@@ -7,6 +7,7 @@ import ImageSelectorModal from "./ImageSelectorModal";
 import LexicalEditor from "./RichTextEditor";
 import { useCreateQuestion } from "../hooks/useCreateQuestion";
 import { Link, useNavigate } from "react-router-dom";
+import UserGuidelinesModal from "./UserQuideLineModal";
 
 const deliveryOptions = [
   { label: "Normal", value: "normal" },
@@ -27,6 +28,7 @@ const initialState = {
   step: 1,
   agreed: false,
   showImageSelector: false,
+  showGuidelines: false,
 };
 
 // 2. Reducer function
@@ -63,6 +65,8 @@ function reducer(state, action) {
       return { ...state, agreed: action.value };
     case "SET_SHOW_IMAGE_SELECTOR":
       return { ...state, showImageSelector: action.value };
+    case "SET_SHOW_GUIDELINES": // New action for guidelines modal
+      return { ...state, showGuidelines: action.value };
     case "RESET":
       return { ...initialState };
     default:
@@ -231,8 +235,10 @@ const AskQuestionModal = ({ professional, onClose }) => {
             )}
 
             <span className="text-xs text-blue-800  cursor-pointer pl-2">
-              <Link to={`/profile/${professional.firstName}_${professional.lastName}`}>
-              See Profile
+              <Link
+                to={`/profile/${professional.firstName}_${professional.lastName}`}
+              >
+                See Profile
               </Link>
             </span>
           </div>
@@ -294,6 +300,10 @@ const AskQuestionModal = ({ professional, onClose }) => {
                 hideSubmitButton={false}
                 autoFocus={false}
                 maxLength={2500}
+                showInfo={true} // Ensure showInfo is enabled
+                onInfoClick={() =>
+                  dispatch({ type: "SET_SHOW_GUIDELINES", value: true })
+                } // Add this line
               />
             </div>
             <div className="mb-4">
@@ -409,8 +419,9 @@ const AskQuestionModal = ({ professional, onClose }) => {
                 <DropdownSelector
                   options={deliveryOptions.map((opt) => opt.label)}
                   value={
-                    deliveryOptions.find((opt) => opt.value === state.deliveryTime)
-                      ?.label || deliveryOptions[0].label
+                    deliveryOptions.find(
+                      (opt) => opt.value === state.deliveryTime
+                    )?.label || deliveryOptions[0].label
                   }
                   onChange={(label) => {
                     const selected = deliveryOptions.find(
@@ -450,8 +461,9 @@ const AskQuestionModal = ({ professional, onClose }) => {
                     Set a budget
                   </label>
                   <span className="text-xs text-gray-500 mt-1 block">
-                    This professional has set their price between $
-                    {professional.priceRangeLow} and $
+                    This professional has set their price between{" "}
+                    {professional.currency}
+                    {professional.priceRangeLow} and {professional.currency}
                     {professional.priceRangeHigh}. Please enter or select an
                     amount within this range.
                   </span>
@@ -461,17 +473,22 @@ const AskQuestionModal = ({ professional, onClose }) => {
                     className="border rounded px-2 py-1"
                     value={state.budget || professional.priceRangeLow}
                     onChange={(e) =>
-                      dispatch({ type: "SET_BUDGET", value: Number(e.target.value) })
+                      dispatch({
+                        type: "SET_BUDGET",
+                        value: Number(e.target.value),
+                      })
                     }
                   >
                     {budgetOptions.map((price) => (
                       <option key={price} value={price}>
-                        ${price}
+                        {professional.currency}
+                        {price}
                       </option>
                     ))}
                   </select>
                   <span className="text-gray-500 text-sm font-medium">
-                    ${professional.priceRangeLow} - $
+                    {professional.currency}
+                    {professional.priceRangeLow} - {professional.currency}
                     {professional.priceRangeHigh}
                   </span>
                 </div>
@@ -568,6 +585,10 @@ const AskQuestionModal = ({ professional, onClose }) => {
         agreed={state.agreed}
         setAgreed={(v) => dispatch({ type: "SET_AGREED", value: v })}
         isLoading={createQuestion.isPending}
+      />
+      <UserGuidelinesModal
+        open={state.showGuidelines}
+        onClose={() => dispatch({ type: "SET_SHOW_GUIDELINES", value: false })}
       />
       <DiscardModal
         open={state.showDiscard}

@@ -22,6 +22,8 @@ import AppSkeleton from "./pages/AppSkeleton";
 import QuestionsPage from "./pages/QuestionsPage";
 import TestPayQuestion from "./pages/TestPayQuestion";
 import PublicProfilePage from "./components/PublicProfilePage";
+import LinkedInLinking from "./components/LinkedInCallbackPage";
+
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -132,6 +134,7 @@ function App() {
         <Route path="/stripe" element={<TestPayQuestion />} />
         <Route path="/profile/:name" element={<PublicProfilePage />} />
         <Route path="/auth/linkedin/callback" element={<LinkedInCallback />} />
+        <Route path="/auth/linkedin/link" element={<LinkedInLinking />} />
         <Route path="/resetSuccess" element={<PasswordResetSuccess />} />
       </Routes>
     </AuthProvider>

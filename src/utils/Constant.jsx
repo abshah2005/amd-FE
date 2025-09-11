@@ -23,3 +23,12 @@ export const ratingOptions = [
   { label: "4+ rating", value: 4 },
   { label: "5 rating", value: 5 },
 ];
+
+export const currencies = [
+  { sign: "$", name: "USD", description: "United States Dollar" },
+  { sign: "C$", name: "CAD", description: "Canadian Dollar" },
+  { sign: "A$", name: "AUD", description: "Australian Dollar" },
+  { sign: "Ft", name: "HUF", description: "Hungarian Forint" },
+  { sign: "€", name: "EUR", description: "Euro" },
+  { sign: "£", name: "GBP", description: "British Pound Sterling" },
+];

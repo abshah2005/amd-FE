@@ -35,6 +35,6 @@ export const LinkedInCallback = () => {
   return (
     <div className="flex justify-center items-center h-screen">
       <p>Verifying LinkedIn authentication...</p>
-    </div>
-  );
+  </div>
+);
 };

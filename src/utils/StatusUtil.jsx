@@ -1,6 +1,6 @@
 export function getStatusLabel(status) {
   const map = {
-    submitted: "Pending",
+    submitted: "Submitted",
     approved: "Approved",
     rejected: "Rejected",
     quoted: "Quoted",

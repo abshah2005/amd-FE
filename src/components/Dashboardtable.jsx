@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useToggleProfessionalStatus } from "../hooks/userhooks";
 
 const columns = {
   Professionals: [
@@ -7,6 +8,7 @@ const columns = {
     { label: "TOTAL EARNINGS", key: "earnings" },
     { label: "NO. OF ANSWER", key: "answers" },
     { label: "STATUS", key: "status" },
+    { label: "ACTIONS", key: "actions" }, // New column
   ],
   Askers: [
     { label: "NAME", key: "name" },
@@ -44,6 +46,19 @@ const SearchBar = ({ value, onChange }) => (
 
 const DashboardTable = ({ type, data }) => {
   const [search, setSearch] = useState("");
+  const toggleStatus = useToggleProfessionalStatus();
+
+  const handleToggleFeature = async (professionalId, currentFeatured) => {
+    try {
+      await toggleStatus.mutate({
+        professionalId,
+        featured: !currentFeatured,
+      });
+    } catch (error) {
+      console.error("Failed to toggle feature status:", error);
+    }
+  };
+
   const filtered = data.filter((row) =>
     Object.values(row).some((val) =>
       String(val).toLowerCase().includes(search.toLowerCase())
@@ -66,7 +81,9 @@ const DashboardTable = ({ type, data }) => {
                   className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
                 >
                   {col.label}
-                  <span className="ml-1 text-gray-400">↕</span>
+                  {col.key !== "actions" && (
+                    <span className="ml-1 text-gray-400">↕</span>
+                  )}
                 </th>
               ))}
             </tr>
@@ -77,40 +94,66 @@ const DashboardTable = ({ type, data }) => {
                 <td className="px-6 py-4">
                   <input type="checkbox" className="rounded border-gray-300" />
                 </td>
-                {columns[type].map((col) =>
-                  col.key === "status" ? (
-                    <td
-                      key={col.key}
-                      className={`px-6 py-4 text-sm font-medium cursor-pointer flex items-center ${
-                        row.status ? "text-blue-600" : "text-gray-400"
-                      }`}
-                    >
-                      {row.status ? "Active" : "Inactive"}
-                      <svg
-                        className="ml-1"
-                        width="12"
-                        height="12"
-                        fill="none"
-                        viewBox="0 0 12 12"
+                {columns[type].map((col) => {
+                  if (col.key === "actions" && type === "Professionals") {
+                    return (
+                      <td key={col.key} className="px-6 py-4">
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() =>
+                              handleToggleFeature(row._id, row.featured)
+                            }
+                            className={`px-3 py-1 rounded-full text-xs font-medium ${
+                              row.featured
+                                ? "bg-green-100 text-green-800 hover:bg-green-200" // Changed to green theme
+                                : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                            }`}
+                            disabled={toggleStatus.isPending}
+                          >
+                            {row.featured ? "✅ Featured" : "Feature"} 
+                          </button>
+                          {row.verified && (
+                            <span className="text-blue-600">✓ Verified</span>
+                          )}
+                        </div>
+                      </td>
+                    );
+                  }
+
+                  if (col.key === "status") {
+                    return (
+                      <td
+                        key={col.key}
+                        className={`px-6 py-4 text-sm font-medium cursor-pointer flex items-center ${
+                          row.status ? "text-blue-600" : "text-gray-400"
+                        }`}
                       >
-                        <path
-                          d="M3 5l3 3 3-3"
-                          stroke={row.status ? "#2563eb" : "#a0aec0"}
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    </td>
-                  ) : (
-                    <td
-                      key={col.key}
-                      className="px-6 py-4 text-sm text-gray-900"
-                    >
+                        {row.status ? "Active" : "Inactive"}
+                        <svg
+                          className="ml-1"
+                          width="12"
+                          height="12"
+                          fill="none"
+                          viewBox="0 0 12 12"
+                        >
+                          <path
+                            d="M3 5l3 3 3-3"
+                            stroke={row.status ? "#2563eb" : "#a0aec0"}
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </td>
+                    );
+                  }
+
+                  return (
+                    <td key={col.key} className="px-6 py-4 text-sm text-gray-900">
                       {row[col.key]}
                     </td>
-                  )
-                )}
+                  );
+                })}
               </tr>
             ))}
           </tbody>

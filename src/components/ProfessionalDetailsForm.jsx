@@ -269,21 +269,7 @@ const ProfessionalDetailsForm = ({
 
         <div className="flex-1 space-y-4">
           <div className="flex flex-col gap-3 items-center">
-            {/* <select
-              className="border border-gray-300 rounded-md p-2 text-sm flex-1"
-              value={currentCategoryId}
-              onChange={(e) => {
-                setCurrentCategoryId(e.target.value);
-                setCurrentSubSelected([]);
-              }}
-            >
-              <option value="">Select category</option>
-              {categories.map((c) => (
-                <option key={c._id} value={c._id}>
-                  {c.category}
-                </option>
-              ))}
-            </select> */}
+            
             
 
             {/* Category checkbox grid */}

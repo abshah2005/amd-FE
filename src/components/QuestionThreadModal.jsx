@@ -389,7 +389,7 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
               <td className="px-3 py-2 font-bold">{question.submittedDate}</td>
               <td className="px-3 py-2 font-bold">{question.asker}</td>
               <td className="px-3 py-2 font-bold">
-                ${question.proposedBudget}
+                {questionData.professional.currency}{question.proposedBudget}
               </td>
               <td className="px-2 py-2">
                 <div className="flex items-center text-yellow-500 ">
@@ -628,7 +628,8 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
             status={status}
             questionId={questionId}
             role={role}
-            priceRange={`$${question.priceRangeLow} - $${question.priceRangeHigh}`}
+            currency={questionData.professional.currency}
+            priceRange={`${questionData.professional.currency}${question.priceRangeLow} - ${questionData.professional.currency}${question.priceRangeHigh}`}
             onPriceChange={(newPrice) =>
               console.log("Price updated:", newPrice)
             }

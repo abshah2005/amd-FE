@@ -8,6 +8,7 @@ const PricingInput = ({
   normalDeliveryTime,
   fastDeliveryTime,
   price,
+  currency,
   priceRange = "$25-$35",
   settledPrice,
   onQuote,
@@ -277,7 +278,7 @@ const PricingInput = ({
                 ? "Normal Delivery Price"
                 : "Fast Delivery Price"}
             </p>
-            <p className="text-xl font-bold text-gray-800">${price}</p>
+            <p className="text-xl font-bold text-gray-800">{currency}{price}</p>
             <p className="text-xs text-gray-600 mt-2">
               Delivery Mode:{" "}
               <span className="font-semibold">
@@ -327,7 +328,7 @@ const PricingInput = ({
                 : "Fast Delivery Price"}
             </p>
             <p className="text-xl font-bold text-gray-800">
-              ${getPriceForMode(selectedDeliveryType)}
+              {currency}{getPriceForMode(selectedDeliveryType)}
             </p>
             <button
               className={`w-full py-2 mt-3 rounded-full font-medium ${
@@ -352,7 +353,7 @@ const PricingInput = ({
                 : "Fast Delivery Price"}
             </p>
             <p className="text-xl font-bold text-gray-800">
-              ${getPriceForMode(selectedDeliveryType)}
+              {currency}{getPriceForMode(selectedDeliveryType)}
             </p>
             <button
               className={`w-full py-2 mt-3 rounded-full font-medium ${
@@ -392,7 +393,7 @@ const PricingInput = ({
                 isDisabled ? "text-gray-500" : "text-gray-800"
               }`}
             >
-              ${price}
+              {currency}{price}
             </p>
           )}
 
