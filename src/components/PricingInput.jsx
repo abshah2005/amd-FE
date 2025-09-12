@@ -505,6 +505,7 @@ const PricingInput = ({
 
       <PaymentModal
         isOpen={isPaymentOpen}
+        currency={currency}
         onRequestClose={() => setIsPaymentOpen(false)}
         amount={getPriceForMode(selectedDeliveryType) * 100}
         questionId={questionId}

@@ -19,7 +19,7 @@ const stripeElementStyles = {
   },
 };
 
-const PaymentModal = ({ isOpen, onRequestClose, amount, questionId, deliveryType }) => {
+const PaymentModal = ({ isOpen, onRequestClose, amount, questionId, deliveryType,currency }) => {
   const [clientSecret, setClientSecret] = useState("");
   const [saveCard, setSaveCard] = useState(false);
   const [cardholderName, setCardholderName] = useState("");
@@ -206,7 +206,7 @@ const PaymentModal = ({ isOpen, onRequestClose, amount, questionId, deliveryType
               disabled={!stripe || loading}
               className="w-full bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 disabled:bg-gray-400 transition"
             >
-              {loading ? "Processing..." : `Pay $${amount / 100}`}
+              {loading ? "Processing..." : `Pay ${currency}${amount / 100}`}
             </button>
 
             {status && (
