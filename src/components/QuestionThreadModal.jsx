@@ -339,7 +339,7 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
             {status === "submitted" && (
               <button
                 className="px-4 py-2 bg-green-600 text-white rounded-full text-sm hover:bg-green-700"
-                onClick={() => handleAction("approve")} 
+                onClick={() => handleAction("approve")}
               >
                 Approve Question
               </button>
@@ -389,7 +389,8 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
               <td className="px-3 py-2 font-bold">{question.submittedDate}</td>
               <td className="px-3 py-2 font-bold">{question.asker}</td>
               <td className="px-3 py-2 font-bold">
-                {questionData.professional.currency}{question.proposedBudget}
+                {questionData.professional.currency}
+                {question.proposedBudget}
               </td>
               <td className="px-2 py-2">
                 <div className="flex items-center text-yellow-500 ">
@@ -958,7 +959,7 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
   // Main render logic
   let content = null;
   // show the same detailed view for professional, user and asker so modal isn't empty
-  if (["professional", "user", "asker"].includes(role)) {
+  if (["professional", "admin", "asker"].includes(role)) {
     content = <ProfessionalSubmittedView />;
   } else {
     content = (

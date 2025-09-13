@@ -23,6 +23,7 @@ import QuestionsPage from "./pages/QuestionsPage";
 import TestPayQuestion from "./pages/TestPayQuestion";
 import PublicProfilePage from "./components/PublicProfilePage";
 import LinkedInLinking from "./components/LinkedInCallbackPage";
+import AdminAnswersPage from "./pages/AdminQuestionsPage";
 
 
 function ProtectedRoute({ children }) {
@@ -134,6 +135,7 @@ function App() {
         <Route path="/stripe" element={<TestPayQuestion />} />
         <Route path="/profile/:name" element={<PublicProfilePage />} />
         <Route path="/auth/linkedin/callback" element={<LinkedInCallback />} />
+        <Route path="/admin/questions" element={<AdminAnswersPage />} />
         <Route path="/auth/linkedin/link" element={<LinkedInLinking />} />
         <Route path="/resetSuccess" element={<PasswordResetSuccess />} />
       </Routes>
