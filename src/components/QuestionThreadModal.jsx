@@ -796,8 +796,8 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
           </div>
         ) : (
           <div className="mt-4 flex justify-center">
-            {/* quoted will be removed soon  */}
-            {(() => {
+            
+            {role==="admin"?null:(() => {
               const allowFollowUp = ["in_thread", "answered"].includes(
                 status.toLowerCase()
               );
@@ -808,7 +808,7 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
                       ? "bg-blue-600 text-white"
                       : "bg-gray-400 text-white"
                   } rounded-full text-sm`}
-                  disabled={!allowFollowUp}
+                  disabled={!allowFollowUp || role==="admin"}
                   onClick={() => {
                     // open DateTimePicker for testing
                     // setDatePickerOpen(true);
