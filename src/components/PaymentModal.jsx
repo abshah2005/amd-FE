@@ -7,18 +7,6 @@ import {
   CardCvcElement,
 } from "@stripe/react-stripe-js";
 import { useQueryClient } from "@tanstack/react-query";
-import { getCurrencySymbol } from "../utils/Constant";
-
-// Stripe element styles to match your design
-const stripeElementStyles = {
-  base: {
-    fontSize: "16px",
-    color: "#32325d",
-    "::placeholder": {
-      color: "#a0aec0",
-    },
-  },
-};
 
 const PaymentModal = ({
   isOpen,
@@ -27,61 +15,116 @@ const PaymentModal = ({
   questionId,
   deliveryType,
 }) => {
+  const stripeElementStyles = {
+    base: {
+      fontSize: '16px',
+      color: '#32325d',
+      fontFamily: 'Arial, sans-serif',
+      fontSmoothing: 'antialiased',
+      '::placeholder': {
+        color: '#aab7c4',
+      },
+    },
+    invalid: {
+      color: '#fa755a',
+      iconColor: '#fa755a',
+    },
+  };
   const [clientSecret, setClientSecret] = useState("");
   const [saveCard, setSaveCard] = useState(false);
   const [cardholderName, setCardholderName] = useState("");
   const [country, setCountry] = useState("US");
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [selectedCurrency, setSelectedCurrency] = useState("usd");
   const [currencies, setCurrencies] = useState([]);
   const [priceUSD, setPriceUSD] = useState(0);
   const [convertedPrice, setConvertedPrice] = useState(0);
+  const [processing, setProcessing] = useState(false);
   const queryClient = useQueryClient();
 
   const stripe = useStripe();
   const elements = useElements();
 
-  // Call handlePay automatically when modal opens
-  // useEffect(() => {
-  //   if (isOpen && !clientSecret) {
-  //     const handlePay = async () => {
-  //       const token = localStorage.getItem("accessToken");
-  //       const res = await fetch(
-  //         `${import.meta.env.VITE_API_BASE_URL}/questions/${questionId}/pay`,
-  //         {
-  //           method: "POST",
-  //           headers: {
-  //             "Content-Type": "application/json",
-  //             Authorization: `Bearer ${token}`,
-  //           },
-  //           body: JSON.stringify({
-  //             deliveryType,
-  //             selectedCurrency,
-  //           }),
-  //         }
-  //       );
-  //       const data = await res.json();
-  //       if (data?.data) {
-  //         setClientSecret(data.data.clientSecret);
-  //         setCurrencies(data.data.availableCurrencies || []);
-  //         setPriceUSD(data.data.priceUSD);
-  //         setConvertedPrice(data.data.priceInSelectedCurrency);
-  //       } else {
-  //         alert(data?.message || "Failed to get client secret");
-  //       }
-  //     };
-  //     handlePay();
-  //   }
-  // }, [isOpen, clientSecret, questionId, deliveryType, selectedCurrency]);
+  // Step 1: Load available currencies and pricing when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      const getPaymentOptions = async () => {
+        setInitialLoading(true);
+        const token = localStorage.getItem("accessToken");
+        try {
+          const res = await fetch(
+            `${import.meta.env.VITE_API_BASE_URL}/questions/${questionId}/payment-options`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({ deliveryType }),
+            }
+          );
 
+          const data = await res.json();
+          if (data?.data) {
+            setPriceUSD(data.data.priceUSD);
 
-  // Update the useEffect hook that loads initial data
-useEffect(() => {
-  if (isOpen && !clientSecret) {
-    const handlePay = async () => {
+            // Save available currencies
+            const availableCurrencies = data.data.availableCurrencies || [];
+            setCurrencies(availableCurrencies);
+
+            // Set USD as default currency
+            const usdCurrency = availableCurrencies.find((c) => c.code === "usd");
+            if (usdCurrency) {
+              setSelectedCurrency("usd");
+              setConvertedPrice(usdCurrency.convertedAmount);
+            }
+          } else {
+            alert(data?.message || "Failed to get payment options");
+          }
+        } catch (error) {
+          console.error("Error loading payment options:", error);
+          alert(
+            "An error occurred while loading payment options. Please try again."
+          );
+        } finally {
+          setInitialLoading(false);
+        }
+      };
+
+      getPaymentOptions();
+    }
+  }, [isOpen, questionId, deliveryType]);
+
+  // Handle currency change - just update the state, don't call the server
+  const handleCurrencyChange = (e) => {
+    const newCurrency = e.target.value;
+    setSelectedCurrency(newCurrency);
+
+    // Find the converted price for this currency
+    const currencyData = currencies.find((c) => c.code === newCurrency);
+    if (currencyData) {
+      setConvertedPrice(currencyData.convertedAmount);
+    }
+  };
+
+  // Step 2: Create payment intent when user submits the form
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setProcessing(true);
+    setStatus("");
+
+    if (!stripe || !elements) {
+      setStatus("Stripe.js has not loaded yet.");
+      setProcessing(false);
+      return;
+    }
+
+    try {
+      // First create the payment intent
       const token = localStorage.getItem("accessToken");
-      const res = await fetch(
+      const payRes = await fetch(
         `${import.meta.env.VITE_API_BASE_URL}/questions/${questionId}/pay`,
         {
           method: "POST",
@@ -95,136 +138,74 @@ useEffect(() => {
           }),
         }
       );
-      const data = await res.json();
-      if (data?.data) {
-        setClientSecret(data.data.clientSecret);
-        setPriceUSD(data.data.priceUSD);
-        
-        // Save all available currencies
-        const availableCurrencies = data.data.availableCurrencies || [];
-        setCurrencies(availableCurrencies);
-        
-        // Set the initial converted price based on the first available currency
-        if (availableCurrencies.length > 0) {
-          // Find the current currency in available currencies
-          const currencyData = availableCurrencies.find(
-            c => c.code === selectedCurrency
-          ) || availableCurrencies[0];
-          
-          // Update both selected currency and converted price
-          setSelectedCurrency(currencyData.code);
-          setConvertedPrice(currencyData.convertedAmount);
-        }
-      } else {
-        alert(data?.message || "Failed to get client secret");
+
+      const payData = await payRes.json();
+      if (!payData?.data?.clientSecret) {
+        setStatus(
+          "Failed to create payment: " +
+            (payData?.message || "Unknown error")
+        );
+        setProcessing(false);
+        return;
       }
-    };
-    handlePay();
-  }
-}, [isOpen, clientSecret, questionId, deliveryType]);
 
-  const handleCurrencyChange = (e) => {
-    const newCurrency = e.target.value;
-    setSelectedCurrency(newCurrency);
+      const clientSecret = payData.data.clientSecret;
 
-    // Find the converted price for this currency
-    const currencyData = currencies.find((c) => c.code === newCurrency);
-    if (currencyData) {
-      setConvertedPrice(currencyData.convertedAmount);
-    }
-
-    // Don't reset client secret - we'll update it without full re-render
-    updatePaymentIntent(newCurrency);
-  };
-
-  // New function to update payment intent without full re-render
-  const updatePaymentIntent = async (currencyCode) => {
-    setLoading(true);
-    const token = localStorage.getItem("accessToken");
-
-    try {
-      const res = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/questions/${questionId}/pay`,
+      // Create payment method
+      const { error: methodError, paymentMethod } = await stripe.createPaymentMethod(
         {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
+          type: "card",
+          card: elements.getElement(CardNumberElement),
+          billing_details: {
+            name: cardholderName,
+            address: {
+              country: country,
+            },
           },
-          body: JSON.stringify({
-            deliveryType,
-            selectedCurrency: currencyCode,
-          }),
         }
       );
 
-      const data = await res.json();
-      if (data?.data) {
-        setClientSecret(data.data.clientSecret);
-        setCurrencies(data.data.availableCurrencies || []);
-        // Don't reset the entire form, just update the necessary values
+      if (methodError) {
+        setStatus("Card error: " + methodError.message);
+        setProcessing(false);
+        return;
+      }
+
+      // Confirm payment with the client secret
+      const result = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: paymentMethod.id,
+      });
+
+      if (result.error) {
+        setStatus("Payment failed: " + result.error.message);
+      } else if (result.paymentIntent.status === "succeeded") {
+        setStatus("Payment succeeded!");
+
+        // Update question status
+        const res = await fetch(
+          `${import.meta.env.VITE_API_BASE_URL}/questions/${questionId}/paid`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({}),
+          }
+        );
+
+        // Refresh data and close modal
+        queryClient.invalidateQueries({ queryKey: ["question", questionId] });
+        setTimeout(() => onRequestClose(), 1500);
       }
     } catch (error) {
-      console.error("Error updating payment intent:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setStatus("");
-
-    if (!stripe || !elements) {
-      setStatus("Stripe.js has not loaded yet.");
-      setLoading(false);
-      return;
-    }
-
-    // Create payment method
-    const { error, paymentMethod } = await stripe.createPaymentMethod({
-      type: "card",
-      card: elements.getElement(CardNumberElement),
-      billing_details: {
-        name: cardholderName,
-        address: {
-          country: country,
-        },
-      },
-    });
-
-    if (error) {
-      setStatus("Error: " + error.message);
-      setLoading(false);
-      return;
-    }
-
-    // Confirm payment with the client secret
-    const result = await stripe.confirmCardPayment(clientSecret, {
-      payment_method: paymentMethod.id,
-    });
-
-    if (result.error) {
-      setStatus("Payment failed: " + result.error.message);
-    } else if (result.paymentIntent.status === "succeeded") {
-      setStatus("Payment succeeded!");
-      const res = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/questions/${questionId}/paid`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({}),
-        }
+      console.error("Payment processing error:", error);
+      setStatus(
+        "An error occurred while processing your payment. Please try again."
       );
-      const data = await res.json();
-      queryClient.invalidateQueries({ queryKey: ["question", questionId] });
-      onRequestClose();
-      // You might want to close the modal or redirect after successful payment
+    } finally {
+      setProcessing(false);
     }
-    setLoading(false);
   };
 
   if (!isOpen) return null;
@@ -249,7 +230,9 @@ useEffect(() => {
 
         {/* Price information */}
         <div className="mb-5 p-4 bg-gray-50 rounded-md shadow-sm">
-          <div className="font-medium text-lg mb-3">Question Price: ${priceUSD} USD</div>
+          <div className="font-medium text-lg mb-3">
+            Question Price: ${priceUSD} USD
+          </div>
 
           {/* Currency selector */}
           <div className="mt-2">
@@ -260,28 +243,35 @@ useEffect(() => {
               value={selectedCurrency}
               onChange={handleCurrencyChange}
               className="w-full border border-gray-300 rounded p-2.5 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              disabled={processing}
             >
               {currencies.map((currency) => (
                 <option key={currency.code} value={currency.code}>
-                  {currency.symbol} {currency.code.toUpperCase()} - {currency.convertedAmount.toFixed(2)} ({currency.code.toUpperCase()})
+                  {currency.symbol} {currency.code.toUpperCase()} -{" "}
+                  {currency.convertedAmount.toFixed(2)} ({currency.code.toUpperCase()})
                 </option>
               ))}
             </select>
             <p className="text-sm text-gray-500 mt-2 pl-1">
-              You'll be charged {currencies.find(c => c.code === selectedCurrency)?.symbol || '$'}{convertedPrice ? convertedPrice.toFixed(2) : '0.00'} in {selectedCurrency.toUpperCase()}
+              You'll be charged{" "}
+              {currencies.find((c) => c.code === selectedCurrency)?.symbol || "$"}
+              {convertedPrice ? convertedPrice.toFixed(2) : "0.00"} in{" "}
+              {selectedCurrency.toUpperCase()}
             </p>
           </div>
         </div>
 
         {/* Rest of your payment form */}
-        {!clientSecret ? (
+        {initialLoading ? (
           <div className="text-center py-12 my-4 bg-gray-50 rounded-md">
             <div className="animate-pulse flex justify-center">
               <div className="h-5 w-5 bg-blue-600 rounded-full mr-2"></div>
               <div className="h-5 w-5 bg-blue-600 rounded-full mr-2 animate-pulse-delay-200"></div>
               <div className="h-5 w-5 bg-blue-600 rounded-full animate-pulse-delay-400"></div>
             </div>
-            <span className="text-gray-600 block mt-3">Loading payment form...</span>
+            <span className="text-gray-600 block mt-3">
+              Loading payment options...
+            </span>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -353,7 +343,10 @@ useEffect(() => {
                 onChange={(e) => setSaveCard(e.target.checked)}
                 className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
               />
-              <label htmlFor="saveCard" className="ml-2 text-sm text-gray-700">
+              <label
+                htmlFor="saveCard"
+                className="ml-2 text-sm text-gray-700"
+              >
                 Save this card for future payments
               </label>
             </div>
@@ -369,10 +362,10 @@ useEffect(() => {
 
             <button
               type="submit"
-              disabled={!stripe || loading}
+              disabled={!stripe || processing || initialLoading}
               className="w-full bg-green-600 text-white py-3 px-4 rounded-md hover:bg-green-700 disabled:bg-gray-400 transition text-base font-medium mt-3"
             >
-              {loading
+              {processing
                 ? "Processing..."
                 : `Pay ${
                     currencies.find((c) => c.code === selectedCurrency)
