@@ -25,6 +25,7 @@ import ThreadClosureModal from "./ThreadClosureModal";
 import FeedbackModal from "./FeedbackModal";
 import { useLeaveFeedback } from "../hooks/useQuestionsAndAnswers";
 import { ImageUploader } from "./ImageUploader";
+import { allLanguages, allLocations,deliveryOptions,ratingOptions, standardCurrency } from "../utils/Constant";
 
 const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
   const [showMessage, setShowMessage] = useState(true);
@@ -653,8 +654,8 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
             status={status}
             questionId={questionId}
             role={role}
-            currency={questionData.professional.currency}
-            priceRange={`${questionData.professional.currency}${question.priceRangeLow} - ${questionData.professional.currency}${question.priceRangeHigh}`}
+            currency={standardCurrency.sign}
+            priceRange={`${standardCurrency.sign}${question.priceRangeLow} - ${standardCurrency.sign}${question.priceRangeHigh}`}
             onPriceChange={(newPrice) =>
               console.log("Price updated:", newPrice)
             }

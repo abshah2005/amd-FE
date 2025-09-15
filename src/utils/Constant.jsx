@@ -24,6 +24,21 @@ export const ratingOptions = [
   { label: "5 rating", value: 5 },
 ];
 
+export const getCurrencySymbol = (code) => {
+  const symbolMap = {
+    usd: '$',
+    eur: '€',
+    gbp: '£',
+    cad: 'C$',
+    aud: 'A$',
+    huf: 'Ft'
+  };
+  
+  return symbolMap[code] || '$';
+};
+
+export const standardCurrency={ sign: "$", name: "USD", description: "United States Dollar" }
+
 export const currencies = [
   { sign: "$", name: "USD", description: "United States Dollar" },
   { sign: "C$", name: "CAD", description: "Canadian Dollar" },

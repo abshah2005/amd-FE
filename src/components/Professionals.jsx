@@ -9,7 +9,7 @@ import ProfessionalProfileModal from "./ProfessionalProfileModal";
 import useSpecializations from "../hooks/useSpecializations";
 import useProfessionals from "../hooks/useProfessionals";
 import ToggleSwitch from "./ToggleSwitch";
-import { allLanguages, allLocations,deliveryOptions,ratingOptions } from "../utils/Constant";
+import { allLanguages, allLocations,deliveryOptions,ratingOptions, standardCurrency } from "../utils/Constant";
 
 
 
@@ -301,8 +301,9 @@ const Professionals = () => {
           </div>
           <div className="flex gap-4 items-center mb-2">
             <span className="font-semibold">
-              {prof.currency}
-              {prof.priceRangeLow ?? ""} - {prof.currency}
+              {/* {prof.currency} */}
+              {standardCurrency.sign}
+              {prof.priceRangeLow ?? ""} - {standardCurrency.sign}
               {prof.priceRangeHigh ?? ""}{" "}
               <span className="text-gray-500 text-xs">per question</span>
             </span>

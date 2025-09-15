@@ -9,6 +9,7 @@ import Verified from "../icons/verified";
 import Star from "../icons/star";
 import Back from "../icons/back";
 import AskQuestionModal from "./AskQuestionModal";
+import { standardCurrency } from "../utils/Constant";
 
 const dummyData = {
   id: 1,
@@ -190,8 +191,9 @@ const ProfessionalProfileModal = ({ professional, onClose }) => {
             </div>
             <div className="flex gap-3 items-center mb-1 text-sm">
               <span className="text-blue-600 font-semibold">
-                {prof.currency}
-                {prof.priceRangeLow} - {prof.currency}
+                {/* {prof.currency} */}
+                {standardCurrency.sign}
+                {prof.priceRangeLow} - {standardCurrency.sign}
                 {prof.priceRangeHigh}
               </span>
               <span className="text-slate-500">{prof.perQuestion}</span>

@@ -1021,7 +1021,7 @@ const ProfessionalInfoBox = ({
               editing ? "" : "bg-gray-100 text-gray-600"
             }`}
           />
-          <select
+          {/* <select
             value={formData.currency ?? prof.currency ?? ""}
             disabled={!editing}
             onChange={(e) =>
@@ -1043,7 +1043,7 @@ const ProfessionalInfoBox = ({
                 {currency.sign} - {currency.name}
               </option>
             ))}
-          </select>
+          </select> */}
         </div>
       </div>
 
@@ -1399,10 +1399,10 @@ const ProfileView = () => {
         "priceRangeHigh",
         formData.priceRangeHigh ?? user?.professional?.priceRangeHigh ?? ""
       );
-      fd.append(
-        "currency",
-        formData.currency ?? user?.professional?.currency ?? "$"
-      );
+      // fd.append(
+      //   "currency",
+      //   formData.currency ?? user?.professional?.currency ?? "$"
+      // );
       fd.append(
         "entityType",
         formData.entityType ?? user?.professional?.entityType ?? "individual"
