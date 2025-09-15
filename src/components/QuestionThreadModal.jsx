@@ -24,6 +24,7 @@ import { usePostAnswer } from "../hooks/useQuestionsAndAnswers";
 import ThreadClosureModal from "./ThreadClosureModal";
 import FeedbackModal from "./FeedbackModal";
 import { useLeaveFeedback } from "../hooks/useQuestionsAndAnswers";
+import { ImageUploader } from "./ImageUploader";
 
 const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
   const [showMessage, setShowMessage] = useState(true);
@@ -44,6 +45,29 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
     html: null,
     plainText: null,
   });
+
+  const [answerFiles, setAnswerFiles] = useState([]);
+  const [previewUrls, setPreviewUrls] = useState([]);
+  const fileInputRef = useRef(null);
+  const MemoizedLexicalEditor = React.memo(LexicalEditor);
+
+  useEffect(() => {
+    // create preview URLs
+    const urls = answerFiles.map((f) => URL.createObjectURL(f));
+    setPreviewUrls(urls);
+    return () => {
+      urls.forEach((u) => URL.revokeObjectURL(u));
+    };
+  }, [answerFiles]);
+
+  const handleFiles = (e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    const max = 5;
+    const combined = [...answerFiles, ...files].slice(0, max);
+    setAnswerFiles(combined);
+    e.target.value = null; // reset input
+  };
 
   const [isPaymentOpen, setIsPaymentOpen] = useState(true);
   const [paymentAmount, setPaymentAmount] = useState(null);
@@ -663,7 +687,7 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
                 </div>
               )}
               <div className="rounded-lg">
-                <LexicalEditor
+                <MemoizedLexicalEditor
                   value={""}
                   initialEditorState={null}
                   onChange={(editorData) => {
@@ -678,7 +702,53 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
                   autoFocus={false}
                   readOnly={false}
                 />
+                {/* <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  onChange={handleFiles}
+                /> */}
+                {/* {previewUrls.length > 0 && (
+                  <div className="flex gap-2 mt-3">
+                    {previewUrls.map((url, i) => (
+                      <div key={i} className="relative">
+                        <img
+                          src={url}
+                          alt={`preview-${i}`}
+                          className="w-16 h-16 object-cover rounded"
+                        />
+                        <button
+                          className="absolute -top-1 -right-1 bg-white rounded-full p-0.5 text-xs"
+                          onClick={() =>
+                            setAnswerFiles((prev) =>
+                              prev.filter((_, idx) => idx !== i)
+                            )
+                          }
+                          aria-label="remove image"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )} */}
                 <div className="flex justify-end mt-4">
+                  {/* <button
+                    className="px-4 py-2 bg-white border rounded text-gray-700 hover:bg-gray-50"
+                    onClick={() =>
+                      fileInputRef.current && fileInputRef.current.click()
+                    }
+                    disabled={answerFiles.length >= 5}
+                  >
+                    Attach images ({answerFiles.length}/5)
+                  </button> */}
+                  {/* <ImageUploader
+                    answerFiles={answerFiles}
+                    setAnswerFiles={setAnswerFiles}
+                    fileInputRef={fileInputRef}
+                  /> */}
                   <button
                     className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
                     onClick={() => {
@@ -691,10 +761,23 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
                         "Answer submitted (Plain text):",
                         editorContentRef.current.plainText
                       );
-                      postAnswer.mutate({
-                        questionId: questionId,
-                        body: editorContentRef.current.html,
-                      });
+                      // postAnswer.mutate({
+                      //   questionId: questionId,
+                      //   body: editorContentRef.current.html,
+                      // });
+                      postAnswer.mutate(
+                        {
+                          questionId: questionId,
+                          body: editorContentRef.current.html,
+                          attachments: answerFiles,
+                        },
+                        {
+                          onSuccess: () => {
+                            setAnswerFiles([]);
+                            setPreviewUrls([]);
+                          },
+                        }
+                      );
                     }}
                   >
                     Send
@@ -796,29 +879,30 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
           </div>
         ) : (
           <div className="mt-4 flex justify-center">
-            
-            {role==="admin"?null:(() => {
-              const allowFollowUp = ["in_thread", "answered"].includes(
-                status.toLowerCase()
-              );
-              return (
-                <button
-                  className={`px-4 py-2 ${
-                    allowFollowUp
-                      ? "bg-blue-600 text-white"
-                      : "bg-gray-400 text-white"
-                  } rounded-full text-sm`}
-                  disabled={!allowFollowUp || role==="admin"}
-                  onClick={() => {
-                    // open DateTimePicker for testing
-                    // setDatePickerOpen(true);
-                    setFollowUpOpen(true);
-                  }}
-                >
-                  Ask Follow Up Question
-                </button>
-              );
-            })()}
+            {role === "admin"
+              ? null
+              : (() => {
+                  const allowFollowUp = ["in_thread", "answered"].includes(
+                    status.toLowerCase()
+                  );
+                  return (
+                    <button
+                      className={`px-4 py-2 ${
+                        allowFollowUp
+                          ? "bg-blue-600 text-white"
+                          : "bg-gray-400 text-white"
+                      } rounded-full text-sm`}
+                      disabled={!allowFollowUp || role === "admin"}
+                      onClick={() => {
+                        // open DateTimePicker for testing
+                        // setDatePickerOpen(true);
+                        setFollowUpOpen(true);
+                      }}
+                    >
+                      Ask Follow Up Question
+                    </button>
+                  );
+                })()}
           </div>
         )}
         {/* Activity section */}

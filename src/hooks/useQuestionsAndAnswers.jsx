@@ -78,13 +78,53 @@ export function useGetQuestion(id) {
   });
 }
 
+// export function usePostAnswer() {
+//   const queryClient = useQueryClient();
+
+//   return useMutation({
+//     mutationFn: async ({ questionId, body }) => {
+//       const endpoint = `${API_BASE_URL}/questions/${questionId}/answer`;
+
+//       const { data } = await axios.post(
+//         endpoint,
+//         { body },
+//         { headers: getAuthHeaders() }
+//       );
+//       return data;
+//     },
+//     onSuccess: (data, variables) => {
+//       queryClient.invalidateQueries(["question", variables.questionId]);
+//     },
+//     onError: (error) => {
+//       console.error("Failed to post answer:", error);
+//     },
+//   });
+// }
+
+
 export function usePostAnswer() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ questionId, body }) => {
+    mutationFn: async ({ questionId, body, attachments } = {}) => {
       const endpoint = `${API_BASE_URL}/questions/${questionId}/answer`;
 
+      // If attachments present, send multipart/form-data
+      if (attachments && attachments.length) {
+        const form = new FormData();
+        if (body) form.append("body", body);
+        attachments.forEach((file) => form.append("attachments", file));
+        console.log(form);
+        const { data } = await axios.post(endpoint, form, {
+          headers: {
+            ...getAuthHeaders(),
+            "Content-Type": "multipart/form-data",
+          },
+        });
+        return data;
+      }
+
+      // fallback JSON POST
       const { data } = await axios.post(
         endpoint,
         { body },
@@ -100,6 +140,7 @@ export function usePostAnswer() {
     },
   });
 }
+
 
 export function usePostFollowUp() {
   const queryClient = useQueryClient();
