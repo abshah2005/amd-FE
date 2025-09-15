@@ -7,7 +7,7 @@ export default function ThreadClosureModal({
   loading,
 }) {
   const [showWarning, setShowWarning] = useState(false);
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState();
 
   if (!open) return null;
 
@@ -79,7 +79,7 @@ export default function ThreadClosureModal({
 
         {/* Message Input */}
         <textarea
-          value={message}
+        value={message}
           onChange={(e) => setMessage(e.target.value)}
           placeholder="Write your final message here..."
           className="w-full border border-gray-300 rounded px-3 py-2 resize-none h-18 focus:outline-none focus:ring-2 focus:ring-blue-200"
@@ -89,13 +89,13 @@ export default function ThreadClosureModal({
         <div className="flex items-center justify-end gap-4 mt-4">
           <button
             className={`px-6 py-2  text-black ${
-              message.trim() && !loading
+              message?.trim() && !loading
                 ? "  hover:shadow-md"
                 : " cursor-not-allowed"
             }`}
             onClick={() => onConfirm(message)}
             type="button"
-            disabled={!message.trim() || loading}
+            disabled={!message?.trim() || loading}
           >
             {loading ? (
               <span className="flex items-center gap-2">

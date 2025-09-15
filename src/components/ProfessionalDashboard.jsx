@@ -6,6 +6,7 @@ import {
 } from "../hooks/useDashboard";
 import { getStatusLabel } from "../utils/StatusUtil";
 import QuestionThreadModal from "./QuestionThreadModal";
+import PendingPayoutsCard from "./PendingPayoutsCard";
 
 function StatsCard({ title, value }) {
   return (
@@ -15,6 +16,8 @@ function StatsCard({ title, value }) {
     </div>
   );
 }
+
+
 function ShareBox({ url }) {
   const [copied, setCopied] = useState(false);
 
@@ -266,6 +269,15 @@ export default function ProfessionalDashboard() {
                 value={statsLoading ? "..." : `$${stats?.totalEarnings ?? "0"}`}
               />
             </div>
+            {stats?.pendingPayouts && stats.pendingPayouts.length > 0 
+            && (
+              <div className="mb-8">
+                <PendingPayoutsCard
+                  pendingPayouts={stats.pendingPayouts} 
+                  loading={statsLoading} 
+                />
+              </div>
+            )}
 
             <section>
               <div className="bg-white rounded-[12px] border">

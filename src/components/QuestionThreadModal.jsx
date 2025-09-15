@@ -208,7 +208,9 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
     );
   };
 
-  const handleThreadClosure = () => {
+  const handleThreadClosure = (modalMessage) => {
+    setMessage(modalMessage);
+      console.log("Message received in handleThreadClosure:", modalMessage);
     useCloseHook.mutate(
       { questionId, body: message },
       {
@@ -1102,7 +1104,7 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
       <ThreadClosureModal
         open={threadClosureOpen}
         onClose={() => setThreadClosureOpen(false)}
-        message={setMessage}
+        
         loading={useCloseHook.isPending}
         onConfirm={handleThreadClosure}
       />
