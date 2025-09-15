@@ -17,7 +17,6 @@ function StatsCard({ title, value }) {
   );
 }
 
-
 function ShareBox({ url }) {
   const [copied, setCopied] = useState(false);
 
@@ -63,16 +62,15 @@ function ShareBox({ url }) {
           </svg>
         </div>
       </div>
-      
 
-      <div className="text-sm font-medium text-gray-800">Sharable Profile Link</div>
-
-      
+      <div className="text-sm font-medium text-gray-800">
+        Sharable Profile Link
+      </div>
 
       <div className="mt-4 flex gap-4 justify-around items-center">
         <div className=" text-xs text-black font-bold break-words">
-        {url || "—"}
-      </div>
+          {url || "—"}
+        </div>
         <button
           onClick={handleCopy}
           className="inline-flex items-center gap-2 text-sm px-3 py-1 border rounded-full text-blue-600 hover:bg-blue-50"
@@ -99,13 +97,12 @@ function ShareBox({ url }) {
   );
 }
 
-
 function SidebarList({ items }) {
   return (
     <div className=" pr-6">
       <h3 className="text-lg font-semibold mb-4">Active Questions</h3>
       <ul className="text-sm space-y-6">
-        {items.slice(0,6).map((it, i) => (
+        {items.slice(0, 6).map((it, i) => (
           <li key={i} className="flex items-start gap-3">
             <div className="w-2 h-2 rounded-full bg-gray-800 mt-1" />
             <div>
@@ -126,7 +123,11 @@ function SidebarList({ items }) {
             </div>
           </li>
         ))}
-        {items.length-6>0 && <li className="text-sm text-gray-500">and {items.length-6} more...</li>}
+        {items.length - 6 > 0 && (
+          <li className="text-sm text-gray-500">
+            and {items.length - 6} more...
+          </li>
+        )}
       </ul>
     </div>
   );
@@ -210,21 +211,21 @@ export default function ProfessionalDashboard() {
   //       (it.id || "").toLowerCase().includes(q.toLowerCase()))
   // );
   const filtered = (pending || [])
-  .filter(
-    (it) =>
-      it.status !== "closed" &&
-      it.status !== "rejected" &&
-      (!q ||
-        (it.question || "").toLowerCase().includes(q.toLowerCase()) ||
-        (it.asker?.user?.firstName || it.asker?.firstName || it.asker || "")
-          .toLowerCase()
-          .includes(q.toLowerCase()) ||
-        (it.id || "").toLowerCase().includes(q.toLowerCase()))
-  )
-  .map((it, index) => ({
-    ...it,
-    label: `Qno.${index + 1}`, // Add a label property
-  }));
+    .filter(
+      (it) =>
+        it.status !== "closed" &&
+        it.status !== "rejected" &&
+        (!q ||
+          (it.question || "").toLowerCase().includes(q.toLowerCase()) ||
+          (it.asker?.user?.firstName || it.asker?.firstName || it.asker || "")
+            .toLowerCase()
+            .includes(q.toLowerCase()) ||
+          (it.id || "").toLowerCase().includes(q.toLowerCase()))
+    )
+    .map((it, index) => ({
+      ...it,
+      label: `Qno.${index + 1}`, // Add a label property
+    }));
 
   const handleRowClick = (id) => {
     setSelectedQuestionId(id); // Set the selected question ID
@@ -262,19 +263,21 @@ export default function ProfessionalDashboard() {
               />
               <StatsCard
                 title="Avg. Rating"
-                value={statsLoading ? "..." : (stats?.avgRating).toFixed(2) ?? "0"}
+                value={
+                  statsLoading ? "..." : (stats?.avgRating).toFixed(2) ?? "0"
+                }
               />
               <StatsCard
                 title="Total Earnings"
                 value={statsLoading ? "..." : `$${stats?.totalEarnings ?? "0"}`}
               />
             </div>
-            {stats?.pendingPayouts && stats.pendingPayouts.length > 0 
-            && (
+            {stats?.pendingPayouts && stats.pendingPayouts.length > 0 && (
               <div className="mb-8">
                 <PendingPayoutsCard
-                  pendingPayouts={stats.pendingPayouts} 
-                  loading={statsLoading} 
+                  pendingPayouts={stats.pendingPayouts}
+                  loading={statsLoading}
+                  professional={stats.professionalActivationStatus}
                 />
               </div>
             )}
@@ -329,13 +332,15 @@ export default function ProfessionalDashboard() {
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
-                        {filtered.map((row,i) => (
-                          <tr key={row._id} className="hover:bg-gray-50 cursor-pointer"
-                          onClick={() => handleRowClick(row._id)}
+                        {filtered.map((row, i) => (
+                          <tr
+                            key={row._id}
+                            className="hover:bg-gray-50 cursor-pointer"
+                            onClick={() => handleRowClick(row._id)}
                           >
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 font-medium">
                               {/* {row._id} */}
-                              {`Qno.${i+1}`}
+                              {`Qno.${i + 1}`}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                               {new Date(row.createdAt)
@@ -393,10 +398,10 @@ export default function ProfessionalDashboard() {
         //     : null
         // }
         questionLabel={
-    selectedQuestionId
-      ? filtered.find((i) => i._id === selectedQuestionId)?.label
-      : null
-  }
+          selectedQuestionId
+            ? filtered.find((i) => i._id === selectedQuestionId)?.label
+            : null
+        }
       />
     </div>
   );
