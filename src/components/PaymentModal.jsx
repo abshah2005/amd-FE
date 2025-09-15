@@ -231,12 +231,12 @@ useEffect(() => {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 "
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40"
       style={{ backdropFilter: "blur(2px)" }}
       onClick={onRequestClose}
     >
       <div
-        className="max-w-md w-full bg-white p-6 rounded shadow-lg relative overflow-y-auto"
+        className="max-w-md w-full bg-white p-6 rounded shadow-lg relative max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -248,69 +248,73 @@ useEffect(() => {
         <h2 className="text-2xl font-bold mb-4">Pay Now</h2>
 
         {/* Price information */}
-        <div className="mb-4 p-3 bg-gray-50 rounded">
-          <div className="font-medium">Question Price: ${priceUSD} USD</div>
+        <div className="mb-5 p-4 bg-gray-50 rounded-md shadow-sm">
+          <div className="font-medium text-lg mb-3">Question Price: ${priceUSD} USD</div>
 
           {/* Currency selector */}
-          <div className="mt-3">
+          <div className="mt-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Select Payment Currency
             </label>
             <select
               value={selectedCurrency}
               onChange={handleCurrencyChange}
-              className="w-full border border-gray-300 rounded p-2"
+              className="w-full border border-gray-300 rounded p-2.5 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               {currencies.map((currency) => (
                 <option key={currency.code} value={currency.code}>
-                  {currency.symbol} {currency.code.toUpperCase()} -{" "}
-                  {currency.convertedAmount} ({currency.code.toUpperCase()})
+                  {currency.symbol} {currency.code.toUpperCase()} - {currency.convertedAmount.toFixed(2)} ({currency.code.toUpperCase()})
                 </option>
               ))}
             </select>
-            <p className="text-xs text-gray-500 mt-1">
-  You'll be charged {currencies.find(c => c.code === selectedCurrency)?.symbol || '$'}{convertedPrice ? convertedPrice.toFixed(2) : '0.00'} in {selectedCurrency.toUpperCase()}
-</p>
+            <p className="text-sm text-gray-500 mt-2 pl-1">
+              You'll be charged {currencies.find(c => c.code === selectedCurrency)?.symbol || '$'}{convertedPrice ? convertedPrice.toFixed(2) : '0.00'} in {selectedCurrency.toUpperCase()}
+            </p>
           </div>
         </div>
 
         {/* Rest of your payment form */}
         {!clientSecret ? (
-          <div className="text-center py-8">
-            <span className="text-gray-600">Loading payment form...</span>
+          <div className="text-center py-12 my-4 bg-gray-50 rounded-md">
+            <div className="animate-pulse flex justify-center">
+              <div className="h-5 w-5 bg-blue-600 rounded-full mr-2"></div>
+              <div className="h-5 w-5 bg-blue-600 rounded-full mr-2 animate-pulse-delay-200"></div>
+              <div className="h-5 w-5 bg-blue-600 rounded-full animate-pulse-delay-400"></div>
+            </div>
+            <span className="text-gray-600 block mt-3">Loading payment form...</span>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="bg-white p-0.5 rounded-md">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Card Information
               </label>
-              <div className="border border-gray-300 rounded p-2">
+              <div className="border border-gray-300 rounded p-3 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500">
                 <CardNumberElement options={{ style: stripeElementStyles }} />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   MM / YY
                 </label>
-                <div className="border border-gray-300 rounded p-2">
+                <div className="border border-gray-300 rounded p-3 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500">
                   <CardExpiryElement options={{ style: stripeElementStyles }} />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   CVC/CVV
                 </label>
-                <div className="border border-gray-300 rounded p-2">
+                <div className="border border-gray-300 rounded p-3 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500">
                   <CardCvcElement options={{ style: stripeElementStyles }} />
                 </div>
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Cardholder Name
               </label>
               <input
@@ -318,43 +322,43 @@ useEffect(() => {
                 value={cardholderName}
                 onChange={(e) => setCardholderName(e.target.value)}
                 placeholder="Full Name on Card"
-                className="w-full border border-gray-300 rounded p-2"
+                className="w-full border border-gray-300 rounded p-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Country or region
               </label>
               <select
                 value={country}
                 onChange={(e) => setCountry(e.target.value)}
-                className="w-full border border-gray-300 rounded p-2"
+                className="w-full border border-gray-300 rounded p-2.5 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
-                <option value="Us">Us</option>
-                <option value="Sc">SC</option>
-                <option value="Wa">PK</option>
-                <option value="In">IN</option>
+                <option value="US">United States</option>
+                <option value="SC">Seychelles</option>
+                <option value="PK">Pakistan</option>
+                <option value="IN">India</option>
               </select>
             </div>
 
             <hr className="my-4" />
 
-            <div className="flex items-center">
+            <div className="flex items-center mb-1">
               <input
                 type="checkbox"
                 id="saveCard"
                 checked={saveCard}
                 onChange={(e) => setSaveCard(e.target.checked)}
-                className="h-4 w-4 text-blue-600 rounded"
+                className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
               />
               <label htmlFor="saveCard" className="ml-2 text-sm text-gray-700">
                 Save this card for future payments
               </label>
             </div>
 
-            <div className="text-sm text-gray-500 mt-2">
+            <div className="text-sm text-gray-500 mt-3 p-3 bg-gray-50 rounded-md">
               <p>
                 <strong>Note:</strong> Make sure your payment information is
                 correct before submitting. In case of a failed transaction, your
@@ -366,7 +370,7 @@ useEffect(() => {
             <button
               type="submit"
               disabled={!stripe || loading}
-              className="w-full bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 disabled:bg-gray-400 transition"
+              className="w-full bg-green-600 text-white py-3 px-4 rounded-md hover:bg-green-700 disabled:bg-gray-400 transition text-base font-medium mt-3"
             >
               {loading
                 ? "Processing..."
@@ -378,10 +382,10 @@ useEffect(() => {
 
             {status && (
               <div
-                className={`mt-4 text-sm ${
+                className={`mt-4 text-sm p-3 rounded-md ${
                   status.includes("succeeded")
-                    ? "text-green-700"
-                    : "text-red-700"
+                    ? "text-green-700 bg-green-50"
+                    : "text-red-700 bg-red-50"
                 }`}
               >
                 {status}

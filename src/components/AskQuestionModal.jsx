@@ -8,6 +8,7 @@ import LexicalEditor from "./RichTextEditor";
 import { useCreateQuestion } from "../hooks/useCreateQuestion";
 import { Link, useNavigate } from "react-router-dom";
 import UserGuidelinesModal from "./UserQuideLineModal";
+import { standardCurrency } from "../utils/Constant";
 
 const deliveryOptions = [
   { label: "Normal", value: "normal" },
@@ -462,8 +463,9 @@ const AskQuestionModal = ({ professional, onClose }) => {
                   </label>
                   <span className="text-xs text-gray-500 mt-1 block">
                     This professional has set their price between{" "}
-                    {professional.currency}
-                    {professional.priceRangeLow} and {professional.currency}
+                    {/* {professional.currency} */}
+                    {standardCurrency.sign}
+                    {professional.priceRangeLow} and {standardCurrency.sign}
                     {professional.priceRangeHigh}. Please enter or select an
                     amount within this range.
                   </span>
@@ -481,14 +483,14 @@ const AskQuestionModal = ({ professional, onClose }) => {
                   >
                     {budgetOptions.map((price) => (
                       <option key={price} value={price}>
-                        {professional.currency}
+                        {standardCurrency.sign}
                         {price}
                       </option>
                     ))}
                   </select>
                   <span className="text-gray-500 text-sm font-medium">
-                    {professional.currency}
-                    {professional.priceRangeLow} - {professional.currency}
+                    {standardCurrency.sign}
+                    {professional.priceRangeLow} - {standardCurrency.sign}
                     {professional.priceRangeHigh}
                   </span>
                 </div>

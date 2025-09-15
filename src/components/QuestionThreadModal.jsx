@@ -414,7 +414,8 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
               <td className="px-3 py-2 font-bold">{question.submittedDate}</td>
               <td className="px-3 py-2 font-bold">{question.asker}</td>
               <td className="px-3 py-2 font-bold">
-                {questionData.professional.currency}
+                {/* {questionData.professional.currency} */}
+                {standardCurrency.sign}
                 {question.proposedBudget}
               </td>
               <td className="px-2 py-2">
@@ -650,7 +651,7 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
             normalDeliveryTime={normalDeliveryTime}
             fastDeliveryTime={fastDeliveryTime}
             initialMode={question.deliveryType}
-            price={question.price}
+            price={questionData.priceUSD}
             status={status}
             questionId={questionId}
             role={role}
