@@ -39,6 +39,8 @@ export const getCurrencySymbol = (code) => {
 
 export const standardCurrency={ sign: "$", name: "USD", description: "United States Dollar" }
 
+export const officialMail="benjamin@askmedirect.com"
+
 export const currencies = [
   { sign: "$", name: "USD", description: "United States Dollar" },
   { sign: "C$", name: "CAD", description: "Canadian Dollar" },

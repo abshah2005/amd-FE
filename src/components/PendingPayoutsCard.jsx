@@ -95,7 +95,7 @@ export default function PendingPayoutsCard({ pendingPayouts, loading, profession
                 : "bg-green-600 text-white hover:bg-green-700"
             }`}
           >
-            {processBacklog.isLoading ? (
+            {processBacklog.isPending ? (
               <>
                 <svg className="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24" fill="none">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3"></circle>
@@ -110,7 +110,7 @@ export default function PendingPayoutsCard({ pendingPayouts, loading, profession
         </div>
       )}
 
-      {processBacklog.isLoading && (
+      {processBacklog.isPending && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
           <div className="bg-white rounded-lg p-6 w-full max-w-lg mx-4">
             <div className="flex items-center gap-4">

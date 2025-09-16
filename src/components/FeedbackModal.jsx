@@ -92,6 +92,9 @@ const FeedbackModal = ({
           value={comment}
           onChange={e => setComment(e.target.value)}
         />
+        <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 1 }}>
+          Note: Your rating and comment will be publicly visible with the answer.
+        </Typography>
       </DialogContent>
       <DialogActions sx={{ justifyContent: "space-between", px: 2, pb: 2 }}>
         <Button onClick={handleAskLater} disabled={loading} variant="text">

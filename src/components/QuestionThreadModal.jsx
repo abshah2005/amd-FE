@@ -25,7 +25,14 @@ import ThreadClosureModal from "./ThreadClosureModal";
 import FeedbackModal from "./FeedbackModal";
 import { useLeaveFeedback } from "../hooks/useQuestionsAndAnswers";
 import { ImageUploader } from "./ImageUploader";
-import { allLanguages, allLocations,deliveryOptions,ratingOptions, standardCurrency } from "../utils/Constant";
+import {
+  allLanguages,
+  allLocations,
+  deliveryOptions,
+  officialMail,
+  ratingOptions,
+  standardCurrency,
+} from "../utils/Constant";
 
 const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
   const [showMessage, setShowMessage] = useState(true);
@@ -72,6 +79,8 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
 
   const [isPaymentOpen, setIsPaymentOpen] = useState(true);
   const [paymentAmount, setPaymentAmount] = useState(null);
+  const [showGuidelinesMenu, setShowGuidelinesMenu] = useState(false);
+  const [showGuidelinesDialog, setShowGuidelinesDialog] = useState(false);
 
   const [followUpOpen, setFollowUpOpen] = useState(false); // added state
   const [datePickerOpen, setDatePickerOpen] = useState(false); // for testing DateTimePicker
@@ -210,7 +219,7 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
 
   const handleThreadClosure = (modalMessage) => {
     setMessage(modalMessage);
-      console.log("Message received in handleThreadClosure:", modalMessage);
+    console.log("Message received in handleThreadClosure:", modalMessage);
     useCloseHook.mutate(
       { questionId, body: message },
       {
@@ -561,13 +570,187 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
               )}
               <td className="px-4 py-2 font-bold">{question.payment}</td>
               <td className="px-4 py-2 text-right">
-                <svg
+                {/* <svg
                   className="inline-block w-5 h-5"
                   viewBox="0 0 20 20"
                   fill="currentColor"
                 >
                   <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
+                </svg> */}
+                <svg
+                  className="inline-block w-5 h-5 cursor-pointer"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowGuidelinesMenu(!showGuidelinesMenu);
+                  }}
+                >
+                  <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
                 </svg>
+
+                {showGuidelinesMenu && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10">
+                    <div className="py-1">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowGuidelinesDialog(true);
+                          setShowGuidelinesMenu(false);
+                        }}
+                        className="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        Show Guidelines
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                <Dialog
+                  open={showGuidelinesDialog}
+                  onClose={() => setShowGuidelinesDialog(false)}
+                  maxWidth="md"
+                  PaperProps={{
+                    sx: {
+                      borderRadius: "12px",
+                      padding: "16px",
+                    },
+                  }}
+                >
+                  <DialogTitle
+                    sx={{
+                      fontWeight: "bold",
+                      borderBottom: "1px solid #eee",
+                      paddingBottom: "8px",
+                    }}
+                  >
+                    Guidelines for{" "}
+                    {role.charAt(0).toUpperCase() + role.slice(1)}
+                  </DialogTitle>
+                  <DialogContent sx={{ mt: 2 }}>
+                    {role === "professional" && (
+                      <div>
+                        <h3 className="text-lg font-semibold mb-2">
+                          Professional Guidelines
+                        </h3>
+                        <ul className="list-disc pl-5 space-y-2">
+                          <li>
+                            Respond to questions within the promised delivery
+                            timeframe
+                          </li>
+                          <li>
+                            Provide clear, accurate, and thorough answers to
+                            questions
+                          </li>
+                          <li>
+                            <p>
+                              To ensure you don't miss any important updates,
+                              please add
+                              <strong>{" "}{officialMail} </strong> to your email's
+                              safe sender list or whitelist it in your spam
+                              settings.
+                            </p>
+                          </li>
+                          <li>
+                            Keep communications professional and respectful
+                          </li>
+                          <li>
+                            Notify the asker if you need additional information
+                          </li>
+                          <li>Avoid sharing personal contact information</li>
+                          <li>
+                            Close a thread only when all questions have been
+                            satisfactorily answered
+                          </li>
+                        </ul>
+                      </div>
+                    )}
+
+                    {role === "asker" && (
+                      <div>
+                        <h3 className="text-lg font-semibold mb-2">
+                          Asker Guidelines
+                        </h3>
+                        <ul className="list-disc pl-5 space-y-2">
+                          <li>
+                            Clearly articulate your question with all relevant
+                            details
+                          </li>
+                          <li>
+                            Respond promptly to requests for additional
+                            information
+                          </li>
+                          <li>
+                            <p>
+                              To ensure you don't miss any important updates,
+                              please add 
+                              <strong>{" "} {officialMail} </strong> to your email's
+                              safe sender list or whitelist it in your spam
+                              settings.
+                            </p>
+                          </li>
+                          <li>
+                            Keep follow-up questions relevant to the original
+                            topic
+                          </li>
+                          <li>
+                            Make payment promptly after receiving a quote if you
+                            wish to proceed
+                          </li>
+                          <li>
+                            Provide feedback after the question has been
+                            answered and the thread closed
+                          </li>
+                          <li>Respect the professional's expertise and time</li>
+                        </ul>
+                      </div>
+                    )}
+
+                    {role === "admin" && (
+                      <div>
+                        <h3 className="text-lg font-semibold mb-2">
+                          Administrator Guidelines
+                        </h3>
+                        <ul className="list-disc pl-5 space-y-2">
+                          <li>
+                            Monitor conversations to ensure they follow platform
+                            guidelines
+                          </li>
+                          <li>Intervene in disputes if necessary</li>
+                          <li>Review flagged content or reported issues</li>
+                          <li>Ensure payments are processed correctly</li>
+                          <li>Assist users with technical difficulties</li>
+                          <li>
+                            Take appropriate action against users who violate
+                            terms of service
+                          </li>
+                        </ul>
+                      </div>
+                    )}
+
+                    <div className="mt-4 p-3 bg-blue-50 border-l-4 border-blue-500 rounded">
+                      <p className="text-sm text-blue-700">
+                        These guidelines are designed to ensure a productive and
+                        respectful experience for all users of AskMeDirect.
+                      </p>
+                    </div>
+                  </DialogContent>
+                  <DialogActions>
+                    <Button
+                      onClick={() => setShowGuidelinesDialog(false)}
+                      sx={{
+                        color: "#fff",
+                        backgroundColor: "#2563eb",
+                        "&:hover": { backgroundColor: "#1d4ed8" },
+                        borderRadius: "8px",
+                        padding: "6px 16px",
+                        textTransform: "none",
+                      }}
+                    >
+                      Close
+                    </Button>
+                  </DialogActions>
+                </Dialog>
               </td>
             </tr>
           </tbody>
@@ -1104,7 +1287,6 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
       <ThreadClosureModal
         open={threadClosureOpen}
         onClose={() => setThreadClosureOpen(false)}
-        
         loading={useCloseHook.isPending}
         onConfirm={handleThreadClosure}
       />

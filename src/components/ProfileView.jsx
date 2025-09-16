@@ -1,9 +1,14 @@
 import React, { useState, useEffect, memo, useRef } from "react";
 import { useAuth } from "../contextProvider/AuthContextProvider";
 import Edit from "../icons/Edit";
-import useUpdateProfile, { useCancelProfileDeletion, useRequestProfileDeletion } from "../hooks/userhooks";
+import useUpdateProfile, {
+  useCancelProfileDeletion,
+  useRequestProfileDeletion,
+} from "../hooks/userhooks";
 import useSpecializations from "../hooks/useSpecializations";
 import { allLanguages, allLocations, currencies } from "../utils/Constant";
+import DeleteConfirmationModal from "./DeleteConfirmationModal";
+import ScheduledDeletionModal from "./ScheduleDeleteModal";
 
 const DefaultView = memo(
   ({
@@ -1400,8 +1405,29 @@ const ProfileView = () => {
   });
   const [selectedFile, setSelectedFile] = useState(null);
   const fileInputRef = useRef(null);
-  const deleteMutation=useRequestProfileDeletion();
-  const cancelMutation=useCancelProfileDeletion();
+  const deleteMutation = useRequestProfileDeletion();
+  const cancelMutation = useCancelProfileDeletion();
+  const [showRequestModal, setShowRequestModal] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [modalError, setModalError] = useState("");
+
+  const openRequestModal = () => {
+    setModalError("");
+    setShowRequestModal(true);
+  };
+  const closeRequestModal = () => {
+    setModalError("");
+    setShowRequestModal(false);
+  };
+
+  const openCancelModal = () => {
+    setModalError("");
+    setShowCancelModal(true);
+  };
+  const closeCancelModal = () => {
+    setModalError("");
+    setShowCancelModal(false);
+  };
 
   // Setup the update profile mutation
   const updateProfile = useUpdateProfile({
@@ -1448,28 +1474,58 @@ const ProfileView = () => {
     return () => clearInterval(t);
   }, [user?.deletionScheduledAt]);
 
-  const handleRequestDeletion = async () => {
-    if (
-      !confirm(
-        "Delete professional profile? This schedules permanent deletion in 5 days."
-      )
-    )
-      return;
+  // const handleRequestDeletion = async () => {
+  //   if (
+  //     !confirm(
+  //       "Delete professional profile? This schedules permanent deletion in 5 days."
+  //     )
+  //   )
+  //     return;
+  //   try {
+  //     await deleteMutation.mutateAsync();
+  //   } catch (err) {
+  //     console.error("Deletion request failed", err);
+  //     alert("Failed to request deletion.");
+  //   }
+  // };
+
+  // const handleCancelDeletion = async () => {
+  //   if (!confirm("Cancel scheduled deletion?")) return;
+  //   try {
+  //     await cancelMutation.mutateAsync();
+  //   } catch (err) {
+  //     console.error("Cancel deletion failed", err);
+  //     alert("Failed to cancel deletion.");
+  //   }
+  // };
+
+  const handleRequestDeletion = () => openRequestModal();
+  const handleCancelDeletion = () => openCancelModal();
+  // user confirmed request deletion inside modal
+  const confirmRequestDeletion = async () => {
     try {
+      setModalError("");
       await deleteMutation.mutateAsync();
+      closeRequestModal();
     } catch (err) {
       console.error("Deletion request failed", err);
-      alert("Failed to request deletion.");
+      setModalError(
+        err?.response?.data?.message || "Failed to request deletion."
+      );
     }
   };
 
-  const handleCancelDeletion = async () => {
-    if (!confirm("Cancel scheduled deletion?")) return;
+  // user confirmed cancel deletion inside modal
+  const confirmCancelDeletion = async () => {
     try {
+      setModalError("");
       await cancelMutation.mutateAsync();
+      closeCancelModal();
     } catch (err) {
       console.error("Cancel deletion failed", err);
-      alert("Failed to cancel deletion.");
+      setModalError(
+        err?.response?.data?.message || "Failed to cancel deletion."
+      );
     }
   };
 
@@ -1685,6 +1741,34 @@ const ProfileView = () => {
         onRequestDeletion={handleRequestDeletion}
         onCancelDeletion={handleCancelDeletion}
         deletionState={deletionState}
+      />
+
+
+      <DeleteConfirmationModal
+        open={showRequestModal}
+        title="Delete professional profile"
+        description="This will schedule permanent deletion of your professional profile in 5 days. Are you sure you want to proceed?"
+        error={modalError}
+        loading={deleteMutation.isPending}
+        confirmLabel="Yes, schedule deletion"
+        cancelLabel="Cancel"
+        onClose={closeRequestModal}
+        onConfirm={confirmRequestDeletion}
+        confirmClassName="px-4 py-2 rounded bg-red-600 text-white"
+      />
+
+      {/* Scheduled deletion info + cancel action (reusable) */}
+      <ScheduledDeletionModal
+        open={
+          showCancelModal ||
+          Boolean(deletionState.scheduledAt && showCancelModal)
+        }
+        scheduledAt={deletionState.scheduledAt}
+        timeLeftText={deletionState.timeLeftText}
+        error={modalError}
+        onClose={closeCancelModal}
+        onCancelDeletion={confirmCancelDeletion}
+        cancelling={cancelMutation.isPending}
       />
     </>
   ) : (
