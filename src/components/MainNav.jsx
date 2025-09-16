@@ -140,7 +140,7 @@ const MainNav = ({ isDashboard }) => {
 
         {/* Desktop Center Section */}
 
-        {user?.activeRole === "asker" && (
+        {(!user || user?.activeRole === "asker") && (
           <div className="hidden lg:flex flex-1 justify-center gap-2">
             <div className="flex items-center bg-[#F0F1F3] relative rounded-full px-4 py-2 w-[340px] max-w-md">
               <img src={findIcon} alt="Search" className="w-4 h-4 mr-2" />
@@ -214,7 +214,10 @@ const MainNav = ({ isDashboard }) => {
             </button>
             <div className="flex items-center justify-between space-between">
               <div className="w-[1px] h-6 bg-black mx-2"></div>
-              <button className="flex items-center gap-1 text-blue-600 font-medium text-sm" disabled={true}>
+              <button
+                className="flex items-center gap-1 text-blue-600 font-medium text-sm"
+                disabled={true}
+              >
                 Find a Professional
               </button>
               <div className="flex items-center pl-4">
@@ -226,7 +229,7 @@ const MainNav = ({ isDashboard }) => {
 
         {/* Desktop Right Section */}
         <div className="hidden lg:flex items-center gap-6 relative lg:right-10">
-          {!user?.isAdmin && (
+          {/* {!user?.isAdmin && (
             <Link
               to="/questions"
               aria-current={isQuestionsActive ? "page" : undefined}
@@ -234,11 +237,157 @@ const MainNav = ({ isDashboard }) => {
             >
               {isQuestionsActive ? <ActiveMessageIcon /> : <MessageLogo />}
             </Link>
+          )} */}
+
+          {!user ? (
+            <div className="flex items-center gap-4">
+              <Link
+                to="/signin"
+                className="text-blue-600 font-medium text-sm hover:text-blue-800"
+              >
+                Sign in
+              </Link>
+              <Link
+                to="/signup"
+                className="bg-blue-600 text-white px-4 py-2 rounded-full font-medium text-sm hover:bg-blue-700"
+              >
+                Sign up
+              </Link>
+            </div>
+          ) : (
+            <>
+              {/* Existing user controls for logged in users */}
+              {!user?.isAdmin && (
+                <Link
+                  to="/questions"
+                  aria-current={isQuestionsActive ? "page" : undefined}
+                  className={`rounded-full p-1 flex items-center justify-center transition`}
+                >
+                  {isQuestionsActive ? <ActiveMessageIcon /> : <MessageLogo />}
+                </Link>
+              )}
+              {/* Profile section */}
+
+              <div className="relative">
+                <button
+                  onClick={() => setShowProfileModal((s) => !s)}
+                  aria-expanded={showProfileModal}
+                  aria-label="Open profile"
+                  className="flex items-center gap-2 cursor-pointer focus:outline-none"
+                >
+                  <img
+                    src={userProfilePic}
+                    alt="Profile"
+                    className="w-10 h-10 rounded-full border-2 border-blue-600 object-cover cursor-pointer transition-shadow hover:shadow-lg"
+                  />
+                </button>
+
+                {showProfileModal && (
+                  <div
+                    ref={modalRef}
+                    className="absolute  right-5 mt-2 w-72 bg-white rounded-xl shadow-xl z-50 ring-1 ring-black ring-opacity-5"
+                  >
+                    <div className="p-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold text-lg">
+                          {user?.firstName ? user.firstName[0] : "U"}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="font-semibold text-gray-900 text-sm truncate">
+                            {displayName}
+                          </div>
+                          <div className="text-xs text-gray-500 truncate">
+                            {email}
+                          </div>
+                        </div>
+                      </div>
+
+                      {canToggleRole && (
+                        <div className="mt-4">
+                          <button
+                            onClick={async () => {
+                              try {
+                                const target =
+                                  user?.activeRole === "professional"
+                                    ? "asker"
+                                    : "professional";
+                                // If user only has "asker" role and wants to switch to professional
+                                if (
+                                  Array.isArray(user?.roles) &&
+                                  user?.roles.length === 1 &&
+                                  user?.roles[0] === "asker" &&
+                                  target === "professional"
+                                ) {
+                                  // Use hook to add professional role
+                                  await registerStep2({
+                                    email: user.email,
+                                    role: "professional",
+                                  });
+                                  if (
+                                    typeof refreshCurrentUser === "function"
+                                  ) {
+                                    await refreshCurrentUser();
+                                  }
+                                  // Use react-router navigation
+                                  navigate("/pofon", { state: { user } });
+                                  return;
+                                }
+                                await toggleActiveRole(target);
+                                setShowProfileModal(false);
+                              } catch (err) {
+                                console.error("Role toggle failed", err);
+                              }
+                            }}
+                            disabled={isLoading}
+                            className={`w-full ${
+                              isLoading
+                                ? "opacity-60 cursor-wait"
+                                : "bg-white border border-blue-200"
+                            } text-blue-600 rounded-full py-2 text-sm font-medium`}
+                          >
+                            {isLoading ? "Switching..." : switchLabel}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="border-t border-gray-200" />
+
+                    <div className="p-2">
+                      <Link
+                        to={"/account-settings"}
+                        className="flex items-center gap-3 px-3 py-3 rounded hover:bg-gray-50 text-gray-800 text-sm"
+                      >
+                        <span className="w-6 h-6 flex items-center justify-center text-gray-700">
+                          <Setting />
+                        </span>
+                        <span className="font-medium">Account Settings</span>
+                      </Link>
+
+                      <button
+                        onClick={() => {
+                          logout();
+                          setShowProfileModal(false);
+                        }}
+                        className="flex items-center gap-3 w-full px-3 py-3 mt-1 rounded hover:bg-gray-50 text-gray-800 text-sm"
+                        type="button"
+                      >
+                        <span className="w-6 h-6 flex items-center justify-center text-gray-700">
+                          <Logout />
+                        </span>
+                        <span className="font-medium">Log out</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </>
           )}
+
           {/* <img src={bellIcon} alt="Bell" className="w-5 h-5" /> */}
 
           {/* Profile: clickable avatar opens modal-style card */}
-          <div className="relative">
+          {/* <div className="relative">
             <button
               onClick={() => setShowProfileModal((s) => !s)}
               aria-expanded={showProfileModal}
@@ -319,10 +468,8 @@ const MainNav = ({ isDashboard }) => {
                   )}
                 </div>
 
-                {/* divider */}
                 <div className="border-t border-gray-200" />
 
-                {/* actions */}
                 <div className="p-2">
                   <Link
                     to={"/account-settings"}
@@ -350,7 +497,7 @@ const MainNav = ({ isDashboard }) => {
                 </div>
               </div>
             )}
-          </div>
+          </div> */}
         </div>
 
         {/* Mobile Section */}

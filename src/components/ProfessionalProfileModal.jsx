@@ -10,6 +10,7 @@ import Star from "../icons/star";
 import Back from "../icons/back";
 import AskQuestionModal from "./AskQuestionModal";
 import { standardCurrency } from "../utils/Constant";
+import { useNavigate } from "react-router-dom";
 
 const dummyData = {
   id: 1,
@@ -64,9 +65,8 @@ const iconMap = {
 
 const iconsList=[<Linkedin />,<Facebook />,<Instagram />,<Website />]
 
-const ProfessionalProfileModal = ({ professional, onClose }) => {
+const ProfessionalProfileModal = ({ professional, onClose,isAuthenticated=false }) => {
   const [isQuestionOpen, setIsQuestionOpen] = useState(false);
-
   const getDeliveryLabel = (days) => {
     if (days <= 1) return "Less than 24hr";
     if (days <= 7) return "Less than 7 days";
@@ -292,6 +292,7 @@ const ProfessionalProfileModal = ({ professional, onClose }) => {
       {isQuestionOpen && (
         <AskQuestionModal
           professional={prof}
+          isAuthenticated={isAuthenticated}
           onClose={() => setIsQuestionOpen(false)}
         />
       )}

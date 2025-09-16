@@ -1,4 +1,4 @@
-import { Routes, Route, Outlet, Navigate } from "react-router-dom";
+import { Routes, Route, Outlet, Navigate, useLocation } from "react-router-dom";
 import MainNav from "./components/MainNav";
 import SignUpPage from "./pages/Signup";
 import ProfessionalOnboarding from "./pages/ProfessionalOnboarding";
@@ -25,10 +25,24 @@ import PublicProfilePage from "./components/PublicProfilePage";
 import LinkedInLinking from "./components/LinkedInCallbackPage";
 import AdminAnswersPage from "./pages/AdminQuestionsPage";
 
+//uncomment for previous functionality
+// function ProtectedRoute({ children }) {
+//   const { user, loading } = useAuth();
+//   if (loading) return <AppSkeleton />;
+//   return user ? children : <Navigate to="/signin" replace />;
+// }
 
-function ProtectedRoute({ children }) {
+function ProtectedRoute({ children, allowPublicTest = false }) {
   const { user, loading } = useAuth();
+  const location = useLocation();
+
   if (loading) return <AppSkeleton />;
+
+  if (!user && allowPublicTest && location.pathname === "/") {
+    return children;
+  }
+
+  // Otherwise enforce authentication for other routes
   return user ? children : <Navigate to="/signin" replace />;
 }
 
@@ -54,10 +68,23 @@ function ProtectedNonAskerRoute({ children }) {
   );
 }
 
+// function LandingRedirect() {
+//   const { user, loading } = useAuth();
+//   if (loading) return <AppSkeleton />;
+//   if (!user) return <Navigate to="/signin" replace />;
+//   return user.activeRole === "asker" || user.role === "asker" ? (
+//     <Test />
+//   ) : (
+//     <Navigate to="/dashboard" replace />
+//   );
+// }
+
 function LandingRedirect() {
   const { user, loading } = useAuth();
   if (loading) return <AppSkeleton />;
-  if (!user) return <Navigate to="/signin" replace />;
+
+  if (!user) return <Test />;
+
   return user.activeRole === "asker" || user.role === "asker" ? (
     <Test />
   ) : (
@@ -84,13 +111,11 @@ function App() {
       <Routes>
         <Route
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowPublicTest={true}>
               <MainLayout />
             </ProtectedRoute>
           }
         >
-          <Route path="/" element={<LandingRedirect />} />
-
           <Route
             path="/test"
             element={
@@ -111,14 +136,10 @@ function App() {
             }
           />
 
-          {/* <Route
-            path="/pofon"
-            element={
-              <ProtectedNonAskerRoute>
-                <ProfessionalOnboarding />
-              </ProtectedNonAskerRoute>
-            }
-          /> */}
+          {/* <Route element={<MainLayout />}>
+            <Route path="/" element={<LandingRedirect />} />
+          </Route> */}
+          <Route path="/" element={<LandingRedirect />} />
         </Route>
 
         <Route path="/signup" element={<SignUpPage />} />

@@ -10,7 +10,7 @@ import useSpecializations from "../hooks/useSpecializations";
 import useProfessionals from "../hooks/useProfessionals";
 import ToggleSwitch from "./ToggleSwitch";
 import { allLanguages, allLocations,deliveryOptions,ratingOptions, standardCurrency } from "../utils/Constant";
-
+import { useNavigate } from "react-router-dom";
 
 
 
@@ -77,9 +77,9 @@ function reducer(state, action) {
   }
 }
 
-const Professionals = () => {
+const Professionals = ({isAuthenticated=false}) => {
   const { allSubCategories, specializations, loading } = useSpecializations();
-
+  const navigate=useNavigate();
   // 3. Use useReducer
   const [state, dispatch] = useReducer(reducer, initialState);
 
@@ -1180,6 +1180,7 @@ const Professionals = () => {
         {state.showProfileModal && state.selectedProfessional && (
           <ProfessionalProfileModal
             // professionalId={state.selectedProfessional._id}
+            isAuthenticated={isAuthenticated}
             professional={state.selectedProfessional}
             onClose={() =>
               dispatch({ type: "SET_SHOW_PROFILE_MODAL", value: false })
@@ -1189,6 +1190,7 @@ const Professionals = () => {
         {state.showModal && state.selectedProfessional && (
           <AskQuestionModal
             professional={state.selectedProfessional}
+            isAuthenticated={isAuthenticated}
             onClose={() => dispatch({ type: "SET_SHOW_MODAL", value: false })}
           />
         )}
