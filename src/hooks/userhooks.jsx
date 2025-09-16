@@ -130,7 +130,6 @@ export const useLinkedInCallback = () =>
   });
 
 
-// ...existing code...
 
 export const useStripeOnboardingStatus = (professionalId) => {
   return useQuery({
@@ -221,6 +220,51 @@ export const useRegisterStep4 = () => {
     },
   });
 };
+
+
+export const useRequestProfileDeletion = () => {
+  const queryClient = useQueryClient();
+  const { refreshCurrentUser } = useAuth();
+
+  return useMutation({
+    mutationFn: async (profileType = "professional") => {
+      const token = localStorage.getItem("accessToken");
+      if (!token) throw new Error("Not authenticated");
+      const res = await axios.delete(`${API_BASE_URL}/account/delete-account`, {
+        headers: { Authorization: `Bearer ${token}` },
+        data: { profileType },
+      });
+      return res.data;
+    },
+    onSuccess: async () => {
+      await refreshCurrentUser();
+      queryClient.invalidateQueries(["currentUser"]);
+    },
+  });
+};
+
+export const useCancelProfileDeletion = () => {
+  const queryClient = useQueryClient();
+  const { refreshCurrentUser } = useAuth();
+
+  return useMutation({
+    mutationFn: async (profileType = "professional") => {
+      const token = localStorage.getItem("accessToken");
+      if (!token) throw new Error("Not authenticated");
+      const res = await axios.post(
+        `${API_BASE_URL}/account/cancel-deletion`,
+        { profileType },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      return res.data;
+    },
+    onSuccess: async () => {
+      await refreshCurrentUser();
+      queryClient.invalidateQueries(["currentUser"]);
+    },
+  });
+};
+
 
 export const useToggleProfessionalStatus = () => {
   const queryClient = useQueryClient();

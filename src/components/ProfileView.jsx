@@ -1,7 +1,7 @@
 import React, { useState, useEffect, memo, useRef } from "react";
 import { useAuth } from "../contextProvider/AuthContextProvider";
 import Edit from "../icons/Edit";
-import useUpdateProfile from "../hooks/userhooks";
+import useUpdateProfile, { useCancelProfileDeletion, useRequestProfileDeletion } from "../hooks/userhooks";
 import useSpecializations from "../hooks/useSpecializations";
 import { allLanguages, allLocations, currencies } from "../utils/Constant";
 
@@ -1224,13 +1224,15 @@ const ProfessionalView = memo(
     fileInputRef,
     isUpdating,
     selectedFile,
+    onRequestDeletion,
+    onCancelDeletion,
+    deletionState,
   }) => {
     const prof = user?.professional || {};
     return (
       <div className="">
         <div className="relative bg-white border border-gray-100 rounded-xl p-6 mb-6">
           <div className="flex justify-end mb-4">
-            
             <div className="text-right">
               {editing ? (
                 <div className="flex space-x-2">
@@ -1252,13 +1254,35 @@ const ProfessionalView = memo(
                   </button>
                 </div>
               ) : (
-                <button
-                  onClick={() => setEditing(true)}
-                  aria-label="Edit profile"
-                  className="inline-flex items-center justify-center p-2 rounded-full hover:bg-gray-50 border border-transparent"
-                >
-                  <Edit />
-                </button>
+                // <button
+                //   onClick={() => setEditing(true)}
+                //   aria-label="Edit profile"
+                //   className="inline-flex items-center justify-center p-2 rounded-full hover:bg-gray-50 border border-transparent"
+                // >
+                //   <Edit />
+                // </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setEditing(true)}
+                    aria-label="Edit profile"
+                    className="inline-flex items-center justify-center p-2 rounded-full hover:bg-gray-50 border border-transparent"
+                  >
+                    <Edit />
+                  </button>
+
+                  {/* Delete professional profile button */}
+                  <button
+                    type="button"
+                    onClick={onRequestDeletion}
+                    className="inline-flex items-center justify-center px-3 py-1 rounded text-sm text-white bg-red-500 hover:bg-red-600"
+                    title="Delete professional profile"
+                    disabled={deletionState?.isPending}
+                  >
+                    {deletionState?.isPending
+                      ? "Processing..."
+                      : "Delete Profile"}
+                  </button>
+                </div>
               )}
               {/* <div className="text-xs text-gray-400 mt-1">
                 * Mandatory fields
@@ -1266,7 +1290,74 @@ const ProfessionalView = memo(
             </div>
           </div>
 
+          {deletionState?.scheduledAt && (
+            <div className="mb-4 p-3 border border-red-100 bg-red-50 rounded text-sm text-red-700">
+              <div className="font-medium">
+                Professional profile scheduled for deletion
+              </div>
+              <div className="mt-1">
+                Will be permanently deleted on{" "}
+                <strong>
+                  {new Date(deletionState.scheduledAt).toLocaleString()}
+                </strong>
+                .
+              </div>
+              <div className="mt-2 flex items-center gap-2">
+                <span className="text-xs text-gray-700">
+                  Time left: {deletionState.timeLeftText}
+                </span>
+                <button
+                  type="button"
+                  onClick={onCancelDeletion}
+                  className="ml-auto inline-flex items-center px-3 py-1 rounded text-sm text-white bg-gray-700 hover:bg-gray-800"
+                  disabled={deletionState?.isCancelling}
+                >
+                  {deletionState?.isCancelling
+                    ? "Cancelling..."
+                    : "Cancel Deletion"}
+                </button>
+              </div>
+            </div>
+          )}
+
           <div className="flex flex-col gap-8">
+            {deletionState.scheduledAt && (
+              <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40">
+                <div className="bg-white rounded-lg p-6 max-w-lg w-full mx-4">
+                  <h2 className="text-lg font-semibold mb-2 text-red-600">
+                    Professional profile scheduled for deletion
+                  </h2>
+                  <p className="text-sm text-gray-700 mb-4">
+                    Your professional profile is scheduled to be permanently
+                    deleted on{" "}
+                    <strong>
+                      {deletionState.scheduledAt.toLocaleString()}
+                    </strong>
+                    .
+                  </p>
+                  <p className="text-sm text-gray-700 mb-4">
+                    Time left until deletion:{" "}
+                    <strong>{deletionState.timeLeftText}</strong>
+                  </p>
+                  <div className="flex gap-2 justify-end">
+                    <button
+                      onClick={onCancelDeletion}
+                      className="px-4 py-2 rounded bg-gray-700 text-white"
+                      disabled={deletionState.isCancelling}
+                    >
+                      {deletionState.isCancelling
+                        ? "Cancelling..."
+                        : "Cancel Deletion"}
+                    </button>
+                  </div>
+                  <div className="text-xs text-gray-500 mt-3">
+                    If you cancel deletion you can continue using your
+                    professional profile and switch back to it via the role
+                    switch.
+                  </div>
+                </div>
+              </div>
+            )}
             <div className="w-full">
               <PersonalInfoBox
                 user={user}
@@ -1309,6 +1400,8 @@ const ProfileView = () => {
   });
   const [selectedFile, setSelectedFile] = useState(null);
   const fileInputRef = useRef(null);
+  const deleteMutation=useRequestProfileDeletion();
+  const cancelMutation=useCancelProfileDeletion();
 
   // Setup the update profile mutation
   const updateProfile = useUpdateProfile({
@@ -1317,6 +1410,75 @@ const ProfileView = () => {
       await refreshCurrentUser();
     },
   });
+
+  const proDeletionScheduledAt = user?.deletionScheduledAt
+    ? new Date(user.deletionScheduledAt)
+    : null;
+
+  const [timeLeftText, setTimeLeftText] = useState("");
+
+  useEffect(() => {
+    let t;
+    function updateTimeLeft() {
+      if (!proDeletionScheduledAt) {
+        setTimeLeftText("");
+        return;
+      }
+      const now = new Date();
+      const diff = proDeletionScheduledAt - now;
+      if (diff <= 0) {
+        setTimeLeftText("Less than a second");
+        return;
+      }
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const minutes = Math.floor((diff / (1000 * 60)) % 60);
+      const seconds = Math.floor((diff / 1000) % 60);
+      const pieces = [];
+      if (days) pieces.push(`${days}d`);
+      if (hours) pieces.push(`${hours}h`);
+      if (minutes) pieces.push(`${minutes}m`);
+      pieces.push(`${seconds}s`);
+      setTimeLeftText(pieces.join(" "));
+    }
+    updateTimeLeft();
+    if (proDeletionScheduledAt) {
+      t = setInterval(updateTimeLeft, 1000);
+    }
+    return () => clearInterval(t);
+  }, [user?.deletionScheduledAt]);
+
+  const handleRequestDeletion = async () => {
+    if (
+      !confirm(
+        "Delete professional profile? This schedules permanent deletion in 5 days."
+      )
+    )
+      return;
+    try {
+      await deleteMutation.mutateAsync();
+    } catch (err) {
+      console.error("Deletion request failed", err);
+      alert("Failed to request deletion.");
+    }
+  };
+
+  const handleCancelDeletion = async () => {
+    if (!confirm("Cancel scheduled deletion?")) return;
+    try {
+      await cancelMutation.mutateAsync();
+    } catch (err) {
+      console.error("Cancel deletion failed", err);
+      alert("Failed to cancel deletion.");
+    }
+  };
+
+  const deletionState = {
+    scheduledAt: proDeletionScheduledAt,
+    timeLeftText,
+    isPending: deleteMutation.isLoading,
+    isCancelling: cancelMutation.isLoading,
+  };
 
   // Initialize form from user when available
   useEffect(() => {
@@ -1479,24 +1641,24 @@ const ProfileView = () => {
 
   const avatarInitial = (formData.firstName?.trim()[0] || "U").toUpperCase();
 
- const handleLinkLinkedIn = () => {
-  const userId = user?._id; 
-  if (!userId) {
-    alert("User ID is missing. Please log in again.");
-    return;
-  }
+  const handleLinkLinkedIn = () => {
+    const userId = user?._id;
+    if (!userId) {
+      alert("User ID is missing. Please log in again.");
+      return;
+    }
 
-  window.location.href = `${
-    import.meta.env.VITE_API_BASE_URL
-  }/users/auth/linkedin/link?userId=${userId}`;
-};
+    window.location.href = `${
+      import.meta.env.VITE_API_BASE_URL
+    }/users/auth/linkedin/link?userId=${userId}`;
+  };
 
   // Choose view based on activeRole
   const role = user?.activeRole || "asker";
 
   return role === "professional" ? (
     <>
-    {!user?.professional?.verified && (
+      {!user?.professional?.verified && (
         <div className="mb-4">
           <button
             onClick={handleLinkLinkedIn}
@@ -1506,23 +1668,25 @@ const ProfileView = () => {
           </button>
         </div>
       )}
-    <ProfessionalView
-      formData={formData}
-      handleInputChange={handleInputChange}
-      editing={editing}
-      setEditing={setEditing}
-      setFormData={setFormData}
-      avatarInitial={avatarInitial}
-      user={user}
-      handleSaveChanges={handleSaveChanges}
-      handleCancelEdit={handleCancelEdit}
-      handleFileChange={handleFileChange}
-      fileInputRef={fileInputRef}
-      isUpdating={updateProfile.isPending}
-      selectedFile={selectedFile}
-    />
+      <ProfessionalView
+        formData={formData}
+        handleInputChange={handleInputChange}
+        editing={editing}
+        setEditing={setEditing}
+        setFormData={setFormData}
+        avatarInitial={avatarInitial}
+        user={user}
+        handleSaveChanges={handleSaveChanges}
+        handleCancelEdit={handleCancelEdit}
+        handleFileChange={handleFileChange}
+        fileInputRef={fileInputRef}
+        isUpdating={updateProfile.isPending}
+        selectedFile={selectedFile}
+        onRequestDeletion={handleRequestDeletion}
+        onCancelDeletion={handleCancelDeletion}
+        deletionState={deletionState}
+      />
     </>
-    
   ) : (
     <DefaultView
       formData={formData}
