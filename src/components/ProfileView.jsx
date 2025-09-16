@@ -1474,34 +1474,9 @@ const ProfileView = () => {
     return () => clearInterval(t);
   }, [user?.deletionScheduledAt]);
 
-  // const handleRequestDeletion = async () => {
-  //   if (
-  //     !confirm(
-  //       "Delete professional profile? This schedules permanent deletion in 5 days."
-  //     )
-  //   )
-  //     return;
-  //   try {
-  //     await deleteMutation.mutateAsync();
-  //   } catch (err) {
-  //     console.error("Deletion request failed", err);
-  //     alert("Failed to request deletion.");
-  //   }
-  // };
-
-  // const handleCancelDeletion = async () => {
-  //   if (!confirm("Cancel scheduled deletion?")) return;
-  //   try {
-  //     await cancelMutation.mutateAsync();
-  //   } catch (err) {
-  //     console.error("Cancel deletion failed", err);
-  //     alert("Failed to cancel deletion.");
-  //   }
-  // };
 
   const handleRequestDeletion = () => openRequestModal();
   const handleCancelDeletion = () => openCancelModal();
-  // user confirmed request deletion inside modal
   const confirmRequestDeletion = async () => {
     try {
       setModalError("");

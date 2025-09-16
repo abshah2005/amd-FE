@@ -500,7 +500,7 @@ const Professionals = () => {
           </div>
 
           {/* Tags */}
-          <div className="mb-4">
+          {/* <div className="mb-4">
             <label className="block text-sm font-medium mb-1">
               Tags (max - 2)
             </label>
@@ -551,7 +551,7 @@ const Professionals = () => {
               <div className="text-xs text-gray-500 mt-1">
                 <hr className="my-4 border-gray-200 border-1" />
               </div>
-              {/* Dropdown */}
+              
               {state.showTagDropdown && (
                 <div className="absolute left-0 top-full mt-2 w-full bg-white border rounded-xl shadow-lg z-10 max-h-48 overflow-auto">
                   {allSubCategories.map((tag) => (
@@ -583,7 +583,89 @@ const Professionals = () => {
                 </div>
               )}
             </div>
-          </div>
+          </div> */}
+          <div className="mb-4">
+  <label className="block text-sm font-medium mb-1">Tags (max - 2)</label>
+  <div className="relative">
+    <div className="flex items-center border rounded-full px-4 py-2 bg-white w-full">
+      <span className="mr-2 text-gray-400">
+        <img loading="lazy" src={find} alt="" />
+      </span>
+      <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+        {state.tags.map((tag) => (
+          <span
+            key={tag}
+            className="flex items-center bg-blue-50 border border-blue-400 text-blue-700 px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap"
+          >
+            {tag}
+            <button
+              type="button"
+              className="ml-1 text-blue-500 font-bold focus:outline-none"
+              onClick={() => handleTagChange(tag)}
+            >
+              &times;
+            </button>
+          </span>
+        ))}
+      </div>
+      <button
+        type="button"
+        className="ml-auto text-gray-400"
+        onClick={() =>
+          dispatch({
+            type: "SET_SHOW_TAG_DROPDOWN",
+            value: !state.showTagDropdown,
+          })
+        }
+        tabIndex={-1}
+      >
+        <svg width="20" height="20" fill="none">
+          <path
+            d="M6 8l4 4 4-4"
+            stroke="#94A3B8"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
+    </div>
+    <div className="text-xs text-gray-500 mt-1">
+      <hr className="my-4 border-gray-200 border-1" />
+    </div>
+    {/* Dropdown */}
+    {state.showTagDropdown && (
+      <div className="absolute left-0 top-full mt-2 w-full bg-white border rounded-xl shadow-lg z-10 max-h-48 overflow-auto">
+        {allSubCategories.map((tag) => (
+          <button
+            key={tag}
+            className={`w-full text-left px-4 py-2 text-sm hover:bg-blue-50 ${
+              state.tags.includes(tag)
+                ? "bg-blue-100 text-blue-700 font-semibold"
+                : "text-gray-700"
+            }`}
+            onClick={() => {
+              if (state.tags.includes(tag)) {
+                handleTagChange(tag);
+              } else if (state.tags.length < 2) {
+                handleTagChange(tag);
+              }
+              dispatch({
+                type: "SET_SHOW_TAG_DROPDOWN",
+                value: false,
+              });
+            }}
+            disabled={
+              !state.tags.includes(tag) && state.tags.length >= 2
+            }
+          >
+            {tag}
+          </button>
+        ))}
+      </div>
+    )}
+  </div>
+</div>
 
           {/* Budget Range */}
           <div className="mb-4">
