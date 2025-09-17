@@ -58,15 +58,31 @@ export function useProfessionalStats() {
   });
 }
 
-export function usePendingQuestions() {
+// export function usePendingQuestions() {
+//   return useQuery({
+//     queryKey: ["pendingQuestions"],
+//     queryFn: async () => {
+//       const { data } = await axios.get(`${API_BASE_URL}/admin/dashboard/pending`, {
+//           headers: getAuthHeaders(),
+//         });
+//       return data?.data;
+//     },
+//     staleTime: 1000 * 60 * 2,
+//   });
+// }
+
+
+export function usePendingQuestions(page = 1, limit = 10, search = "") {
   return useQuery({
-    queryKey: ["pendingQuestions"],
+    queryKey: ["pendingQuestions", page, limit, search],
     queryFn: async () => {
       const { data } = await axios.get(`${API_BASE_URL}/admin/dashboard/pending`, {
-          headers: getAuthHeaders(),
-        });
+        params: { page, limit, search },
+        headers: getAuthHeaders(),
+      });
       return data?.data;
     },
+    keepPreviousData: true, // Keep previous data while fetching new data
     staleTime: 1000 * 60 * 2,
   });
 }
