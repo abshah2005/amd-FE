@@ -140,9 +140,12 @@ const MainNav = ({ isDashboard }) => {
 
         {/* Desktop Center Section */}
 
-        {(!user || user?.activeRole === "asker") && (
+        
           <div className="hidden lg:flex flex-1 justify-center gap-2">
-            <div className="flex items-center bg-[#F0F1F3] relative rounded-full px-4 py-2 w-[340px] max-w-md">
+
+            { (user?.activeRole==="asker")? (
+              <>
+              <div className="flex items-center bg-[#F0F1F3] relative rounded-full px-4 py-2 w-[340px] max-w-md">
               <img src={findIcon} alt="Search" className="w-4 h-4 mr-2" />
 
               <input
@@ -212,6 +215,22 @@ const MainNav = ({ isDashboard }) => {
             >
               <img src={searchIcon} alt="Search" className="w-5 h-5" />
             </button>
+              </>
+            ) :(
+              <div className="flex  items-center jusitfy-between gap-3  cursor-pointer ">
+                <div>How it works</div>
+                <div>Professionals</div>
+                <div>Askers</div>
+                <div>FAQs</div>
+              </div>
+            )
+            }
+
+
+            
+
+
+        
             <div className="flex items-center justify-between space-between">
               <div className="w-[1px] h-6 bg-black mx-2"></div>
               <button
@@ -225,7 +244,7 @@ const MainNav = ({ isDashboard }) => {
               </div>
             </div>
           </div>
-        )}
+        
 
         {/* Desktop Right Section */}
         <div className="hidden lg:flex items-center gap-6 relative lg:right-10">

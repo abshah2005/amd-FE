@@ -15,7 +15,6 @@ import PasswordResetSuccess from "./pages/ResetSuccess";
 import Test from "./pages/Test";
 import RichEditor from "./pages/RichEditor";
 import { AuthProvider } from "./contextProvider/AuthContextProvider";
-
 import { useAuth } from "./contextProvider/AuthContextProvider";
 import DashboardPage from "./pages/DashboardPage";
 import AppSkeleton from "./pages/AppSkeleton";
@@ -24,6 +23,7 @@ import TestPayQuestion from "./pages/TestPayQuestion";
 import PublicProfilePage from "./components/PublicProfilePage";
 import LinkedInLinking from "./components/LinkedInCallbackPage";
 import AdminAnswersPage from "./pages/AdminQuestionsPage";
+import PrivacyPage from "./PrivacyPage";
 
 //uncomment for previous functionality
 // function ProtectedRoute({ children }) {
@@ -136,6 +136,7 @@ function App() {
             }
           />
 
+
           {/* <Route element={<MainLayout />}>
             <Route path="/" element={<LandingRedirect />} />
           </Route> */}
@@ -159,6 +160,8 @@ function App() {
         <Route path="/admin/questions" element={<AdminAnswersPage />} />
         <Route path="/auth/linkedin/link" element={<LinkedInLinking />} />
         <Route path="/resetSuccess" element={<PasswordResetSuccess />} />
+        <Route path="/privacy-policy" element={<PrivacyPage />} />
+
       </Routes>
     </AuthProvider>
   );

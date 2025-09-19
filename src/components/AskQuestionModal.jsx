@@ -9,6 +9,8 @@ import { useCreateQuestion } from "../hooks/useCreateQuestion";
 import { Link, useNavigate } from "react-router-dom";
 import UserGuidelinesModal from "./UserQuideLineModal";
 import { standardCurrency } from "../utils/Constant";
+import SignupForm from "./SignupForm";
+import SignUpPage from "../pages/Signup";
 
 const deliveryOptions = [
   { label: "Normal", value: "normal" },
@@ -75,7 +77,11 @@ function reducer(state, action) {
   }
 }
 
-const AskQuestionModal = ({ professional, onClose,isAuthenticated = false }) => {
+const AskQuestionModal = ({
+  professional,
+  onClose,
+  isAuthenticated = false,
+}) => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const fileInputRef = useRef();
   const createQuestion = useCreateQuestion();
@@ -268,31 +274,26 @@ const AskQuestionModal = ({ professional, onClose,isAuthenticated = false }) => 
       value: professional?.priceRangeLow ?? "",
     });
   }, [professional]);
-  
+
   if (!isAuthenticated) {
-    return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-xl p-6 max-w-md w-full">
-          <h2 className="text-xl font-bold mb-4">Sign in required</h2>
-          <p className="mb-6">You need to sign in to ask questions to professionals.</p>
-          <div className="flex justify-end gap-4">
-            <button 
-              onClick={onClose}
-              className="px-4 py-2 border rounded-lg text-gray-600 hover:bg-gray-50"
-            >
-              Cancel
-            </button>
-            <button 
-              onClick={() => navigate("/signin")}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-            >
-              Sign in
-            </button>
-          </div>
-        </div>
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="relative bg-white rounded-xl p-6 w-[40%]">
+        {/* Close button */}
+        <div
+        className="m-auto text-center pt-2 font-bold text-xl text-wrap w-[55%]">Sign up to get in touch with a Professional</div>
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl z-[9999]"
+        >
+          &times;
+        </button>
+        {/* Signup form */}
+        <SignupForm tailwindclass="md:w-full p-0" />
       </div>
-    );
-  }
+    </div>
+  );
+}
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
