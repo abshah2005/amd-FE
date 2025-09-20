@@ -37,8 +37,9 @@ function RoleSwitchOverlay({ show }) {
   );
 }
 
-const MainNav = ({ isDashboard }) => {
+const MainNav = ({ tailwindclass = "bg-white border-b border-gray-200" }) => {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const { user, logout, refreshCurrentUser } = useAuth();
   const { mutateAsync: toggleActiveRole, isPending: isLoading } =
@@ -66,6 +67,16 @@ const MainNav = ({ isDashboard }) => {
     setPage((prev) => prev + 1); // Increment the page number
     fetchNextPage(); // Fetch the next set of professionals
   };
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 0);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
 
   // <-- new: use location to determine active route (no extra state)
   const location = useLocation();
@@ -127,10 +138,15 @@ const MainNav = ({ isDashboard }) => {
   }, [showResults]);
 
   return (
-    <div>
+    <div className="w-full sticky top-0 z-50">
       {console.log("isLoading", isLoading)}
       <RoleSwitchOverlay show={isLoading} />
-      <nav className="w-full bg-white px-4 lg:px-8 py-3 flex items-center justify-between shadow-sm border-b border-gray-200">
+
+      <nav
+        className={`transition-all duration-300 ${
+          isScrolled ? "backdrop-blur-md bg-white/70 shadow-md" : tailwindclass
+        } px-4 lg:px-8 py-3 flex items-center justify-between`}
+      >
         {/* Logo */}
         <div className="flex items-center relative lg:left-10">
           <Link to="/">
@@ -140,111 +156,123 @@ const MainNav = ({ isDashboard }) => {
 
         {/* Desktop Center Section */}
 
-        
-          <div className="hidden lg:flex flex-1 justify-center gap-2">
-
-            { (user?.activeRole==="asker")? (
-              <>
+        <div className="hidden lg:flex flex-1 justify-center gap-2">
+          {user?.activeRole === "asker" ? (
+            <>
               <div className="flex items-center bg-[#F0F1F3] relative rounded-full px-4 py-2 w-[340px] max-w-md">
-              <img src={findIcon} alt="Search" className="w-4 h-4 mr-2" />
+                <img src={findIcon} alt="Search" className="w-4 h-4 mr-2" />
 
-              <input
-                type="text"
-                placeholder="Search"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="bg-transparent outline-none flex-1 text-sm"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && searchQuery.trim()) {
-                    setPage(1);
-                    setShowResults(true);
-                  }
-                }}
-              />
-              <img
-                src={dropdownIcon}
-                alt="Dropdown"
-                data-dropdown="true"
-                onClick={() => setShowResults((prev) => !prev)}
-                className="w-4 h-4 ml-2 cursor-pointer"
-              />
+                <input
+                  type="text"
+                  placeholder="Search"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="bg-transparent outline-none flex-1 text-sm"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && searchQuery.trim()) {
+                      setPage(1);
+                      setShowResults(true);
+                    }
+                  }}
+                />
+                <img
+                  src={dropdownIcon}
+                  alt="Dropdown"
+                  data-dropdown="true"
+                  onClick={() => setShowResults((prev) => !prev)}
+                  className="w-4 h-4 ml-2 cursor-pointer"
+                />
 
-              {showResults && (
-                <div
-                  ref={resultsRef}
-                  className="absolute top-10 left-0 mt-2 w-full bg-white shadow-lg rounded-lg p-4 z-20"
-                >
-                  {isPending ? (
-                    <p>Loading...</p>
-                  ) : data?.results?.length > 0 ? (
-                    <div
-                      className="flex flex-col gap-4 overflow-x-hidden overflow-y-auto max-h-[300px] px-2"
-                      style={{
-                        scrollbarWidth: "thin",
-                        scrollbarColor: "#ccc #f0f0f0",
-                      }}
-                    >
-                      {data.results.map((professional) => (
-                        <ProfessionalCard
-                          key={professional._id}
-                          professional={professional}
-                        />
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-center text-gray-500">
-                      No results to show
-                    </p>
-                  )}
-                  {data?.results?.length > 0 &&
-                    data?.results?.length < data?.total && (
-                      <button
-                        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded"
-                        onClick={handleShowMore}
-                        disabled={isPending}
+                {showResults && (
+                  <div
+                    ref={resultsRef}
+                    className="absolute top-10 left-0 mt-2 w-full bg-white shadow-lg rounded-lg p-4 z-20"
+                  >
+                    {isPending ? (
+                      <p>Loading...</p>
+                    ) : data?.results?.length > 0 ? (
+                      <div
+                        className="flex flex-col gap-4 overflow-x-hidden overflow-y-auto max-h-[300px] px-2"
+                        style={{
+                          scrollbarWidth: "thin",
+                          scrollbarColor: "#ccc #f0f0f0",
+                        }}
                       >
-                        {isPending ? "Loading..." : "Show More"}
-                      </button>
+                        {data.results.map((professional) => (
+                          <ProfessionalCard
+                            key={professional._id}
+                            professional={professional}
+                          />
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-center text-gray-500">
+                        No results to show
+                      </p>
                     )}
-                </div>
-              )}
-            </div>
-            <button
-              className="ml-4 bg-blue-600 rounded-full w-9 h-9 flex items-center justify-center"
-              onClick={handleSearch}
-            >
-              <img src={searchIcon} alt="Search" className="w-5 h-5" />
-            </button>
-              </>
-            ) :(
-              <div className="flex  items-center jusitfy-between gap-3  cursor-pointer ">
-                <div>How it works</div>
-                <div>Professionals</div>
-                <div>Askers</div>
-                <div>FAQs</div>
+                    {data?.results?.length > 0 &&
+                      data?.results?.length < data?.total && (
+                        <button
+                          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded"
+                          onClick={handleShowMore}
+                          disabled={isPending}
+                        >
+                          {isPending ? "Loading..." : "Show More"}
+                        </button>
+                      )}
+                  </div>
+                )}
               </div>
-            )
-            }
-
-
-            
-
-
-        
-            <div className="flex items-center justify-between space-between">
-              <div className="w-[1px] h-6 bg-black mx-2"></div>
               <button
-                className="flex items-center gap-1 text-blue-600 font-medium text-sm"
-                disabled={true}
+                className="ml-4 bg-blue-600 rounded-full w-9 h-9 flex items-center justify-center"
+                onClick={handleSearch}
               >
-                Find a Professional
+                <img src={searchIcon} alt="Search" className="w-5 h-5" />
               </button>
-              <div className="flex items-center pl-4">
-                <img src={userIcon} alt="User" className="w-6 h-6" />
-              </div>
+            </>
+          ) : (
+            <div className="flex  items-center jusitfy-between gap-3  cursor-pointer ">
+              {/* <div>How it works</div>
+              <div>Professionals</div>
+              <div>Askers</div>
+              <div>FAQs</div> */}
+              <a
+                href="/#how-it-works"
+                className="cursor-pointer hover:text-blue-600"
+              >
+                How it works
+              </a>
+              <a
+                href="/#how-it-works"
+                className="cursor-pointer hover:text-blue-600"
+              >
+                Professionals
+              </a>
+              <a
+                href="/#how-it-works"
+                className="cursor-pointer hover:text-blue-600"
+              >
+                Askers
+              </a>
+              <a href="/#faqs" className="cursor-pointer hover:text-blue-600">
+                FAQs
+              </a>
+            </div>
+          )}
+
+          <div className="flex items-center justify-between space-between">
+            <div className="w-[1px] h-6 bg-black mx-2"></div>
+            <button
+              className="flex items-center gap-1 text-blue-600 font-medium text-sm"
+              disabled={true}
+            >
+              <Link to="/?section=prof-list">Find a Professional</Link>
+            </button>
+            <div className="flex items-center pl-4">
+              <img src={userIcon} alt="User" className="w-6 h-6" />
             </div>
           </div>
-        
+        </div>
 
         {/* Desktop Right Section */}
         <div className="hidden lg:flex items-center gap-6 relative lg:right-10">
@@ -260,17 +288,35 @@ const MainNav = ({ isDashboard }) => {
 
           {!user ? (
             <div className="flex items-center gap-4">
-              <Link
-                to="/signin"
-                className="text-blue-600 font-medium text-sm hover:text-blue-800"
-              >
-                Sign in
+              <Link to="/signin" className="flex font-medium text-sm gap-1">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                >
+                  <g clip-path="url(#clip0_1078_6351)">
+                    <path
+                      fill-rule="evenodd"
+                      clip-rule="evenodd"
+                      d="M13.3333 11.6667C14.4071 11.6667 15.4393 12.0813 16.2148 12.8239C16.9903 13.5665 17.4492 14.5798 17.4958 15.6525L17.5 15.8333V17.5C17.4998 17.7124 17.4184 17.9167 17.2726 18.0711C17.1268 18.2256 16.9275 18.3185 16.7155 18.331C16.5035 18.3434 16.2947 18.2744 16.1318 18.1381C15.9689 18.0018 15.8643 17.8084 15.8392 17.5975L15.8333 17.5V15.8333C15.8334 15.1957 15.5897 14.5821 15.1523 14.1181C14.7148 13.6542 14.1166 13.3749 13.48 13.3375L13.3333 13.3333H6.66667C6.02899 13.3333 5.4154 13.5769 4.95145 14.0144C4.48749 14.4519 4.20824 15.0501 4.17083 15.6867L4.16667 15.8333V17.5C4.16643 17.7124 4.0851 17.9167 3.93929 18.0711C3.79349 18.2256 3.59421 18.3185 3.38217 18.331C3.17014 18.3434 2.96135 18.2744 2.79847 18.1381C2.6356 18.0018 2.53092 17.8084 2.50583 17.5975L2.5 17.5V15.8333C2.50006 14.7596 2.91462 13.7274 3.65722 12.9519C4.39982 12.1763 5.41313 11.7174 6.48583 11.6708L6.66667 11.6667H13.3333ZM10 1.66667C11.1051 1.66667 12.1649 2.10566 12.9463 2.88706C13.7277 3.66846 14.1667 4.72827 14.1667 5.83334C14.1667 6.93841 13.7277 7.99821 12.9463 8.77962C12.1649 9.56102 11.1051 10 10 10C8.89493 10 7.83512 9.56102 7.05372 8.77962C6.27232 7.99821 5.83333 6.93841 5.83333 5.83334C5.83333 4.72827 6.27232 3.66846 7.05372 2.88706C7.83512 2.10566 8.89493 1.66667 10 1.66667ZM10 3.33334C9.6717 3.33334 9.34661 3.398 9.04329 3.52364C8.73998 3.64928 8.46438 3.83343 8.23223 4.06557C8.00009 4.29772 7.81594 4.57332 7.6903 4.87663C7.56466 5.17994 7.5 5.50503 7.5 5.83334C7.5 6.16164 7.56466 6.48673 7.6903 6.79005C7.81594 7.09336 8.00009 7.36896 8.23223 7.60111C8.46438 7.83325 8.73998 8.0174 9.04329 8.14304C9.34661 8.26867 9.6717 8.33334 10 8.33334C10.663 8.33334 11.2989 8.06995 11.7678 7.60111C12.2366 7.13226 12.5 6.49638 12.5 5.83334C12.5 5.1703 12.2366 4.53441 11.7678 4.06557C11.2989 3.59673 10.663 3.33334 10 3.33334Z"
+                      fill="#2F2E41"
+                    />
+                  </g>
+                  <defs>
+                    <clipPath id="clip0_1078_6351">
+                      <rect width="20" height="20" fill="white" />
+                    </clipPath>
+                  </defs>
+                </svg>
+                Login
               </Link>
               <Link
                 to="/signup"
-                className="bg-blue-600 text-white px-4 py-2 rounded-full font-medium text-sm hover:bg-blue-700"
+                className="bg-[#086BFF] text-white px-4 py-2 rounded-full font-medium text-sm hover:bg-blue-700"
               >
-                Sign up
+                Get Started
               </Link>
             </div>
           ) : (

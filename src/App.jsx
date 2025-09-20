@@ -24,6 +24,10 @@ import PublicProfilePage from "./components/PublicProfilePage";
 import LinkedInLinking from "./components/LinkedInCallbackPage";
 import AdminAnswersPage from "./pages/AdminQuestionsPage";
 import PrivacyPage from "./PrivacyPage";
+import LandingPage from "./components/LandingPage";
+import CookiePage from "./pages/CookiePage";
+import TermsPage from "./pages/TermsPage";
+import ScrollToTop from "./Navigation/ScrollToTop";
 
 //uncomment for previous functionality
 // function ProtectedRoute({ children }) {
@@ -83,7 +87,8 @@ function LandingRedirect() {
   const { user, loading } = useAuth();
   if (loading) return <AppSkeleton />;
 
-  if (!user) return <Test />;
+  // if (!user) return <Test />;
+  if (!user) return <LandingPage />;
 
   return user.activeRole === "asker" || user.role === "asker" ? (
     <Test />
@@ -92,14 +97,11 @@ function LandingRedirect() {
   );
 }
 
-function ProtectedLayout() {
-  return <Outlet />;
-}
 
 function MainLayout() {
   return (
     <>
-      <MainNav />
+      <MainNav tailwindclass="bg-[#F1F4F9]" />
       <Outlet />
     </>
   );
@@ -108,6 +110,7 @@ function MainLayout() {
 function App() {
   return (
     <AuthProvider>
+      <ScrollToTop />
       <Routes>
         <Route
           element={
@@ -135,13 +138,13 @@ function App() {
               </ProtectedNonAskerRoute>
             }
           />
+          <Route path="/privacy-policy" element={<PrivacyPage />} />
+          <Route path="/cookie" element={<CookiePage />} />
+          <Route path="/terms" element={<TermsPage />} />
 
-
-          {/* <Route element={<MainLayout />}>
-            <Route path="/" element={<LandingRedirect />} />
-          </Route> */}
           <Route path="/" element={<LandingRedirect />} />
         </Route>
+
 
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/account-settings" element={<AccountSettings />} />
@@ -160,8 +163,6 @@ function App() {
         <Route path="/admin/questions" element={<AdminAnswersPage />} />
         <Route path="/auth/linkedin/link" element={<LinkedInLinking />} />
         <Route path="/resetSuccess" element={<PasswordResetSuccess />} />
-        <Route path="/privacy-policy" element={<PrivacyPage />} />
-
       </Routes>
     </AuthProvider>
   );

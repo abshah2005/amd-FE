@@ -328,7 +328,7 @@ const Professionals = ({isAuthenticated=false}) => {
         </div>
         <div className="flex flex-col items-center gap-3 min-w-[160px]  h-[34vh] justify-between">
           <div>
-            <button
+            {/* <button
               className="bg-blue-600 text-white px-5 py-2 rounded-full font-semibold text-sm hover:bg-blue-700 transition "
               onClick={() => {
                 //             dispatch({ type: "SET_SELECTED_PROFESSIONAL", value: prof });
@@ -338,8 +338,16 @@ const Professionals = ({isAuthenticated=false}) => {
               }}
             >
               Open Profile
-            </button>
+            </button> */}
+
+            <button className="border rounded-full border-blue-600 text-blue-600 px-3 py-1  hover:bg-blue-100" onClick={() => {
+                dispatch({ type: "SET_SELECTED_PROFESSIONAL", value: prof });
+                dispatch({ type: "SET_SHOW_PROFILE_MODAL", value: true });
+              }}>
+         Open Profile
+        </button>
           </div>
+          
           <div className="flex flex-col items-end gap-1 mt-auto">
             <span className="text-xs text-gray-500">
               Delivery Time:{" "}
