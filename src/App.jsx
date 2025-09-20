@@ -29,13 +29,7 @@ import CookiePage from "./pages/CookiePage";
 import TermsPage from "./pages/TermsPage";
 import ScrollToTop from "./Navigation/ScrollToTop";
 import FooterMain from "./components/FooterMain";
-
-//uncomment for previous functionality
-// function ProtectedRoute({ children }) {
-//   const { user, loading } = useAuth();
-//   if (loading) return <AppSkeleton />;
-//   return user ? children : <Navigate to="/signin" replace />;
-// }
+import FooterLoggedIn from "./components/FooterLoggedIn";
 
 function ProtectedRoute({ children, allowPublicTest = false }) {
   const { user, loading } = useAuth();
@@ -43,7 +37,10 @@ function ProtectedRoute({ children, allowPublicTest = false }) {
 
   if (loading) return <AppSkeleton />;
 
-  if (!user && allowPublicTest && location.pathname === "/") {
+  if (
+    (!user && allowPublicTest && location.pathname === "/") ||
+    location.pathname.startsWith("/?")
+  ) {
     return children;
   }
 
@@ -73,17 +70,6 @@ function ProtectedNonAskerRoute({ children }) {
   );
 }
 
-// function LandingRedirect() {
-//   const { user, loading } = useAuth();
-//   if (loading) return <AppSkeleton />;
-//   if (!user) return <Navigate to="/signin" replace />;
-//   return user.activeRole === "asker" || user.role === "asker" ? (
-//     <Test />
-//   ) : (
-//     <Navigate to="/dashboard" replace />
-//   );
-// }
-
 function LandingRedirect() {
   const { user, loading } = useAuth();
   if (loading) return <AppSkeleton />;
@@ -98,12 +84,14 @@ function LandingRedirect() {
   );
 }
 
-
 function MainLayout() {
+  const { user } = useAuth();
   return (
     <>
       <MainNav tailwindclass="bg-[#F1F4F9]" />
       <Outlet />
+      {/* <FooterLoggedIn /> */}
+      {user ? <FooterLoggedIn /> : <FooterMain />}
     </>
   );
 }
@@ -117,7 +105,6 @@ function App() {
           element={
             <ProtectedRoute allowPublicTest={true}>
               <MainLayout />
-              <FooterMain />
             </ProtectedRoute>
           }
         >
@@ -126,7 +113,6 @@ function App() {
             element={
               <ProtectedAskerRoute>
                 <Test />
-                
               </ProtectedAskerRoute>
             }
           />
@@ -147,7 +133,6 @@ function App() {
 
           <Route path="/" element={<LandingRedirect />} />
         </Route>
-
 
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/account-settings" element={<AccountSettings />} />
