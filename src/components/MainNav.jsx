@@ -266,7 +266,11 @@ const MainNav = ({ tailwindclass = "bg-white border-b border-gray-200" }) => {
               className="flex items-center gap-1 text-blue-600 font-medium text-sm"
               disabled={true}
             >
-              <Link to="/?section=prof-list">Find a Professional</Link>
+              {user?.activeRole === "asker" ? (
+                "Find a Professional"
+              ) : (
+                <Link to="/?section=prof-list">Find a Professional</Link>
+              )}
             </button>
             <div className="flex items-center pl-4">
               <img src={userIcon} alt="User" className="w-6 h-6" />

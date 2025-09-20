@@ -28,6 +28,7 @@ import LandingPage from "./components/LandingPage";
 import CookiePage from "./pages/CookiePage";
 import TermsPage from "./pages/TermsPage";
 import ScrollToTop from "./Navigation/ScrollToTop";
+import FooterMain from "./components/FooterMain";
 
 //uncomment for previous functionality
 // function ProtectedRoute({ children }) {
@@ -116,6 +117,7 @@ function App() {
           element={
             <ProtectedRoute allowPublicTest={true}>
               <MainLayout />
+              <FooterMain />
             </ProtectedRoute>
           }
         >
@@ -124,6 +126,7 @@ function App() {
             element={
               <ProtectedAskerRoute>
                 <Test />
+                
               </ProtectedAskerRoute>
             }
           />
