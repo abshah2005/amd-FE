@@ -1,5 +1,6 @@
 import React from "react";
 import mapImage from "../assets/worldMap2.png"; // Replace with the actual path to your map image
+import { Link } from "react-router-dom";
 
 const MapComponent = () => {
   return (
@@ -22,7 +23,9 @@ const MapComponent = () => {
         </p>
 
         <button className="border rounded-full border-blue-600 text-blue-600 px-6 py-3  hover:bg-blue-100">
+          <Link to={"/signup"} className="cursor-pointer hover:text-blue-600">
           Get Started
+          </Link>
         </button>
       </div>
 
