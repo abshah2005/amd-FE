@@ -25,9 +25,9 @@ export function useDashboardStats(options = {}) {
 }
 
 // 2. Dashboard users hook (professionals/askers)
-export function useDashboardUsers(type = "professional", page = 1, limit = 20, options = {}) {
+export function useDashboardUsers(type = "professional", page = 1, limit = 20, options = {},search="") {
   return useQuery({
-    queryKey: ["dashboardUsers", type, page, limit],
+    queryKey: ["dashboardUsers", type, page, limit,search],
     queryFn: async () => {
       const { data } = await axios.get(
         `${API_BASE_URL}/admin/dashboard/users`,

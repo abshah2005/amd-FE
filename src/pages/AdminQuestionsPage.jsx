@@ -58,7 +58,7 @@ const AdminAnswersPage = () => {
     data: archivedItems,
     isLoading: loadingArchived,
     isError: archivedError,
-  } = useQuestionsByUserType({ status: archivedStatuses,userType, userId });
+  } = useQuestionsByUserType({ status: archivedStatuses, userType, userId });
 
   const mappedActive = mappedAnswers(activeItems?.questions || []);
   const mappedArchived = mappedAnswers(archivedItems?.questions || []);
@@ -91,6 +91,27 @@ const AdminAnswersPage = () => {
     setModalOpen(true);
   };
 
+  const [flagModalOpen, setFlagModalOpen] = useState(false);
+  const [questionToFlag, setQuestionToFlag] = useState(null);
+
+  const handleFlagQuestion = (id) => {
+    setQuestionToFlag(id);
+    setFlagModalOpen(true);
+  };
+
+  const handleFlagConfirmation = async () => {
+    try {
+      // Replace this with your actual API call
+      // await useFlagQuestion(questionToFlag);
+      // Show success notification or handle success case
+      setFlagModalOpen(false);
+      setQuestionToFlag(null);
+    } catch (error) {
+      // Handle error case
+      console.error("Error flagging question:", error);
+    }
+  };
+
   // simple flag state (client-side). Replace with API call if needed.
   const [flaggedIds, setFlaggedIds] = useState([]);
   const onFlagToggle = (id) => {
@@ -103,7 +124,10 @@ const AdminAnswersPage = () => {
     <div className="min-h-screen bg-white p-6">
       <div className="md:w-[91%] mx-auto">
         <h1 className="text-2xl font-bold text-gray-900 mb-4">
-          Admin — All Answers
+          {professionalName}
+          {userType === "professional"
+            ? " - Professional's Answers"
+            : " - Asker's Questions"}
         </h1>
 
         <Tabs
@@ -130,8 +154,8 @@ const AdminAnswersPage = () => {
             <AdminQuestionsTable
               questions={paginatedItems}
               setModalOpen={(id) => handleOpenQuestion(id)}
-              onFlagToggle={onFlagToggle}
-              flaggedIds={flaggedIds}
+              onFlag={handleFlagQuestion}
+               isArchived={activeTab === "Archived"} 
             />
           )}
 
@@ -162,6 +186,36 @@ const AdminAnswersPage = () => {
           </div>
         </div>
       </div>
+
+      {flagModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="fixed inset-0 bg-black opacity-50"></div>
+          <div className="bg-white rounded-lg p-6 z-50 max-w-md w-full mx-4">
+            <h2 className="text-xl font-bold mb-4">Confirm Flag</h2>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to flag this question? This action cannot be
+              undone.
+            </p>
+            <div className="flex justify-end gap-4">
+              <button
+                className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                onClick={() => {
+                  setFlagModalOpen(false);
+                  setQuestionToFlag(null);
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                onClick={handleFlagConfirmation}
+              >
+                Flag Question
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <QuestionThreadModal
         open={modalOpen}

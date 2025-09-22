@@ -91,10 +91,7 @@ function MainLayout() {
       <MainNav tailwindclass="bg-[#F1F4F9]" />
       <Outlet />
       {/* <FooterLoggedIn /> */}
-      <div className="mt-20">
-
-      {user ? <FooterLoggedIn /> : <FooterMain />}
-      </div>
+      <div className="mt-20">{user ? <FooterLoggedIn /> : <FooterMain />}</div>
     </>
   );
 }
@@ -121,6 +118,7 @@ function App() {
           />
 
           <Route path="/questions" element={<QuestionsPage />} />
+          <Route path="/admin/questions" element={<AdminAnswersPage />} />
 
           <Route
             path="/dashboard"
@@ -151,7 +149,6 @@ function App() {
         <Route path="/stripe" element={<TestPayQuestion />} />
         <Route path="/profile/:name" element={<PublicProfilePage />} />
         <Route path="/auth/linkedin/callback" element={<LinkedInCallback />} />
-        <Route path="/admin/questions" element={<AdminAnswersPage />} />
         <Route path="/auth/linkedin/link" element={<LinkedInLinking />} />
         <Route path="/resetSuccess" element={<PasswordResetSuccess />} />
       </Routes>

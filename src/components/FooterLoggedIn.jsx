@@ -8,7 +8,6 @@ const FooterLoggedIn = () => {
       { name: "Dashboard", href: "/dashboard" },
       { name: "Questions", href: "/questions" },
       { name: "Account Settings", href: "/account-settings" },
-      { name: "Help Center", href: "/help" }, // You can create this route later
     ],
     legal: [
       { name: "Terms of Service", href: "/terms" },

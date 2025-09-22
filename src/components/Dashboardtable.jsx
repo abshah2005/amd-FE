@@ -9,7 +9,7 @@ const columns = {
     { label: "TOTAL EARNINGS", key: "earnings" },
     { label: "NO. OF ANSWER", key: "answers" },
     { label: "STATUS", key: "status" },
-    { label: "ACTIONS", key: "actions" }, // New column
+    { label: "ACTIONS", key: "actions" },
   ],
   Askers: [
     { label: "NAME", key: "name" },
@@ -46,21 +46,29 @@ const SearchBar = ({ value, onChange }) => (
 );
 
 const DashboardTable = ({ type, data }) => {
-  const navigate=useNavigate();
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const toggleStatus = useToggleProfessionalStatus();
 
   const handleRowClick = (row) => {
-  if (type === "Professionals") {
-    navigate('/admin/questions', {
-      state: {
-        userType: 'professional',
-        userId: row._id,
-        professionalName: row.name 
-      }
-    });
-  }
-};
+    if (type === "Professionals") {
+      navigate("/admin/questions", {
+        state: {
+          userType: "professional",
+          userId: row._id,
+          professionalName: row.name,
+        },
+      });
+    } else {
+      navigate("/admin/questions", {
+        state: {
+          userType: "asker",
+          userId: row.userId,
+          professionalName: row.name,
+        },
+      });
+    }
+  };
 
   const handleToggleFeature = async (professionalId, currentFeatured) => {
     try {
@@ -104,7 +112,11 @@ const DashboardTable = ({ type, data }) => {
           </thead>
           <tbody>
             {filtered.map((row, idx) => (
-              <tr key={idx} className="hover:bg-gray-50 transition" onClick={() => handleRowClick(row)}>
+              <tr
+                key={idx}
+                className="hover:bg-gray-50 transition cursor-pointer"
+                onClick={() => handleRowClick(row)}
+              >
                 <td className="px-6 py-4">
                   <input type="checkbox" className="rounded border-gray-300" />
                 </td>
@@ -124,7 +136,7 @@ const DashboardTable = ({ type, data }) => {
                             }`}
                             disabled={toggleStatus.isPending}
                           >
-                            {row.featured ? "✅ Featured" : "Feature"} 
+                            {row.featured ? "✅ Featured" : "Feature"}
                           </button>
                           {row.verified && (
                             <span className="text-blue-600">✓ Verified</span>
@@ -163,7 +175,10 @@ const DashboardTable = ({ type, data }) => {
                   }
 
                   return (
-                    <td key={col.key} className="px-6 py-4 text-sm text-gray-900">
+                    <td
+                      key={col.key}
+                      className="px-6 py-4 text-sm text-gray-900"
+                    >
                       {row[col.key]}
                     </td>
                   );

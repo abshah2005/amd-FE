@@ -3,8 +3,8 @@ import React from "react";
 const AdminQuestionsTable = ({
   questions = [],
   setModalOpen,
-  onFlagToggle = () => {},
-  flaggedIds = [],
+  isArchived = false,
+  onFlag = () => {},
 }) => {
   const getStatusColor = (status) => {
     switch (status.toLowerCase()) {
@@ -51,6 +51,7 @@ const AdminQuestionsTable = ({
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 STATUS ↕
               </th>
+              
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 FLAG ↕
               </th>
@@ -62,11 +63,13 @@ const AdminQuestionsTable = ({
 
           <tbody className="bg-white divide-y divide-gray-200">
             {questions.map((q) => {
-              const flagged = flaggedIds.includes(q.id);
               return (
                 <tr key={q.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <input type="checkbox" className="rounded border-gray-300" />
+                    <input
+                      type="checkbox"
+                      className="rounded border-gray-300"
+                    />
                   </td>
 
                   <td
@@ -94,31 +97,20 @@ const AdminQuestionsTable = ({
                   </td>
 
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <span className={getStatusColor(q.status)}>
-                      {q.status}
-                    </span>
+                    <span className={getStatusColor(q.status)}>{q.status}</span>
                   </td>
 
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <div className="flex items-center gap-2">
-                      <span
-                        className={`text-sm ${
-                          flagged ? "text-red-600" : "text-gray-500"
-                        }`}
-                      >
-                        {flagged ? "Flagged" : "No flag"}
-                      </span>
-                      <button
-                        onClick={() => onFlagToggle(q.id)}
-                        className={`px-2 py-1 text-xs rounded border ${
-                          flagged
-                            ? "bg-red-50 border-red-300 text-red-700"
-                            : "bg-white border-gray-200 text-gray-700"
-                        }`}
-                        aria-label={flagged ? "Unflag question" : "Flag question"}
-                      >
-                        {flagged ? "Unflag" : "Flag"}
-                      </button>
+                      {!isArchived && ( // Only show flag button if not archived
+                        <button
+                          onClick={() => onFlag(q.id)}
+                          className="px-2 py-1 text-xs rounded border bg-white border-gray-200 text-gray-700 hover:bg-gray-50"
+                          aria-label="Flag question"
+                        >
+                          Flag
+                        </button>
+                      )}
                     </div>
                   </td>
 

@@ -31,12 +31,12 @@ const DashboardPage = () => {
   const handlePrev = () => setPage((p) => Math.max(1, p - 1));
   const handleNext = () => setPage((p) => p + 1);
 
-  // Show loading/error gracefully
   const loading = activeTab === "Professionals" ? prosLoading : askersLoading;
   const data = activeTab === "Professionals" ? professionals : askers;
 
   const mappedProfessionals = professionals.map((row) => ({
     _id:row._id,
+    userId: row.userId,
     name: row.name,
     joined: new Date(row.joinedDate).toISOString().slice(0, 10),
     earnings: row.totalEarnings,
@@ -47,6 +47,7 @@ const DashboardPage = () => {
   }));
 
   const mappedAskers = askers.map((row) => ({
+    userId: row.userId,
     name: row.name,
     joined: new Date(row.joinedDate).toISOString().slice(0, 10),
     spendings: row.totalSpendings,
