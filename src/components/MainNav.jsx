@@ -150,14 +150,18 @@ const MainNav = ({ tailwindclass = "bg-white border-b border-gray-200" }) => {
         {/* Logo */}
         <div className="flex items-center relative lg:left-10">
           <Link to="/">
-            <img src={logo} alt="AskMeDirect" className="w-24 lg:w-28 text-black" />
+            <img
+              src={logo}
+              alt="AskMeDirect"
+              className="w-24 lg:w-28 text-black"
+            />
           </Link>
         </div>
 
         {/* Desktop Center Section */}
 
         <div className="hidden lg:flex flex-1 justify-center gap-2">
-          {user?.activeRole === "asker" ? (
+          {( user?.activeRole === "asker") ? (
             <>
               <div className="flex items-center bg-[#F0F1F3] relative rounded-full px-4 py-2 w-[340px] max-w-md">
                 <img src={findIcon} alt="Search" className="w-4 h-4 mr-2" />
@@ -230,51 +234,62 @@ const MainNav = ({ tailwindclass = "bg-white border-b border-gray-200" }) => {
                 <img src={searchIcon} alt="Search" className="w-5 h-5" />
               </button>
             </>
-          ) : (
-            <div className="flex  items-center jusitfy-between gap-3  cursor-pointer ">
-              {/* <div>How it works</div>
+          ) : (!user || user?.activeRole==="asker") ? (
+            <>
+              <div className="flex  items-center jusitfy-between gap-3  cursor-pointer ">
+                {/* <div>How it works</div>
               <div>Professionals</div>
               <div>Askers</div>
               <div>FAQs</div> */}
-              <a
-                href="/#how-it-works"
-                className="cursor-pointer hover:text-blue-600"
-              >
-                How it works
-              </a>
-              <a
-                href="/#professionals"
-                className="cursor-pointer hover:text-blue-600"
-              >
-                Professionals
-              </a>
-              <a
-                href="/#professionals"
-                className="cursor-pointer hover:text-blue-600"
-              >
-                Askers
-              </a>
-              <a href="/#faqs" className="cursor-pointer hover:text-blue-600">
-                FAQs
-              </a>
-            </div>
-          )}
+                <a
+                  href="/#how-it-works"
+                  className="cursor-pointer hover:text-blue-600"
+                >
+                  How it works
+                </a>
+                <a
+                  href="/#professionals"
+                  className="cursor-pointer hover:text-blue-600"
+                >
+                  Professionals
+                </a>
+                <a
+                  href="/#professionals"
+                  className="cursor-pointer hover:text-blue-600"
+                >
+                  Askers
+                </a>
+                <a href="/#faqs" className="cursor-pointer hover:text-blue-600">
+                  FAQs
+                </a>
+              </div>
+            </>
+          ) : null}
 
           <div className="flex items-center justify-between space-between">
-            <div className="w-[1px] h-6 bg-black mx-2"></div>
+            {user?.activeRole === "admin" ||
+            user?.activeRole === "professional" ? null : (
+              <div className="flex items-center pl-4">
+                <div className="w-[1px] h-6 bg-black mx-2"></div>
+              </div>
+            )}
+
             <button
               className="flex items-center gap-1 text-blue-600 font-medium text-sm"
               disabled={true}
             >
               {user?.activeRole === "asker" ? (
                 "Find a Professional"
-              ) : (
+              ) : !user ? (
                 <Link to="/?section=prof-list">Find a Professional</Link>
-              )}
+              ) : null}
             </button>
-            <div className="flex items-center pl-4">
-              <img src={userIcon} alt="User" className="w-6 h-6" />
-            </div>
+            {user?.activeRole === "admin" ||
+            user?.activeRole === "professional" ? null : (
+              <div className="flex items-center pl-4">
+                <img src={userIcon} alt="User" className="w-6 h-6" />
+              </div>
+            )}
           </div>
         </div>
 

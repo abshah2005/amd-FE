@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useToggleProfessionalStatus } from "../hooks/userhooks";
+import { useNavigate } from "react-router-dom";
 
 const columns = {
   Professionals: [
@@ -45,8 +46,21 @@ const SearchBar = ({ value, onChange }) => (
 );
 
 const DashboardTable = ({ type, data }) => {
+  const navigate=useNavigate();
   const [search, setSearch] = useState("");
   const toggleStatus = useToggleProfessionalStatus();
+
+  const handleRowClick = (row) => {
+  if (type === "Professionals") {
+    navigate('/admin/questions', {
+      state: {
+        userType: 'professional',
+        userId: row._id,
+        professionalName: row.name 
+      }
+    });
+  }
+};
 
   const handleToggleFeature = async (professionalId, currentFeatured) => {
     try {
@@ -90,7 +104,7 @@ const DashboardTable = ({ type, data }) => {
           </thead>
           <tbody>
             {filtered.map((row, idx) => (
-              <tr key={idx} className="hover:bg-gray-50 transition">
+              <tr key={idx} className="hover:bg-gray-50 transition" onClick={() => handleRowClick(row)}>
                 <td className="px-6 py-4">
                   <input type="checkbox" className="rounded border-gray-300" />
                 </td>

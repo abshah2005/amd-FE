@@ -7,11 +7,54 @@ function getAuthHeaders() {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-export function useQuestions({ page = 1, limit = 10000, status } = {}) {
+
+export function useQuestionsNew({ page = 1, limit = 10, status, search } = {}) {
   return useQuery({
-    queryKey: ["questions", page, limit, status],
+    queryKey: ["questions", page, limit, status, search],
     queryFn: async () => {
       const params = { page, limit };
+      if (search) params.search = search;
+      if (status) params.status = status;
+      const { data } = await axios.get(`${API_BASE_URL}/questions`, {
+        headers: getAuthHeaders(),
+        params,
+      });
+      return {
+        questions: data?.data?.questions || [],
+        total: data?.data?.total || 0,
+        page: data?.data?.page || 1
+      };
+    },
+  });
+}
+
+// Update the useAnswers hook similarly
+export function useAnswersNew({ page = 1, limit = 10, status, search } = {}) {
+  return useQuery({
+    queryKey: ["answers", page, limit, status, search],
+    queryFn: async () => {
+      const params = { page, limit };
+      if (search) params.search = search;
+      if (status) params.status = status;
+      const { data } = await axios.get(`${API_BASE_URL}/questions`, {
+        headers: getAuthHeaders(),
+        params,
+      });
+      return {
+        questions: data?.data?.questions || [],
+        total: data?.data?.total || 0,
+        page: data?.data?.page || 1
+      };
+    },
+  });
+}
+
+export function useQuestions({ page = 1, limit = 10, status,search } = {}) {
+  return useQuery({
+    queryKey: ["questions", page, limit, status,search],
+    queryFn: async () => {
+      const params = { page, limit };
+      if (search) params.search = search;
       if (status) params.status = status;
       const { data } = await axios.get(`${API_BASE_URL}/questions`, {
         headers: getAuthHeaders(),
@@ -46,11 +89,12 @@ export function useLeaveFeedback() {
   });
 }
 
-export function useAnswers({ page = 1, limit = 10000, status } = {}) {
+export function useAnswers({ page = 1, limit = 10, status,search } = {}) {
   return useQuery({
-    queryKey: ["answers", page, limit, status],
+    queryKey: ["answers", page, limit, status,search],
     queryFn: async () => {
       const params = { page, limit };
+      if (search) params.search = search;
       if (status) params.status = status;
       const { data } = await axios.get(`${API_BASE_URL}/questions`, {
         headers: getAuthHeaders(),
@@ -59,6 +103,23 @@ export function useAnswers({ page = 1, limit = 10000, status } = {}) {
       return data?.data?.questions || [];
     },
     // keepPreviousData: true,
+  });
+}
+
+
+export function useQuestionsByUserType({ userType, userId, page = 1, limit = 10, status } = {}) {
+  return useQuery({
+    queryKey: ["userQuestions", userType, userId, page, limit, status],
+    queryFn: async () => {
+      const params = { userType, userId, page, limit };
+      if (status) params.status = status;
+      const { data } = await axios.get(`${API_BASE_URL}/questions/getQuestions`, {
+        headers: getAuthHeaders(),
+        params,
+      });
+      return data?.data || [];
+    },
+    enabled: !!userType && !!userId,
   });
 }
 

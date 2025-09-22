@@ -2,12 +2,16 @@ import React, { useState, useEffect } from "react";
 import { Tabs } from "../components/Tabs";
 import { SearchBar } from "./SearcBar";
 import AdminQuestionsTable from "../components/AdminQuestionsTable";
-import { useAnswers } from "../hooks/useQuestionsAndAnswers";
+import {
+  useAnswers,
+  useQuestionsByUserType,
+} from "../hooks/useQuestionsAndAnswers";
 import { getStatusLabel } from "../utils/StatusUtil";
 import QuestionThreadModal from "../components/QuestionThreadModal";
+import { useLocation } from "react-router-dom";
 
 const mappedAnswers = (answers) =>
-  answers.map((a, i) => ({
+  answers?.map((a, i) => ({
     id: a._id,
     label: `Qno.${i + 1}`,
     submittedDate: new Date(a.createdAt).toISOString().slice(0, 10),
@@ -20,6 +24,8 @@ const mappedAnswers = (answers) =>
   }));
 
 const AdminAnswersPage = () => {
+  const location = useLocation();
+  const { userType, userId, professionalName } = location.state || {};
   const [activeTab, setActiveTab] = useState("Active");
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
@@ -46,22 +52,21 @@ const AdminAnswersPage = () => {
     data: activeItems,
     isLoading: loadingActive,
     isError: activeError,
-  } = useAnswers({ status: activeStatuses });
+  } = useQuestionsByUserType({ status: activeStatuses, userType, userId });
 
   const {
     data: archivedItems,
     isLoading: loadingArchived,
     isError: archivedError,
-  } = useAnswers({ status: archivedStatuses });
+  } = useQuestionsByUserType({ status: archivedStatuses,userType, userId });
 
-  const mappedActive = mappedAnswers(activeItems || []);
-  const mappedArchived = mappedAnswers(archivedItems || []);
+  const mappedActive = mappedAnswers(activeItems?.questions || []);
+  const mappedArchived = mappedAnswers(archivedItems?.questions || []);
 
   const items = activeTab === "Active" ? mappedActive : mappedArchived;
   const loadingItems = activeTab === "Active" ? loadingActive : loadingArchived;
   const itemsError = activeTab === "Active" ? activeError : archivedError;
 
-  // client-side search (question text, asker or professional)
   const searchedItems = items.filter((it) => {
     if (!searchTerm) return true;
     const s = searchTerm.toLowerCase();
@@ -89,25 +94,38 @@ const AdminAnswersPage = () => {
   // simple flag state (client-side). Replace with API call if needed.
   const [flaggedIds, setFlaggedIds] = useState([]);
   const onFlagToggle = (id) => {
-    setFlaggedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+    setFlaggedIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
   };
 
   return (
     <div className="min-h-screen bg-white p-6">
       <div className="md:w-[91%] mx-auto">
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">Admin — All Answers</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-4">
+          Admin — All Answers
+        </h1>
 
-        <Tabs tabs={["Active", "Archived"]} activeTab={activeTab} setActiveTab={setActiveTab} />
+        <Tabs
+          tabs={["Active", "Archived"]}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+        />
 
         <div className="w-[100%] m-auto border border-gray-200 rounded-[24px]">
           <div className="p-4">
-            <SearchBar value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+            <SearchBar
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
 
           {loadingItems ? (
             <div className="p-6 text-center text-gray-600">Loading…</div>
           ) : itemsError ? (
-            <div className="p-6 text-center text-red-600">Failed to load answers</div>
+            <div className="p-6 text-center text-red-600">
+              Failed to load answers
+            </div>
           ) : (
             <AdminQuestionsTable
               questions={paginatedItems}
@@ -153,7 +171,9 @@ const AdminAnswersPage = () => {
         }}
         questionId={selectedQuestionId}
         questionLabel={
-          selectedQuestionId ? items.find((i) => i.id === selectedQuestionId)?.label : null
+          selectedQuestionId
+            ? items.find((i) => i.id === selectedQuestionId)?.label
+            : null
         }
       />
     </div>

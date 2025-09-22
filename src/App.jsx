@@ -91,7 +91,10 @@ function MainLayout() {
       <MainNav tailwindclass="bg-[#F1F4F9]" />
       <Outlet />
       {/* <FooterLoggedIn /> */}
+      <div className="mt-20">
+
       {user ? <FooterLoggedIn /> : <FooterMain />}
+      </div>
     </>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Tabs } from "../components/Tabs";
 import { SearchBar } from "./SearcBar";
 import { QuestionsTable } from "../components/QuestionsTable";
@@ -6,9 +6,15 @@ import AnswersTable from "../components/AnswersTable";
 import { useAuth } from "../contextProvider/AuthContextProvider";
 import { ArrowBack } from "@mui/icons-material";
 import { Link } from "react-router-dom";
-import { useQuestions, useAnswers } from "../hooks/useQuestionsAndAnswers";
+import {
+  useQuestions,
+  useAnswers,
+  useAnswersNew,
+  useQuestionsNew,
+} from "../hooks/useQuestionsAndAnswers";
 import { getStatusLabel } from "../utils/StatusUtil";
 import QuestionThreadModal from "../components/QuestionThreadModal";
+import useDebouncedValue from "../hooks/useDebouncedValue";
 
 const mappedQuestions = (questions) =>
   questions.map((q, i) => ({
@@ -41,6 +47,7 @@ const QuestionsPage = () => {
   const [selectedQuestionId, setSelectedQuestionId] = useState(null); // New state for selected question ID
   const [activeTab, setActiveTab] = useState("Active");
   const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearch = useDebouncedValue(searchTerm, 500);
   const [page, setPage] = useState(1);
   const pageSize = 10;
   const activeStatuses = [
@@ -63,56 +70,65 @@ const QuestionsPage = () => {
   const isProfessional = user?.activeRole === "professional";
 
   const {
-    data: activeItems,
+    data: activeResponse,
     isLoading: loadingActive,
     isError: activeError,
   } = isProfessional
-    ? useAnswers({ status: activeStatuses })
-    : useQuestions({ status: activeStatuses });
+    ? useAnswersNew({
+        status: activeStatuses,
+        page,
+        limit: pageSize,
+        search: debouncedSearch,
+      })
+    : useQuestionsNew({
+        status: activeStatuses,
+        page,
+        limit: pageSize,
+        search: debouncedSearch,
+      });
 
   // For archived tab
   const {
-    data: archivedItems,
+    data: archivedResponse,
     isLoading: loadingArchived,
     isError: archivedError,
   } = isProfessional
-    ? useAnswers({ status: archivedStatuses })
-    : useQuestions({ status: archivedStatuses });
+    ? useAnswersNew({
+        status: archivedStatuses,
+        page,
+        limit: pageSize,
+        search: debouncedSearch,
+      })
+    : useQuestionsNew({
+        status: archivedStatuses,
+        page,
+        limit: pageSize,
+        search: debouncedSearch,
+      });
 
-  // Map for table
-  const mappedActive = isProfessional
-    ? mappedAnswers(activeItems || [])
-    : mappedQuestions(activeItems || []);
-
-  const mappedArchived = isProfessional
-    ? mappedAnswers(archivedItems || [])
-    : mappedQuestions(archivedItems || []);
-
-  const items = activeTab === "Active" ? mappedActive : mappedArchived;
-  const loadingItems = activeTab === "Active" ? loadingActive : loadingArchived;
-  const itemsError = activeTab === "Active" ? activeError : archivedError;
-
-  console.log("Mapped items for table:", items);
-  const filteredItems = items.filter((q) =>
+  // Replace items mapping with:
+  const items =
     activeTab === "Active"
-      ? q.status !== "Rejected" && q.status !== "Completed"
-      : q.status === "Rejected" || q.status === "Completed"
-  );
-  // .filter(
-  //   (question) =>
-  //     (question.question || "")
-  //       .toLowerCase()
-  //       .includes(searchTerm.toLowerCase()) ||
-  //     (
-  //       (isProfessional
-  //         ? question.asker?.name
-  //         : question.professional?.name) || ""
-  //     )
-  //       .toLowerCase()
-  //       .includes(searchTerm.toLowerCase())
-  // );
+      ? isProfessional
+        ? mappedAnswers(activeResponse?.questions || [])
+        : mappedQuestions(activeResponse?.questions || [])
+      : isProfessional
+      ? mappedAnswers(archivedResponse?.questions || [])
+      : mappedQuestions(archivedResponse?.questions || []);
 
-  console.log("Filtered items after search and status filter:", filteredItems);
+  // Remove the manual filtering code and use the filtered items directly
+  const filteredItems = items;
+
+  // Update pagination logic to use total from API
+  const totalItems =
+    activeTab === "Active"
+      ? activeResponse?.total || 0
+      : archivedResponse?.total || 0;
+  const totalPages = Math.ceil(totalItems / pageSize);
+
+  // Remove the manual pagination slice since data is already paginated from server
+  const paginatedItems = filteredItems;
+
   const title = isProfessional ? "My Answers" : "My Questions";
 
   // Create a handler for opening the modal with a question ID
@@ -120,13 +136,6 @@ const QuestionsPage = () => {
     setSelectedQuestionId(id);
     setModalOpen(true);
   };
-
-  // Pagination logic
-  const totalPages = Math.ceil(filteredItems.length / pageSize);
-  const paginatedItems = filteredItems.slice(
-    (page - 1) * pageSize,
-    page * pageSize
-  );
 
   return (
     <div className="min-h-screen bg-white p-6">
@@ -162,9 +171,9 @@ const QuestionsPage = () => {
             />
           </div>
 
-          {loadingItems ? (
+          {loadingActive || loadingArchived ? (
             <div className="p-6 text-center text-gray-600">Loading…</div>
-          ) : itemsError ? (
+          ) : activeError || archivedError ? (
             <div className="p-6 text-center text-red-600">
               Failed to load {isProfessional ? "answers" : "questions"}
             </div>
