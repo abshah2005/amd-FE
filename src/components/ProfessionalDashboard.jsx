@@ -98,63 +98,7 @@ function ShareBox({ url }) {
   );
 }
 
-function Pagination({ currentPage, totalPages, onPageChange }) {
-  return (
-    <div className="flex justify-center mt-4">
-      <button
-        onClick={() => onPageChange(currentPage - 1)}
-        disabled={currentPage === 1}
-        className="px-4 py-2 border rounded-l disabled:opacity-50"
-      >
-        Previous
-      </button>
-      <span className="px-4 py-2 border-t border-b">{`Page ${currentPage} of ${totalPages}`}</span>
-      <button
-        onClick={() => onPageChange(currentPage + 1)}
-        disabled={currentPage === totalPages}
-        className="px-4 py-2 border rounded-r disabled:opacity-50"
-      >
-        Next
-      </button>
-    </div>
-  );
-}
 
-// function SidebarList({ items }) {
-//   return (
-//     <div className=" pr-6">
-//       <h3 className="text-lg font-semibold mb-4">Active Questions</h3>
-//       <ul className="text-sm space-y-6">
-//         {items.slice(0, 6).map((it, i) => (
-//           <li key={i} className="flex items-start gap-3">
-//             <div className="w-2 h-2 rounded-full bg-gray-800 mt-1" />
-//             <div>
-//               <div className="text-xs text-gray-500">
-//                 {(() => {
-//                   const today = new Date();
-//                   const answerBy = new Date(it.answerBy);
-//                   const diff = Math.ceil(
-//                     (answerBy - today) / (1000 * 60 * 60 * 24)
-//                   );
-//                   if (isNaN(diff)) return "Time is yet to be decided";
-//                   return `${diff} days remaining`;
-//                 })()}
-//               </div>
-//               <div className="text-sm text-gray-700 mt-1">
-//                 {it.body.slice(0, 40) + "..."}
-//               </div>
-//             </div>
-//           </li>
-//         ))}
-//         {items.length - 6 > 0 && (
-//           <li className="text-sm text-gray-500">
-//             and {items.length - 6} more...
-//           </li>
-//         )}
-//       </ul>
-//     </div>
-//   );
-// }
 
 function SidebarList({ items }) {
   return (
@@ -221,18 +165,11 @@ function TabsBar({ active, setActive }) {
 }
 
 function SearchInput({ value, onChange }) {
-  const [inputValue, setInputValue] = useState(value); // Local state for immediate input updates
-  const debouncedValue = useDebouncedValue(inputValue, 500); // Debounce the local state
-
-  useEffect(() => {
-    onChange(debouncedValue); // Trigger the onChange only after debounce delay
-  }, [debouncedValue, onChange]);
-
   return (
     <div className="w-80">
       <input
-        value={inputValue}
-        onChange={(e) => setInputValue(e.target.value)} // Update local state immediately
+        value={value}
+        onChange={onChange}
         placeholder="Search"
         className="w-full border rounded-full px-4 py-2 text-sm placeholder-gray-400"
       />
@@ -258,13 +195,80 @@ function StatusCell({ status }) {
   return <span className={map[label] || "text-gray-600"}>{label}</span>;
 }
 
+function Pagination({ currentPage, totalPages, onPageChange }) {
+  return (
+    <div className="flex items-center justify-between px-4 py-3 border-t">
+      <div className="flex justify-center flex-1 sm:hidden">
+        <button
+          onClick={() => onPageChange(currentPage - 1)}
+          disabled={currentPage <= 1}
+          className="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
+        >
+          Previous
+        </button>
+        <button
+          onClick={() => onPageChange(currentPage + 1)}
+          disabled={currentPage >= totalPages}
+          className="relative inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
+        >
+          Next
+        </button>
+      </div>
+      <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+        <div>
+          <p className="text-sm text-gray-700">
+            Showing page <span className="font-medium">{currentPage}</span> of{" "}
+            <span className="font-medium">{totalPages}</span>
+          </p>
+        </div>
+        <div>
+          <nav
+            className="inline-flex -space-x-px rounded-md shadow-sm"
+            aria-label="Pagination"
+          >
+            <button
+              onClick={() => onPageChange(currentPage - 1)}
+              disabled={currentPage <= 1}
+              className="relative inline-flex items-center px-2 py-2 text-gray-400 rounded-l-md border border-gray-300 bg-white hover:bg-gray-50 disabled:opacity-50"
+            >
+              Previous
+            </button>
+            {[...Array(totalPages)].map((_, idx) => (
+              <button
+                key={idx + 1}
+                onClick={() => onPageChange(idx + 1)}
+                className={`relative inline-flex items-center px-4 py-2 border ${
+                  currentPage === idx + 1
+                    ? "z-10 bg-blue-50 border-blue-500 text-blue-600"
+                    : "bg-white border-gray-300 text-gray-500 hover:bg-gray-50"
+                }`}
+              >
+                {idx + 1}
+              </button>
+            ))}
+            <button
+              onClick={() => onPageChange(currentPage + 1)}
+              disabled={currentPage >= totalPages}
+              className="relative inline-flex items-center px-2 py-2 text-gray-400 rounded-r-md border border-gray-300 bg-white hover:bg-gray-50 disabled:opacity-50"
+            >
+              Next
+            </button>
+          </nav>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function ProfessionalDashboard() {
   const { user } = useAuth();
-  const [q, setQ] = useState(""); // Search query
-  const [page, setPage] = useState(1); // Current page
-  const limit = 10;
+  const [q, setQ] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedQuestionId, setSelectedQuestionId] = useState(null);
+  const [page, setPage] = useState(1);
+
+  const ITEMS_PER_PAGE = 10;
+  const debouncedSearch = useDebouncedValue(q, 500);
 
   // Fetch stats and pending questions
   const {
@@ -272,20 +276,25 @@ export default function ProfessionalDashboard() {
     isLoading: statsLoading,
     error: statsError,
   } = useProfessionalStats();
+
   const {
     data: pending,
     isLoading: loading,
     error,
-  } = usePendingQuestions(page, limit, q);
+  } = usePendingQuestions(page, ITEMS_PER_PAGE, debouncedSearch);
 
-  const totalPages = Math.ceil((pending?.total || 0) / limit);
+  // const { data: pending, isLoading: loading, error } = usePendingQuestions();
 
-  const handleSearch = (debouncedValue) => {
-    setQ(debouncedValue); 
-    setPage(1); 
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch]);
+
+  const totalPages = pending ? Math.ceil(pending.total / ITEMS_PER_PAGE) : 0;
+
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
   };
 
-  
   const filtered = (pending?.questions || [])
     .filter(
       (it) =>
@@ -367,10 +376,13 @@ export default function ProfessionalDashboard() {
                         Pending Actions
                       </h2>
                     </div>
-                    <SearchInput value={q} onChange={handleSearch} />
+                    <SearchInput
+                      value={q}
+                      onChange={(e) => setQ(e.target.value)}
+                    />
                   </div>
                 </div>
-                <div className="overflow-x-auto">
+                <div className=" overflow-x-auto">
                   {loading ? (
                     <div className="text-center text-gray-600">Loading…</div>
                   ) : error ? (
@@ -406,13 +418,15 @@ export default function ProfessionalDashboard() {
                           </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                          {pending?.questions.map((row, i) => (
+                          {(pending?.questions || []).map((row, i) => (
                             <tr
                               key={row._id}
                               className="hover:bg-gray-50 cursor-pointer"
+                              onClick={() => handleRowClick(row._id)}
                             >
                               <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 font-medium">
-                                {`Qno.${(page - 1) * limit + i + 1}`}
+                                {/* {row._id} */}
+                                {`Qno.${i + 1}`}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                                 {new Date(row.createdAt)
@@ -438,7 +452,7 @@ export default function ProfessionalDashboard() {
                               </td>
                             </tr>
                           ))}
-                          {pending?.questions.length === 0 && (
+                          {filtered.length === 0 && (
                             <tr>
                               <td
                                 colSpan={7}
@@ -450,117 +464,18 @@ export default function ProfessionalDashboard() {
                           )}
                         </tbody>
                       </table>
-                      <Pagination
-                        currentPage={page}
-                        totalPages={totalPages}
-                        onPageChange={setPage}
-                      />
+                      {pending?.questions?.length > 0 && (
+                        <Pagination
+                          currentPage={page}
+                          totalPages={totalPages}
+                          onPageChange={handlePageChange}
+                        />
+                      )}
                     </>
                   )}
                 </div>
               </div>
             </section>
-
-            {/* <section>
-              <div className="bg-white rounded-[12px] border">
-                <div className="p-4 border-b">
-                  <div className="flex justify-between items-center">
-                    <div className="pt-2">
-                      <h2 className="text-xl font-semibold mb-4">
-                        Pending Actions
-                      </h2>
-                    </div>
-                    <SearchInput
-                      value={q}
-                      onChange={(e) => setQ(e.target.value)}
-                    />
-                  </div>
-                </div>
-                <div className=" overflow-x-auto">
-                  {loading ? (
-                    <div className="text-center text-gray-600">Loading…</div>
-                  ) : error ? (
-                    <div className="text-center text-red-600">
-                      Failed to load
-                    </div>
-                  ) : (
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-100">
-                        <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            QUESTION ID
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            SUBMITTED DATE
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            QUESTION
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            ASKER
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            PRICE
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            STATUS
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            DELIVERY TIME
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {filtered.map((row, i) => (
-                          <tr
-                            key={row._id}
-                            className="hover:bg-gray-50 cursor-pointer"
-                            onClick={() => handleRowClick(row._id)}
-                          >
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 font-medium">
-                              
-                              {`Qno.${i + 1}`}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                              {new Date(row.createdAt)
-                                .toISOString()
-                                .slice(0, 10)}
-                            </td>
-                            <td className="px-6 py-4 text-sm text-gray-700 max-w-lg truncate">
-                              {row.body.slice(0, 40) + "..."}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                              {row.asker?.user?.firstName ||
-                                row.asker?.firstName ||
-                                row.asker}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                              {row.price}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm">
-                              <StatusCell status={row.status} />
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                              {row.deliveryType}
-                            </td>
-                          </tr>
-                        ))}
-                        {filtered.length === 0 && (
-                          <tr>
-                            <td
-                              colSpan={7}
-                              className="px-6 py-8 text-center text-sm text-gray-500"
-                            >
-                              No items to display
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
-                  )}
-                </div>
-              </div>
-            </section> */}
           </main>
         </div>
       </div>
