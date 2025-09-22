@@ -12,6 +12,7 @@ import CookiePage from "../pages/CookiePage";
 import Test from "../pages/Test";
 import HeaderLower from "./HeaderLower";
 import HowItWorksComponent from "./HowItWorksComponent";
+import CookieConsent from "./CookieConsent";
 
 const LandingPage = () => {
   const location = useLocation();
@@ -119,6 +120,7 @@ const LandingPage = () => {
       )}
       <div className="bg-white">{renderContent()}</div>
       {/* <FooterMain /> */}
+      <CookieConsent />
     </div>
   );
 };
