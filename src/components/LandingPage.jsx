@@ -12,7 +12,6 @@ import CookiePage from "../pages/CookiePage";
 import Test from "../pages/Test";
 import HeaderLower from "./HeaderLower";
 import HowItWorksComponent from "./HowItWorksComponent";
-import DivisionComponent from "./DivisionComponent";
 
 const LandingPage = () => {
   const location = useLocation();
@@ -124,3 +123,5 @@ const LandingPage = () => {
 };
 
 export default LandingPage;
+
+

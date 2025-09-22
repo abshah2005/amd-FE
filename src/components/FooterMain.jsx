@@ -58,7 +58,7 @@ const FooterMain = () => {
                       className="text-base text-gray-600 hover:text-gray-900 relative group"
                     >
                       {link.name}
-                      <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-gray-900 transition-all group-hover:w-full"></span>
+                      <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-blue-700 transition-all group-hover:w-full"></span>
                     </Link>
                   ) : (
                     <a
@@ -88,7 +88,7 @@ const FooterMain = () => {
                       className="text-base text-gray-600 hover:text-gray-900 relative group"
                     >
                       {link.name}
-                      <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-gray-900 transition-all group-hover:w-full"></span>
+                      <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-blue-700 transition-all group-hover:w-full"></span>
                     </Link>
                   ) : (
                     <a
@@ -96,7 +96,7 @@ const FooterMain = () => {
                       className="text-base text-gray-600 hover:text-gray-900 relative group"
                     >
                       {link.name}
-                      <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-gray-900 transition-all group-hover:w-full"></span>
+                      <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-blue-700 transition-all group-hover:w-full"></span>
                     </a>
                   )}
                 </li>
@@ -118,7 +118,7 @@ const FooterMain = () => {
                 >
                   <span className=" text-base relative">
                     {social.name}
-                    <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-gray-900 transition-all group-hover:w-full"></span>
+                    <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-blue-700 transition-all group-hover:w-full"></span>
                   </span>
                 </a>
               ))}
