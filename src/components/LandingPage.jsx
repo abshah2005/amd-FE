@@ -10,6 +10,8 @@ import TermsPage from "../pages/TermsPage";
 import PrivacyPage from "../PrivacyPage";
 import CookiePage from "../pages/CookiePage";
 import Test from "../pages/Test";
+import HeaderLower from "./HeaderLower";
+import HowItWorksComponent from "./HowItWorksComponent";
 
 const LandingPage = () => {
   const location = useLocation();
@@ -103,6 +105,10 @@ const LandingPage = () => {
           <>
             <Grid />
             <MapComponent />
+            <div className="w-full bg-[#F1F4F9]">
+
+            <HowItWorksComponent />
+            </div>
             <div id="faqs" ref={faqsRef}>
               <FAQs />
             </div>
@@ -120,6 +126,7 @@ const LandingPage = () => {
       {shouldShowLandingHeader() && (
         <div className="w-[60%] mx-auto bg-[#F1F4F9]">
           <LandingHeader />
+          <HeaderLower />
         </div>
       )}
       <div className="bg-white">
