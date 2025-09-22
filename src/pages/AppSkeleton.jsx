@@ -1,5 +1,5 @@
 import React from "react";
-import logo from "../assets/logo.svg";
+import logo from "../assets/logonew.svg";
 
 const AppSkeleton = () => (
   <div className="min-h-screen flex flex-col items-center justify-center bg-[#F0F1F3]">

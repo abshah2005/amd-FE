@@ -7,8 +7,8 @@ const FooterMain = () => {
     links: [
       { name: "Home", href: "/?section=prof-list" },
       { name: "How it works", href: "/#how-it-works" },
-      { name: "Professional", href: "/#how-it-works" },
-      { name: "Asker", href: "/#how-it-works" },
+      { name: "Professional", href: "/#professionals" },
+      { name: "Asker", href: "/#asker" },
       { name: "FAQs", href: "/#faqs" },
       { name: "Find a Professional", href: "/" },
     ],

@@ -12,77 +12,50 @@ import CookiePage from "../pages/CookiePage";
 import Test from "../pages/Test";
 import HeaderLower from "./HeaderLower";
 import HowItWorksComponent from "./HowItWorksComponent";
+import DivisionComponent from "./DivisionComponent";
 
 const LandingPage = () => {
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const faqsRef = useRef(null);
   const howItWorksRef = useRef(null);
+  const professionalsRef = useRef(null);
+  const askerRef = useRef(null);
   const [activeSection, setActiveSection] = useState(null);
 
   // Enhanced smooth scrolling function
   const scrollToSection = (elementRef) => {
     if (!elementRef) return;
-    
+
     // Get the element's position
     const yOffset = -80; // Adjust this value to account for fixed headers if needed
     const element = elementRef.current;
-    
+
     if (!element) return;
-    
-    const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
-    
+
+    const y =
+      element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+
     window.scrollTo({
       top: y,
-      behavior: 'smooth'
+      behavior: "smooth",
     });
   };
 
-  // Handle scroll to sections based on URL hash
-  // useEffect(() => {
-  //   // Check for special sections from search params
-  //   const section = searchParams.get("section");
-  //   if (section) {
-  //     setActiveSection(section);
-  //     window.scrollTo(0, 0); // Scroll to top when showing a special section
-  //     return;
-  //   } else {
-  //     setActiveSection(null);
-  //   }
-
-  //   // Handle hash-based navigation for regular sections
-  //   if (location.hash) {
-  //     // Use a longer timeout to ensure DOM is fully loaded
-  //     setTimeout(() => {
-  //       const targetId = location.hash.substring(1); // Remove the # symbol
-        
-  //       switch(targetId) {
-  //         case 'faqs':
-  //           scrollToSection(faqsRef);
-  //           break;
-  //         case 'how-it-works':
-  //           scrollToSection(howItWorksRef);
-  //           break;
-  //         default:
-  //           break;
-  //       }
-  //     }, 300); // Increased timeout for better reliability
-  //   }
-  // }, [location, searchParams]);
-
+  
   useEffect(() => {
-  const handleRouteChange = () => {
-    const section = searchParams.get("section");
-    if (section) {
-      setActiveSection(section);
-      window.scrollTo(0, 0);
-    } else {
-      setActiveSection(null);
-    }
-  };
+    const handleRouteChange = () => {
+      const section = searchParams.get("section");
+      if (section) {
+        setActiveSection(section);
+        window.scrollTo(0, 0);
+      } else {
+        setActiveSection(null);
+      }
+    };
 
-  handleRouteChange();
-}, [searchParams]);
+    handleRouteChange();
+  }, [searchParams]);
 
   // Determine if we should show the landing header
   const shouldShowLandingHeader = () => {
@@ -91,29 +64,44 @@ const LandingPage = () => {
 
   // Render the appropriate content based on activeSection
   const renderContent = () => {
-    switch(activeSection) {
-      case 'terms':
-        return <div className="bg-white"><TermsPage /></div>;
-      case 'privacy':
-        return <div className="bg-white"><PrivacyPage /></div>;
-      case 'prof-list':
-        return <div className="bg-white"><Test /></div>;
-      case 'cookie':
-        return <div className="bg-white"><CookiePage /></div>;
+    switch (activeSection) {
+      case "terms":
+        return (
+          <div className="bg-white">
+            <TermsPage />
+          </div>
+        );
+      case "privacy":
+        return (
+          <div className="bg-white">
+            <PrivacyPage />
+          </div>
+        );
+      case "prof-list":
+        return (
+          <div className="bg-white">
+            <Test />
+          </div>
+        );
+      case "cookie":
+        return (
+          <div className="bg-white">
+            <CookiePage />
+          </div>
+        );
       default:
         return (
           <>
             <Grid />
-            <MapComponent />
-            <div className="w-full bg-[#F1F4F9]">
-
-            <HowItWorksComponent />
+            <div className="w-full bg-[#F1F4F9]" id="how-it-works" ref={howItWorksRef}>
+              <HowItWorksComponent />
             </div>
+            <div id="professionals" ref={professionalsRef}>
+              <InfoSection />
+            </div>
+            <MapComponent />
             <div id="faqs" ref={faqsRef}>
               <FAQs />
-            </div>
-            <div id="how-it-works" ref={howItWorksRef}>
-              <InfoSection />
             </div>
           </>
         );
@@ -129,9 +117,7 @@ const LandingPage = () => {
           <HeaderLower />
         </div>
       )}
-      <div className="bg-white">
-        {renderContent()}
-      </div>
+      <div className="bg-white">{renderContent()}</div>
       {/* <FooterMain /> */}
     </div>
   );

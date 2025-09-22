@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import PageWrapper from "../components/PageWrapper";
-import logo from "../assets/logo.svg";
+import logo from "../assets/logonew.svg";
 import { useAuth } from "../contextProvider/AuthContextProvider";
 import LinkedInIcon from "../icons/LinkedInIcon";
 import EyeClose from "../icons/EyeClose";

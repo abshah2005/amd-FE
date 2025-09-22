@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import screenshot from "../assets/logo.svg";
+import screenshot from "../assets/logonew.svg";
 import { useRegisterStep1 } from "../hooks/userhooks";
 import { useNavigate } from "react-router-dom";
 import PasswordStrengthChecker from "../components/PasswordChecker";

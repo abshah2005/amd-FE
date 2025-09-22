@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../contextProvider/AuthContextProvider";
 import { useToggleActiveRole, useRegisterStep2 } from "../hooks/userhooks";
-import logo from "../assets/logo.svg";
+import logo from "../assets/logonew.svg";
 import searchIcon from "../assets/search.svg";
 import dropdownIcon from "../assets/dropdown.svg";
 import findIcon from "../assets/find.svg";
@@ -150,7 +150,7 @@ const MainNav = ({ tailwindclass = "bg-white border-b border-gray-200" }) => {
         {/* Logo */}
         <div className="flex items-center relative lg:left-10">
           <Link to="/">
-            <img src={logo} alt="AskMeDirect" className="w-24 lg:w-28" />
+            <img src={logo} alt="AskMeDirect" className="w-24 lg:w-28 text-black" />
           </Link>
         </div>
 
@@ -243,13 +243,13 @@ const MainNav = ({ tailwindclass = "bg-white border-b border-gray-200" }) => {
                 How it works
               </a>
               <a
-                href="/#how-it-works"
+                href="/#professionals"
                 className="cursor-pointer hover:text-blue-600"
               >
                 Professionals
               </a>
               <a
-                href="/#how-it-works"
+                href="/#askers"
                 className="cursor-pointer hover:text-blue-600"
               >
                 Askers
