@@ -247,7 +247,7 @@ const PricingInput = ({
         </div>
       </div>
       {/* Price Display for Asker */}
-      {(role === "asker" || role === "professional") &&
+      {(role === "asker" || role === "professional " || role==="admin") &&
         (status === "submitted" || status === "rejected") && (
           <div className="text-center">
             <p className="text-xs text-gray-500 mb-1">
@@ -270,7 +270,7 @@ const PricingInput = ({
             </button>
           </div>
         )}
-      {(role === "asker" || role === "professional") &&
+      {(role === "asker" || role === "professional" || role==="admin") &&
         (status === "paid" || status === "closed" || status==="in_thread" || status==="answered") && (
           <div className="text-center">
             <p className="text-xs text-gray-500 mb-1">
@@ -344,7 +344,7 @@ const PricingInput = ({
           </div>
         )}
 
-      {role === "professional" &&
+      {(role === "professional" || role==="admin") &&
         (status === "awaiting_payment" || status === "quoted" ) && (
           <div className="text-center">
             <p className="text-xs text-gray-500 mb-1">
@@ -370,6 +370,53 @@ const PricingInput = ({
         )}
       {/* Professional Pricing Input */}
       {role === "asker" && status === "approved" && (
+        <div className="text-center">
+          <p className="text-xs text-gray-500 mb-1">
+            {status === "awaiting_response" || status === "approved"
+              ? "Yet to be quoted"
+              : "Question Budget"}
+          </p>
+          {showPriceRange ? (
+            <p className="text-xl font-bold text-gray-500">{priceRange}</p>
+          ) : showInput ? (
+            <input
+              type="number"
+              value={inputPrice}
+              onChange={handlePriceChange}
+              className="text-xl font-bold text-gray-500 border bg-gray-200 rounded w-full text-center"
+              placeholder="Enter price"
+              disabled={isDisabled}
+            />
+          ) : (
+            <p
+              className={`text-xl font-bold ${
+                isDisabled ? "text-gray-500" : "text-gray-800"
+              }`}
+            >
+              {currency}{price}
+            </p>
+          )}
+
+          <button
+            className={`w-full py-2 mt-3 rounded-full font-medium ${
+              isDisabled || (showInput && !inputPrice)
+                ? "bg-gray-400 text-gray-600 cursor-not-allowed"
+                : "bg-blue-600 text-white hover:bg-blue-700"
+            }`}
+            disabled={isDisabled || (showInput && !inputPrice)}
+            onClick={() => {
+              console.log("Pay Now clicked", { isDisabled, buttonText });
+              if (buttonText === "Pay Now" && !isDisabled)
+                setIsPaymentOpen(true);
+              else handleDoneClick();
+            }}
+          >
+            {buttonText}
+          </button>
+        </div>
+      )}
+
+      {role === "admin" && status === "approved" && (
         <div className="text-center">
           <p className="text-xs text-gray-500 mb-1">
             {status === "awaiting_response" || status === "approved"
@@ -462,6 +509,9 @@ const PricingInput = ({
           </button>
         </div>
       )} */}
+
+      
+
       {role === "professional" && status === "approved" && (
         <div className="text-center">
           <p className="text-xs text-gray-500 mb-1">

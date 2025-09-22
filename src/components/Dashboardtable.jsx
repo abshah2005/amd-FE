@@ -47,6 +47,8 @@ const SearchBar = ({ value, onChange }) => (
 
 const DashboardTable = ({ type, data }) => {
   const navigate = useNavigate();
+  const [featureModalOpen, setFeatureModalOpen] = useState(false);
+  const [professionalToFeature, setProfessionalToFeature] = useState(null);
   const [search, setSearch] = useState("");
   const toggleStatus = useToggleProfessionalStatus();
 
@@ -70,12 +72,31 @@ const DashboardTable = ({ type, data }) => {
     }
   };
 
-  const handleToggleFeature = async (professionalId, currentFeatured) => {
+  // const handleToggleFeature = async (professionalId, currentFeatured) => {
+  //   try {
+  //     await toggleStatus.mutate({
+  //       professionalId,
+  //       featured: !currentFeatured,
+  //     });
+  //   } catch (error) {
+  //     console.error("Failed to toggle feature status:", error);
+  //   }
+  // };
+
+  const handleFeatureClick = (e, professionalId, currentFeatured) => {
+    e.stopPropagation(); // Prevent row click event
+    setProfessionalToFeature({ id: professionalId, currentFeatured });
+    setFeatureModalOpen(true);
+  };
+
+  const handleToggleFeature = async () => {
     try {
       await toggleStatus.mutate({
-        professionalId,
-        featured: !currentFeatured,
+        professionalId: professionalToFeature.id,
+        featured: !professionalToFeature.currentFeatured,
       });
+      setFeatureModalOpen(false);
+      setProfessionalToFeature(null);
     } catch (error) {
       console.error("Failed to toggle feature status:", error);
     }
@@ -125,13 +146,26 @@ const DashboardTable = ({ type, data }) => {
                     return (
                       <td key={col.key} className="px-6 py-4">
                         <div className="flex items-center gap-2">
-                          <button
+                          {/* <button
                             onClick={() =>
                               handleToggleFeature(row._id, row.featured)
                             }
                             className={`px-3 py-1 rounded-full text-xs font-medium ${
                               row.featured
-                                ? "bg-green-100 text-green-800 hover:bg-green-200" // Changed to green theme
+                                ? "bg-green-100 text-green-800 hover:bg-green-200"
+                                : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                            }`}
+                            disabled={toggleStatus.isPending}
+                          >
+                            {row.featured ? "✅ Featured" : "Feature"}
+                          </button> */}
+                          <button
+                            onClick={(e) =>
+                              handleFeatureClick(e, row._id, row.featured)
+                            }
+                            className={`px-3 py-1 rounded-full text-xs font-medium ${
+                              row.featured
+                                ? "bg-green-100 text-green-800 hover:bg-green-200"
                                 : "bg-gray-100 text-gray-800 hover:bg-gray-200"
                             }`}
                             disabled={toggleStatus.isPending}
@@ -188,6 +222,45 @@ const DashboardTable = ({ type, data }) => {
           </tbody>
         </table>
       </div>
+      {featureModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="fixed inset-0 bg-black opacity-50"></div>
+          <div className="bg-white rounded-lg p-6 z-50 max-w-md w-full mx-4">
+            <h2 className="text-xl font-bold mb-4">
+              {professionalToFeature?.currentFeatured
+                ? "Remove Featured Status"
+                : "Confirm Feature"}
+            </h2>
+            <p className="text-gray-600 mb-6">
+              {professionalToFeature?.currentFeatured
+                ? "Are you sure you want to remove the featured status from this professional?"
+                : "Are you sure you want to feature this professional?"}
+            </p>
+            <div className="flex justify-end gap-4">
+              <button
+                className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                onClick={() => {
+                  setFeatureModalOpen(false);
+                  setProfessionalToFeature(null);
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                className={`px-4 py-2 text-white rounded ${
+                  professionalToFeature?.currentFeatured
+                    ? "bg-red-600 hover:bg-red-700"
+                    : "bg-green-600 hover:bg-green-700"
+                }`}
+                onClick={handleToggleFeature}
+                disabled={toggleStatus.isPending}
+              >
+                {toggleStatus.isPending ? "Processing..." : "Confirm"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
