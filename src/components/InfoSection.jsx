@@ -4,8 +4,8 @@ import ProcessSteps from "./ProcessSteps";
 import AskerSteps from "./AskerSteps";
 import image from "../assets/sideimg.png";
 
-const InfoSection = () => {
-  const [activeTab, setActiveTab] = useState("Professional");
+const InfoSection = ({selectedTab="professionals"}) => {
+  const [activeTab, setActiveTab] = useState(selectedTab || "professionals");
 
   const handleTabSwitch = (tab) => {
     setActiveTab(tab);
@@ -41,25 +41,25 @@ const InfoSection = () => {
 
         <div className="flex space-x-4 mb-8">
           <button
-            onClick={() => handleTabSwitch("Professional")}
+            onClick={() => handleTabSwitch("professionals")}
             className={`rounded-full px-6 py-2 border ${
-              activeTab === "Professional"
+              activeTab === "professionals"
                 ? "bg-[#D7EDFF] text-[#086BFF] border-blue-500"
                 : "bg-white text-gray-600 border-gray-300"
             } transition-colors duration-300 flex items-center`}
           >
-            <span className={`w-3 h-3 rounded-full mr-2 ${activeTab === "Professional" ? "bg-blue-400" : "bg-gray-400"}`}></span>
+            <span className={`w-3 h-3 rounded-full mr-2 ${activeTab === "professionals" ? "bg-blue-400" : "bg-gray-400"}`}></span>
             Professional
           </button>
           <button
-            onClick={() => handleTabSwitch("Asker")}
+            onClick={() => handleTabSwitch("askers")}
             className={`rounded-full px-6 py-2 border ${
-              activeTab === "Asker"
+              activeTab === "askers"
                 ? "bg-[#D7EDFF] text-[#086BFF] border-blue-500"
                 : "bg-white text-gray-600 border-gray-300"
             } transition-colors duration-300 flex items-center`}
           >
-            <span className={`w-3 h-3 rounded-full mr-2 ${activeTab === "Asker" ? "bg-[#086BFF]" : "bg-gray-400"}`}></span>
+            <span className={`w-3 h-3 rounded-full mr-2 ${activeTab === "askers" ? "bg-[#086BFF]" : "bg-gray-400"}`}></span>
             Asker
           </button>
         </div>
@@ -70,7 +70,7 @@ const InfoSection = () => {
 
       <div className="w-full md:w-[40%]">
         <AnimatePresence mode="wait">
-          {activeTab === "Professional" ? (
+          {activeTab === "professionals" ? (
             <motion.div
               key="professional"
               variants={fadeVariants}

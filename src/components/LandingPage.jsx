@@ -95,8 +95,9 @@ const LandingPage = () => {
             <div className="w-full bg-[#F1F4F9]" id="how-it-works" ref={howItWorksRef}>
               <HowItWorksComponent />
             </div>
+            
             <div id="professionals" ref={professionalsRef}>
-              <InfoSection />
+              <InfoSection selectedTab="professionals"/>
             </div>
             <MapComponent />
             <div id="faqs" ref={faqsRef}>

@@ -92,11 +92,14 @@ const CookiePage = () => {
 
         <h2 className="text-xl font-semibold mb-4">6. Contact Us</h2>
         <p className="text-gray-700 mb-6">
-          If you have any questions about this Cookie Policy, please contact us at:
+          If you have questions about this Cookie Policy, please contact us at : {" "}
+          <b>benjamin@askmedirect.com</b>  
         </p>
         <p className="text-gray-700">
-          [Insert Contact Email] <br />
-          [Insert Company Name & Address]
+          {/* <br /> */}
+          AskMeDirect is an online platform owned and operated by FlexiUp Kft.
+          <p className="text-wrap">A company registered in Hungary company registration no. 01-09-430447,
+          registered seat at 1138 Budapest, Gyöngyösi utca 4. Fsz. 4. ajtó</p>
         </p>
       </div>
     </div>
