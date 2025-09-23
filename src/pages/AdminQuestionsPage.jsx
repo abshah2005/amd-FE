@@ -21,6 +21,7 @@ const mappedAnswers = (answers) =>
     price: a.price || "—",
     status: getStatusLabel(a.status),
     deliveryTime: a.deliveryType,
+    isFlagged: a.flagging?.isFlagged || false,
   }));
 
 const AdminAnswersPage = () => {

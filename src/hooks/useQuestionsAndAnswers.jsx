@@ -289,3 +289,64 @@ export function useUpdateQuestionStatus() {
     },
   });
 }
+
+
+// Add this function after the useUpdateQuestionStatus function
+
+export function useFlagQuestion() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ questionId, reason }) => {
+      const { data } = await axios.post(
+        `${API_BASE_URL}/questions/${questionId}/flag`,
+        { reason },
+        { headers: getAuthHeaders() }
+      );
+      return data;
+    },
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["question", variables.questionId] });
+      queryClient.invalidateQueries({ queryKey: ["questions"] });
+      queryClient.invalidateQueries({ queryKey: ["userQuestions"] });
+
+      
+    },
+    onError: (error) => {
+      console.error("Failed to flag question:", error);
+    },
+  });
+}
+
+
+export function useReviewFlaggedQuestion() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ questionId, action, note }) => {
+      // Validate action is one of the allowed values
+      if (!["reanswer", "refund", "no_action"].includes(action)) {
+        throw new Error("Invalid action. Must be reanswer, refund, or no_action");
+      }
+      
+      const { data } = await axios.post(
+        `${API_BASE_URL}/questions/${questionId}/review-flag`,
+        { action, note },
+        { headers: getAuthHeaders() }
+      );
+      return data;
+    },
+    onSuccess: (data, variables) => {
+      // Invalidate related queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ["question", variables.questionId] });
+      queryClient.invalidateQueries({ queryKey: ["questions"] });
+      queryClient.invalidateQueries({ queryKey: ["userQuestions"] });
+      
+      // You might want to add specific admin-related query invalidations
+      queryClient.invalidateQueries({ queryKey: ["flaggedQuestions"] });
+    },
+    onError: (error) => {
+      console.error("Failed to review flagged question:", error);
+    },
+  });
+}

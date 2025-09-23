@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
+import FlagDialog from "./FlagDialog";
 
 const AdminQuestionsTable = ({
   questions = [],
@@ -23,7 +24,8 @@ const AdminQuestionsTable = ({
         return "text-gray-600";
     }
   };
-
+  const [flagDialogOpen, setFlagDialogOpen] = useState(false);
+  const [selectedQuestionId, setSelectedQuestionId] = useState(null);
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
       <div className="overflow-x-auto">
@@ -51,7 +53,7 @@ const AdminQuestionsTable = ({
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 STATUS ↕
               </th>
-              
+
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 FLAG ↕
               </th>
@@ -71,7 +73,6 @@ const AdminQuestionsTable = ({
                       className="rounded border-gray-300"
                     />
                   </td>
-
                   <td
                     className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 font-medium"
                     onClick={() => setModalOpen(q.id)}
@@ -79,41 +80,42 @@ const AdminQuestionsTable = ({
                   >
                     {q.label}
                   </td>
-
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {q.submittedDate}
                   </td>
-
                   <td className="px-6 py-4 text-sm text-gray-900 max-w-md">
                     <div className="truncate">{q.question}</div>
                   </td>
-
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600">
                     {q.asker?.name || q.professional?.name || "—"}
                   </td>
-
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {q.price || "—"}
                   </td>
-
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <span className={getStatusColor(q.status)}>{q.status}</span>
                   </td>
-
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <div className="flex items-center gap-2">
-                      {!isArchived && ( // Only show flag button if not archived
+                      {!isArchived && !q.isFlagged && (
                         <button
-                          onClick={() => onFlag(q.id)}
+                          onClick={() => {
+                            setFlagDialogOpen(true);
+                            setSelectedQuestionId(q.id);
+                          }}
                           className="px-2 py-1 text-xs rounded border bg-white border-gray-200 text-gray-700 hover:bg-gray-50"
                           aria-label="Flag question"
                         >
                           Flag
                         </button>
                       )}
+                      {!isArchived && q.isFlagged && (
+                        <span className="px-2 py-1 text-xs rounded bg-red-100 border border-red-300 text-red-700">
+                          Flagged
+                        </span>
+                      )}
                     </div>
                   </td>
-
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {q.deliveryTime}
                   </td>
@@ -123,6 +125,12 @@ const AdminQuestionsTable = ({
           </tbody>
         </table>
       </div>
+      <FlagDialog
+        open={flagDialogOpen}
+        isAdmin={true}
+        onClose={() => setFlagDialogOpen(false)}
+        questionId={selectedQuestionId}
+      />
     </div>
   );
 };
