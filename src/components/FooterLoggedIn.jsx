@@ -55,7 +55,7 @@ const FooterLoggedIn = () => {
                     className="text-base text-gray-600 hover:text-gray-900 relative group"
                   >
                     {link.name}
-                    <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-gray-900 transition-all group-hover:w-full"></span>
+                    <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-blue-600 transition-all group-hover:w-full"></span>
                   </Link>
                 </li>
               ))}
