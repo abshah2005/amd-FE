@@ -36,7 +36,7 @@ const AccountSettings = () => {
           </button>
         </div>
         <div className="bg-white w-full  shadow-lg overflow-hidden flex flex-col md:flex-row border border-gray-100">
-          <Sidebar tab={tab} onChange={setTab} />
+          <Sidebar tab={tab} onChange={setTab} showPayments={true} user={user} />
           <div className="flex-1 relative">
             <div className="p-8 h-[70vh] overflow-auto">
               <div className="max-w-[980px] mx-auto">
