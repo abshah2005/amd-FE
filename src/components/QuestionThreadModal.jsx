@@ -131,7 +131,7 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
     ? {
         id: questionData._id,
         label: questionLabel,
-        submittedDate: new Date(questionData.createdAt).toLocaleDateString(),
+        submittedDate: new Date(questionData.createdAt).toLocaleString(),
         payment: questionData.payment?.paid ? "Paid" : "Unpaid",
         asker:
           questionData.asker?.firstName + questionData.asker?.lastName ||
@@ -146,7 +146,7 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
         deliveryTime: questionData.answerByNormal
           ? questionData.answerByNormal
           : "N/A",
-        fastDelivery: questionData.answerByFast
+        fastDelivery:questionData.answerByFast
           ? questionData.answerByFast
           : "N/A",
         images: questionData.attachments || [],
@@ -546,16 +546,16 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
                         ? normalDeliveryTime?.answerByNormal
                           ? new Date(
                               normalDeliveryTime.answerByNormal
-                            ).toLocaleDateString()
+                            ).toLocaleString()
                           : "N/A"
                         : status === "submitted" || status === "rejected"
                         ? "N/A"
                         : normalDeliveryTime?.answerByNormal
                         ? new Date(
                             normalDeliveryTime.answerByNormal
-                          ).toLocaleDateString()
+                          ).toLocaleString()
                         : question.deliveryTime
-                        ? new Date(question.deliveryTime).toLocaleDateString()
+                        ? new Date(question.deliveryTime).toLocaleString()
                         : "N/A"}
 
                       <svg
@@ -598,16 +598,16 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
                         ? fastDeliveryTime?.answerByFast
                           ? new Date(
                               fastDeliveryTime.answerByFast
-                            ).toLocaleDateString()
+                            ).toLocaleString()
                           : "N/A"
                         : status === "submitted" || status === "rejected"
                         ? "N/A"
                         : fastDeliveryTime?.answerByFast
                         ? new Date(
                             fastDeliveryTime.answerByFast
-                          ).toLocaleDateString()
+                          ).toLocaleString()
                         : question.fastDelivery
-                        ? new Date(question.fastDelivery).toLocaleDateString()
+                        ? new Date(question.fastDelivery).toLocaleString()
                         : "N/A"}
                       <svg
                         className="ml-1 w-4 h-4"
@@ -639,7 +639,7 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
 
               {["paid", "in_thread", "answered", "closed"].includes(status) && (
                 <th className="px-3 py-2 font-bold">
-                  {new Date(question?.answerBy).toLocaleDateString()}
+                  {new Date(question?.answerBy).toLocaleString()}
                 </th>
               )}
               <td className="px-4 py-2 font-bold">{question.payment}</td>
@@ -1105,7 +1105,7 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
                   {question.asker}
                 </span>
                 <span className="text-xs text-gray-400">
-                  {new Date(question.feedback.createdAt).toLocaleDateString()}
+                  {new Date(question.feedback.createdAt).toLocaleString()}
                 </span>
               </div>
               <div className="flex items-center justify-center mb-2">
@@ -1225,7 +1225,7 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
                     {item.type === "timeline" ? "AskMeDirect" : item.sender}
                   </span>
                   <span className="text-xs text-gray-400">
-                    {item.at ? new Date(item.at).toLocaleDateString() : ""}
+                    {item.at ? new Date(item.at).toLocaleString() : ""}
                   </span>
                 </div>
 
