@@ -19,7 +19,10 @@ import {
   DialogTitle,
   Button,
 } from "@mui/material"; // Import MUI components
-import dayjs from "dayjs"; // If not installed, use new Date().toISOString()
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime"; // Add this import
+import duration from "dayjs/plugin/duration"; // Add this import
+// If not installed, use new Date().toISOString()
 import PaymentModal from "./PaymentModal";
 import { usePostAnswer } from "../hooks/useQuestionsAndAnswers";
 import ThreadClosureModal from "./ThreadClosureModal";
@@ -36,6 +39,9 @@ import {
 } from "../utils/Constant";
 import FlagDialog from "./FlagDialog";
 import ReviewFlagDialog from "./ReviewFlagDialog";
+
+dayjs.extend(relativeTime);
+dayjs.extend(duration);
 
 const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
   const [showMessage, setShowMessage] = useState(true);
@@ -61,6 +67,8 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
   const [previewUrls, setPreviewUrls] = useState([]);
   const fileInputRef = useRef(null);
   const MemoizedLexicalEditor = React.memo(LexicalEditor);
+
+  const [timeRemaining, setTimeRemaining] = useState("");
 
   useEffect(() => {
     // create preview URLs
@@ -146,7 +154,7 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
         deliveryTime: questionData.answerByNormal
           ? questionData.answerByNormal
           : "N/A",
-        fastDelivery:questionData.answerByFast
+        fastDelivery: questionData.answerByFast
           ? questionData.answerByFast
           : "N/A",
         images: questionData.attachments || [],
@@ -157,6 +165,46 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
         quote: questionData.quote || null,
       }
     : null;
+
+  useEffect(() => {
+    if (
+      !questionData ||
+      !["in_thread", "answered"].includes(questionData.status) ||
+      !questionData.thread?.followUpWindowExpiresAt
+    ) {
+      return;
+    }
+
+    const calculateTimeLeft = () => {
+      const expiryDate = dayjs(questionData.thread.followUpWindowExpiresAt);
+      const now = dayjs();
+
+      if (now.isAfter(expiryDate)) {
+        return "Expired";
+      }
+
+      const diff = expiryDate.diff(now);
+      const duration = dayjs.duration(diff);
+
+      const hours = Math.floor(duration.asHours());
+      const minutes = Math.floor(duration.minutes());
+
+      return `${hours}h ${minutes}m remaining`;
+    };
+
+    setTimeRemaining(calculateTimeLeft());
+
+    const timer = setInterval(() => {
+      const timeLeft = calculateTimeLeft();
+      setTimeRemaining(timeLeft);
+
+      if (timeLeft === "Expired") {
+        clearInterval(timer);
+      }
+    }, 60000); // Update every minute
+
+    return () => clearInterval(timer);
+  }, [questionData]);
 
   const [initialType, setInitialType] = useState("normal");
   const [hasLeftFeedback, setHasLeftFeedback] = useState(!!question?.feedback);
@@ -358,6 +406,41 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
     );
     // Return timeline first, then thread
     return combinedFeed;
+  };
+
+  const FollowUpTimer = () => {
+    if (!["in_thread", "answered"].includes(status) || !timeRemaining) {
+      return null;
+    }
+
+    return (
+      <div className="flex justify-center mt-4">
+        <div
+          className={`px-4 py-2 rounded-full text-sm flex items-center gap-2 
+          ${
+            timeRemaining === "Expired"
+              ? "bg-red-100 text-red-700"
+              : "bg-blue-100 text-blue-700"
+          }`}
+        >
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          <span className="font-medium">Follow-up window: {timeRemaining}</span>
+        </div>
+      </div>
+    );
   };
 
   // UI for professional viewing a submitted question
@@ -877,6 +960,8 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
             </tr>
           </tbody>
         </table>
+
+        <FollowUpTimer />
       </div>
 
       {/* Question content */}
