@@ -409,7 +409,37 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
           </div>
         )}
 
-      {(role === "asker" || role === "admin") && !isFlagged ? (
+      {isFlagged ? (
+        <div className="p-3 flex justify-center items-center gap-2 mt-4 border border-red-600 bg-red-100">
+          <h1 className="text-md text-center text-red-600">
+            Question is flagged
+          </h1>
+          {role === "admin" && (
+            <button
+              onClick={() =>
+                handleOpenReviewDialog(
+                  question.id,
+                  question.flagging?.flagReason
+                )
+              }
+              className="px-2 py-1 text-xs rounded border bg-white border-gray-200 text-gray-700 hover:bg-gray-50"
+            >
+              Review Flag
+            </button>
+          )}
+        </div>
+      ) : role === "asker" || role === "admin" ? (
+        <div className="mt-4 flex justify-center">
+          <button
+            className="px-4 py-2 bg-red-600 text-white rounded-full text-sm hover:bg-red-700"
+            onClick={() => setFlagDialogOpen(true)}
+          >
+            Flag Question
+          </button>
+        </div>
+      ) : null}
+
+      {/* {(role === "asker" || role === "admin") && !isFlagged ? (
         <div className="mt-4 flex justify-center">
           <button
             className="px-4 py-2 bg-red-600 text-white rounded-full text-sm hover:bg-red-700"
@@ -432,7 +462,7 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
             Review Flag
           </button>
         </div>
-      )}
+      )} */}
 
       {/* Question details table */}
       <div className="overflow-x-auto">
