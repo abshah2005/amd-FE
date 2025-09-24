@@ -1128,7 +1128,7 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
                     ))}
                   </div>
                 )} */}
-                <div className="flex justify-end mt-4">
+                <div className="flex justify-end gap-2 mt-4">
                   {/* <button
                     className="px-4 py-2 bg-white border rounded text-gray-700 hover:bg-gray-50"
                     onClick={() =>
@@ -1138,13 +1138,13 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
                   >
                     Attach images ({answerFiles.length}/5)
                   </button> */}
-                  {/* <ImageUploader
+                  <ImageUploader
                     answerFiles={answerFiles}
                     setAnswerFiles={setAnswerFiles}
                     fileInputRef={fileInputRef}
-                  /> */}
+                  />
                   <button
-                    className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                    className="w-20  bg-blue-600 text-white rounded hover:bg-blue-700"
                     onClick={() => {
                       setAnswer(editorContentRef.current.html);
                       console.log(
