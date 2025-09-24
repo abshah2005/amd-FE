@@ -32,7 +32,7 @@ export function useDashboardUsers(type = "professional", page = 1, limit = 20, o
       const { data } = await axios.get(
         `${API_BASE_URL}/admin/dashboard/users`,
         {
-          params: { type, page, limit },
+          params: { type, page, limit,search },
           headers: getAuthHeaders(),
         }
       );

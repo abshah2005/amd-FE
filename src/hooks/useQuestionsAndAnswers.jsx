@@ -107,11 +107,11 @@ export function useAnswers({ page = 1, limit = 10, status,search } = {}) {
 }
 
 
-export function useQuestionsByUserType({ userType, userId, page = 1, limit = 10, status } = {}) {
+export function useQuestionsByUserType({ userType, userId, page = 1, limit = 10, status,search="" } = {}) {
   return useQuery({
-    queryKey: ["userQuestions", userType, userId, page, limit, status],
+    queryKey: ["userQuestions", userType, userId, page, limit, status,search],
     queryFn: async () => {
-      const params = { userType, userId, page, limit };
+      const params = { userType, userId, page, limit,search };
       if (status) params.status = status;
       const { data } = await axios.get(`${API_BASE_URL}/questions/getQuestions`, {
         headers: getAuthHeaders(),

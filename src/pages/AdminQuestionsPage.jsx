@@ -9,6 +9,7 @@ import {
 import { getStatusLabel } from "../utils/StatusUtil";
 import QuestionThreadModal from "../components/QuestionThreadModal";
 import { useLocation } from "react-router-dom";
+import useDebouncedValue from "../hooks/useDebouncedValue";
 
 const mappedAnswers = (answers) =>
   answers?.map((a, i) => ({
@@ -29,6 +30,8 @@ const AdminAnswersPage = () => {
   const { userType, userId, professionalName } = location.state || {};
   const [activeTab, setActiveTab] = useState("Active");
   const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearch = useDebouncedValue(searchTerm, 500);
+
   const [page, setPage] = useState(1);
   const pageSize = 10;
 
@@ -53,36 +56,51 @@ const AdminAnswersPage = () => {
     data: activeItems,
     isLoading: loadingActive,
     isError: activeError,
-  } = useQuestionsByUserType({ status: activeStatuses, userType, userId });
+  } = useQuestionsByUserType({
+    status: activeStatuses,
+    userType,
+    userId,
+    search: debouncedSearch,
+    limit: pageSize,
+  });
 
   const {
     data: archivedItems,
     isLoading: loadingArchived,
     isError: archivedError,
-  } = useQuestionsByUserType({ status: archivedStatuses, userType, userId });
+  } = useQuestionsByUserType({
+    status: archivedStatuses,
+    userType,
+    userId,
+    search: debouncedSearch,
+    limit: pageSize,
+  });
 
   const mappedActive = mappedAnswers(activeItems?.questions || []);
   const mappedArchived = mappedAnswers(archivedItems?.questions || []);
 
   const items = activeTab === "Active" ? mappedActive : mappedArchived;
+  const itemsRaw = activeTab === "Active" ? activeItems : archivedItems;
   const loadingItems = activeTab === "Active" ? loadingActive : loadingArchived;
   const itemsError = activeTab === "Active" ? activeError : archivedError;
 
-  const searchedItems = items.filter((it) => {
-    if (!searchTerm) return true;
-    const s = searchTerm.toLowerCase();
-    return (
-      (it.question || "").toLowerCase().includes(s) ||
-      (it.asker?.name || "").toLowerCase().includes(s) ||
-      (it.professional?.name || "").toLowerCase().includes(s)
-    );
-  });
+  const totalPages = itemsRaw?.totalPages || 1;
+  const totalAnswers = itemsRaw?.total || items.length;
+  // const searchedItems = items.filter((it) => {
+  //   if (!searchTerm) return true;
+  //   const s = searchTerm.toLowerCase();
+  //   return (
+  //     (it.question || "").toLowerCase().includes(s) ||
+  //     (it.asker?.name || "").toLowerCase().includes(s) ||
+  //     (it.professional?.name || "").toLowerCase().includes(s)
+  //   );
+  // });
 
-  const totalPages = Math.max(1, Math.ceil(searchedItems.length / pageSize));
-  const paginatedItems = searchedItems.slice(
-    (page - 1) * pageSize,
-    page * pageSize
-  );
+  // const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
+  // const paginatedItems = searchedItems.slice(
+  //   (page - 1) * pageSize,
+  //   page * pageSize
+  // );
 
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedQuestionId, setSelectedQuestionId] = useState(null);
@@ -153,10 +171,10 @@ const AdminAnswersPage = () => {
             </div>
           ) : (
             <AdminQuestionsTable
-              questions={paginatedItems}
+              questions={items || []}
               setModalOpen={(id) => handleOpenQuestion(id)}
               onFlag={handleFlagQuestion}
-               isArchived={activeTab === "Archived"} 
+              isArchived={activeTab === "Archived"}
             />
           )}
 
@@ -183,7 +201,7 @@ const AdminAnswersPage = () => {
 
         <div className="mt-4 flex justify-between items-center">
           <div className="text-sm text-gray-500">
-            Showing {searchedItems.length} of {items.length} answers
+            Showing {items.length} of {totalAnswers} answers
           </div>
         </div>
       </div>

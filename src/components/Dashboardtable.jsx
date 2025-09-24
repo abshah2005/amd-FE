@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useToggleProfessionalStatus } from "../hooks/userhooks";
 import { useNavigate } from "react-router-dom";
+import useDebouncedValue from "../hooks/useDebouncedValue"; 
 
 const columns = {
   Professionals: [
@@ -45,11 +46,10 @@ const SearchBar = ({ value, onChange }) => (
   </div>
 );
 
-const DashboardTable = ({ type, data }) => {
+const DashboardTable = ({ type, data,loading, page, setPage,search, setSearch }) => {
   const navigate = useNavigate();
   const [featureModalOpen, setFeatureModalOpen] = useState(false);
   const [professionalToFeature, setProfessionalToFeature] = useState(null);
-  const [search, setSearch] = useState("");
   const toggleStatus = useToggleProfessionalStatus();
 
   const handleRowClick = (row) => {
@@ -72,16 +72,7 @@ const DashboardTable = ({ type, data }) => {
     }
   };
 
-  // const handleToggleFeature = async (professionalId, currentFeatured) => {
-  //   try {
-  //     await toggleStatus.mutate({
-  //       professionalId,
-  //       featured: !currentFeatured,
-  //     });
-  //   } catch (error) {
-  //     console.error("Failed to toggle feature status:", error);
-  //   }
-  // };
+  
 
   const handleFeatureClick = (e, professionalId, currentFeatured) => {
     e.stopPropagation(); // Prevent row click event
@@ -102,11 +93,11 @@ const DashboardTable = ({ type, data }) => {
     }
   };
 
-  const filtered = data.filter((row) =>
-    Object.values(row).some((val) =>
-      String(val).toLowerCase().includes(search.toLowerCase())
-    )
-  );
+  // const filtered = data.filter((row) =>
+  //   Object.values(row).some((val) =>
+  //     String(val).toLowerCase().includes(search.toLowerCase())
+  //   )
+  // );
 
   return (
     <div className="border border-gray-200 rounded-2xl bg-white">
@@ -132,7 +123,7 @@ const DashboardTable = ({ type, data }) => {
             </tr>
           </thead>
           <tbody>
-            {filtered.map((row, idx) => (
+            {data.map((row, idx) => (
               <tr
                 key={idx}
                 className="hover:bg-gray-50 transition cursor-pointer"

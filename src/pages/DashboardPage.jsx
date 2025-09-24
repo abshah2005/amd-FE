@@ -6,6 +6,7 @@ import { useDashboardStats, useDashboardUsers } from "../hooks/useDashboard";
 import { useAuth } from "../contextProvider/AuthContextProvider";
 import ProfessionalDashboard from "../components/ProfessionalDashboard";
 import { getStatusLabel } from "../utils/StatusUtil";
+import useDebouncedValue from "../hooks/useDebouncedValue";
 
 const PAGE_SIZE = 5;
 
@@ -14,17 +15,22 @@ const DashboardPage = () => {
   const [activeTab, setActiveTab] = useState("Professionals");
   const [page, setPage] = useState(1);
 
+  const [search, setSearch] = useState("");
+  const debouncedSearch = useDebouncedValue(search, 500);
+
   // If current activeRole is professional, show professional dashboard
   if (user?.activeRole === "professional") return <ProfessionalDashboard />;
 
   // Fetch stats and users
   const { data: stats, isLoading: statsLoading } = useDashboardStats();
   const { data: professionals = [], isLoading: prosLoading } =
-    useDashboardUsers("professional", page, PAGE_SIZE);
+    useDashboardUsers("professional", page, PAGE_SIZE, {}, debouncedSearch);
   const { data: askers = [], isLoading: askersLoading } = useDashboardUsers(
     "asker",
     page,
-    PAGE_SIZE
+    PAGE_SIZE,
+    {},
+    debouncedSearch
   );
 
   // Pagination controls
@@ -35,7 +41,7 @@ const DashboardPage = () => {
   const data = activeTab === "Professionals" ? professionals : askers;
 
   const mappedProfessionals = professionals.map((row) => ({
-    _id:row._id,
+    _id: row._id,
     userId: row.userId,
     name: row.name,
     joined: new Date(row.joinedDate).toISOString().slice(0, 10),
@@ -79,6 +85,8 @@ const DashboardPage = () => {
             loading={loading}
             page={page}
             setPage={setPage}
+            search={search}
+            setSearch={setSearch}
           />
           <div className="flex justify-end items-center gap-2 mt-4">
             <button
