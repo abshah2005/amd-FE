@@ -17,17 +17,17 @@ const PaymentModal = ({
 }) => {
   const stripeElementStyles = {
     base: {
-      fontSize: '16px',
-      color: '#32325d',
-      fontFamily: 'Arial, sans-serif',
-      fontSmoothing: 'antialiased',
-      '::placeholder': {
-        color: '#aab7c4',
+      fontSize: "16px",
+      color: "#32325d",
+      fontFamily: "Arial, sans-serif",
+      fontSmoothing: "antialiased",
+      "::placeholder": {
+        color: "#aab7c4",
       },
     },
     invalid: {
-      color: '#fa755a',
-      iconColor: '#fa755a',
+      color: "#fa755a",
+      iconColor: "#fa755a",
     },
   };
   const [clientSecret, setClientSecret] = useState("");
@@ -55,7 +55,9 @@ const PaymentModal = ({
         const token = localStorage.getItem("accessToken");
         try {
           const res = await fetch(
-            `${import.meta.env.VITE_API_BASE_URL}/questions/${questionId}/payment-options`,
+            `${
+              import.meta.env.VITE_API_BASE_URL
+            }/questions/${questionId}/payment-options`,
             {
               method: "POST",
               headers: {
@@ -75,7 +77,9 @@ const PaymentModal = ({
             setCurrencies(availableCurrencies);
 
             // Set USD as default currency
-            const usdCurrency = availableCurrencies.find((c) => c.code === "usd");
+            const usdCurrency = availableCurrencies.find(
+              (c) => c.code === "usd"
+            );
             if (usdCurrency) {
               setSelectedCurrency("usd");
               setConvertedPrice(usdCurrency.convertedAmount);
@@ -142,8 +146,7 @@ const PaymentModal = ({
       const payData = await payRes.json();
       if (!payData?.data?.clientSecret) {
         setStatus(
-          "Failed to create payment: " +
-            (payData?.message || "Unknown error")
+          "Failed to create payment: " + (payData?.message || "Unknown error")
         );
         setProcessing(false);
         return;
@@ -152,8 +155,8 @@ const PaymentModal = ({
       const clientSecret = payData.data.clientSecret;
 
       // Create payment method
-      const { error: methodError, paymentMethod } = await stripe.createPaymentMethod(
-        {
+      const { error: methodError, paymentMethod } =
+        await stripe.createPaymentMethod({
           type: "card",
           card: elements.getElement(CardNumberElement),
           billing_details: {
@@ -162,8 +165,7 @@ const PaymentModal = ({
               country: country,
             },
           },
-        }
-      );
+        });
 
       if (methodError) {
         setStatus("Card error: " + methodError.message);
@@ -248,13 +250,15 @@ const PaymentModal = ({
               {currencies.map((currency) => (
                 <option key={currency.code} value={currency.code}>
                   {currency.symbol} {currency.code.toUpperCase()} -{" "}
-                  {currency.convertedAmount.toFixed(2)} ({currency.code.toUpperCase()})
+                  {currency.convertedAmount.toFixed(2)} (
+                  {currency.code.toUpperCase()})
                 </option>
               ))}
             </select>
             <p className="text-sm text-gray-500 mt-2 pl-1">
               You'll be charged{" "}
-              {currencies.find((c) => c.code === selectedCurrency)?.symbol || "$"}
+              {currencies.find((c) => c.code === selectedCurrency)?.symbol ||
+                "$"}
               {convertedPrice ? convertedPrice.toFixed(2) : "0.00"} in{" "}
               {selectedCurrency.toUpperCase()}
             </p>
@@ -327,9 +331,45 @@ const PaymentModal = ({
                 className="w-full border border-gray-300 rounded p-2.5 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="US">United States</option>
-                <option value="SC">Seychelles</option>
-                <option value="PK">Pakistan</option>
+                <option value="GB">United Kingdom</option>
+                <option value="CA">Canada</option>
+                <option value="AU">Australia</option>
+                <option value="DE">Germany</option>
+                <option value="FR">France</option>
+                <option value="JP">Japan</option>
+                <option value="SG">Singapore</option>
+                <option value="HK">Hong Kong</option>
+                <option value="IT">Italy</option>
+                <option value="ES">Spain</option>
+                <option value="NL">Netherlands</option>
+                <option value="IE">Ireland</option>
+                <option value="CH">Switzerland</option>
+                <option value="AT">Austria</option>
+                <option value="BE">Belgium</option>
+                <option value="DK">Denmark</option>
+                <option value="SE">Sweden</option>
+                <option value="NO">Norway</option>
+                <option value="FI">Finland</option>
+                <option value="NZ">New Zealand</option>
+                <option value="BR">Brazil</option>
+                <option value="MX">Mexico</option>
                 <option value="IN">India</option>
+                <option value="PK">Pakistan</option>
+                <option value="SC">Seychelles</option>
+                <option value="AE">United Arab Emirates</option>
+                <option value="ZA">South Africa</option>
+                <option value="MY">Malaysia</option>
+                <option value="TH">Thailand</option>
+                <option value="ID">Indonesia</option>
+                <option value="PH">Philippines</option>
+                <option value="TR">Turkey</option>
+                <option value="PT">Portugal</option>
+                <option value="GR">Greece</option>
+                <option value="PL">Poland</option>
+                <option value="CZ">Czech Republic</option>
+                <option value="HU">Hungary</option>
+                <option value="RO">Romania</option>
+                <option value="SK">Slovakia</option>
               </select>
             </div>
 
@@ -343,10 +383,7 @@ const PaymentModal = ({
                 onChange={(e) => setSaveCard(e.target.checked)}
                 className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
               />
-              <label
-                htmlFor="saveCard"
-                className="ml-2 text-sm text-gray-700"
-              >
+              <label htmlFor="saveCard" className="ml-2 text-sm text-gray-700">
                 Save this card for future payments
               </label>
             </div>
