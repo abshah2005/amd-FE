@@ -1100,7 +1100,7 @@ const ProfessionalInfoBox = ({
         </div>
       </div>
 
-      <div className="mb-4">
+      {/* <div className="mb-4">
         <label className="block text-sm text-gray-700 font-medium mb-1">
           Example Questions
         </label>
@@ -1167,6 +1167,153 @@ const ProfessionalInfoBox = ({
           ).map((q, idx) => (
             <li key={idx} className="text-sm text-gray-700 mb-1">
               {q}
+            </li>
+          ))}
+        </ul>
+        {editing && (
+          <div className="flex gap-2">
+            <input
+              placeholder="Add Professional Experience"
+              className="flex-1 border rounded p-2 text-sm"
+              value={formData._newProfessionalExperience || ""}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  _newProfessionalExperience: e.target.value,
+                }))
+              }
+            />
+            <button
+              type="button"
+              className="px-4 py-1 rounded bg-gray-200 text-sm"
+              onClick={() => {
+                const v = (formData._newProfessionalExperience || "").trim();
+                if (!v) return;
+                const prev = Array.isArray(formData.professionalExperiences)
+                  ? [...formData.professionalExperiences]
+                  : prof.professionalExperiences || [];
+                const next = [...prev, v];
+                setFormData((prev) => ({
+                  ...prev,
+                  professionalExperiences: next,
+                  _newProfessionalExperience: "",
+                }));
+                console.log({
+                  field: "professionalExperiences",
+                  old: prev,
+                  new: next,
+                });
+              }}
+            >
+              Add
+            </button>
+          </div>
+        )}
+      </div> */}
+
+      <div className="mb-4">
+        <label className="block text-sm text-gray-700 font-medium mb-1">
+          Example Questions
+        </label>
+        <ul className="list-decimal ml-6 mb-2">
+          {(formData.exampleQuestions && formData.exampleQuestions.length > 0
+            ? formData.exampleQuestions
+            : prof.exampleQuestions || []
+          ).map((q, idx) => (
+            <li key={idx} className="text-sm text-gray-700 mb-1">
+              {q}
+              {editing && (
+                <button
+                  type="button"
+                  className="ml-2 text-gray-400 hover:text-red-500"
+                  onClick={() => {
+                    const prev = Array.isArray(formData.exampleQuestions)
+                      ? [...formData.exampleQuestions]
+                      : prof.exampleQuestions || [];
+                    const next = prev.filter((_, i) => i !== idx);
+                    setFormData((prevState) => ({
+                      ...prevState,
+                      exampleQuestions: next,
+                    }));
+                  }}
+                >
+                  ×
+                </button>
+              )}
+            </li>
+          ))}
+        </ul>
+        {editing && (
+          <div className="flex gap-2">
+            <input
+              placeholder="Add example question"
+              className="flex-1 border rounded p-2 text-sm"
+              value={formData._newExample || ""}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  _newExample: e.target.value,
+                }))
+              }
+            />
+            <button
+              type="button"
+              className="px-4 py-1 rounded bg-gray-200 text-sm"
+              onClick={() => {
+                const v = (formData._newExample || "").trim();
+                if (!v) return;
+                const prev = Array.isArray(formData.exampleQuestions)
+                  ? [...formData.exampleQuestions]
+                  : prof.exampleQuestions || [];
+                const next = [...prev, v];
+                setFormData((prev) => ({
+                  ...prev,
+                  exampleQuestions: next,
+                  _newExample: "",
+                }));
+                console.log({
+                  field: "exampleQuestions",
+                  old: prev,
+                  new: next,
+                });
+              }}
+            >
+              Add
+            </button>
+          </div>
+        )}
+      </div>
+
+      <div className="mb-4">
+        <label className="block text-sm text-gray-700 font-medium mb-1">
+          Profesional Experiences
+        </label>
+        <ul className="list-decimal ml-6 mb-2">
+          {(formData.professionalExperiences &&
+          formData.professionalExperiences.length > 0
+            ? formData.professionalExperiences
+            : prof.professionalExperiences || []
+          ).map((q, idx) => (
+            <li key={idx} className="text-sm text-gray-700 mb-1">
+              {q}
+              {editing && (
+                <button
+                  type="button"
+                  className="ml-2 text-gray-400 hover:text-red-500"
+                  onClick={() => {
+                    const prev = Array.isArray(formData.professionalExperiences)
+                      ? [...formData.professionalExperiences]
+                      : prof.professionalExperiences || [];
+                    const next = prev.filter((_, i) => i !== idx);
+                    setFormData((prevState) => ({
+                      ...prevState,
+                      professionalExperiences: next,
+                    }));
+                  }}
+                >
+                  ×
+                </button>
+              )}
             </li>
           ))}
         </ul>
@@ -1474,7 +1621,6 @@ const ProfileView = () => {
     return () => clearInterval(t);
   }, [user?.deletionScheduledAt]);
 
-
   const handleRequestDeletion = () => openRequestModal();
   const handleCancelDeletion = () => openCancelModal();
   const confirmRequestDeletion = async () => {
@@ -1717,7 +1863,6 @@ const ProfileView = () => {
         onCancelDeletion={handleCancelDeletion}
         deletionState={deletionState}
       />
-
 
       <DeleteConfirmationModal
         open={showRequestModal}
