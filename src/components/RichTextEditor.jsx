@@ -386,7 +386,7 @@ export default function LexicalEditor({
   value = "",
   initialValue = "",
   onInfoClick,
-  initialEditorState = null, // Add this new prop
+  initialEditorState = null, 
   onChange,
   onSubmit,
   onFocus,
@@ -404,7 +404,7 @@ export default function LexicalEditor({
   className,
   style,
   height = 150,
-  autoExpand = true, // New prop to control auto-expanding behavior
+  autoExpand = true, 
   maxHeight = 500, 
   ...props
 }) {

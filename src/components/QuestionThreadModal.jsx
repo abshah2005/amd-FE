@@ -43,6 +43,9 @@ import ReviewFlagDialog from "./ReviewFlagDialog";
 dayjs.extend(relativeTime);
 dayjs.extend(duration);
 
+const MemoizedLexicalEditor = React.memo(LexicalEditor);
+
+
 const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
   const [showMessage, setShowMessage] = useState(true);
   const [threadClosureOpen, setThreadClosureOpen] = useState(false);
@@ -69,7 +72,6 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
   const [answerFiles, setAnswerFiles] = useState([]);
   const [previewUrls, setPreviewUrls] = useState([]);
   const fileInputRef = useRef(null);
-  const MemoizedLexicalEditor = React.memo(LexicalEditor);
 
   const [timeRemaining, setTimeRemaining] = useState("");
 
@@ -396,13 +398,6 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
       _id: msg._id || idx,
     }));
 
-    // Sort timeline and thread separately (latest first)
-    // const sortedTimeline = [...timelineFeed].sort(
-    //   (a, b) => new Date(b.at) - new Date(a.at)
-    // );
-    // const sortedThread = [...threadFeed].sort(
-    //   (a, b) => new Date(b.at) - new Date(a.at)
-    // );
 
     const combinedFeed = [...timelineFeed, ...threadFeed].sort(
       (a, b) => new Date(b.at) - new Date(a.at)
@@ -1087,8 +1082,23 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
                 </div>
               )}
               <div className="rounded-lg">
-                <MemoizedLexicalEditor
+                {/* <MemoizedLexicalEditor
                   value={""}
+                  initialEditorState={null}
+                  onChange={(editorData) => {
+                    editorContentRef.current = {
+                      html: editorData.html,
+                      plainText: editorData.plainText,
+                    };
+                  }}
+                  placeholder="Type your answer here..."
+                  height={150}
+                  hideSubmitButton={true}
+                  autoFocus={false}
+                  readOnly={false}
+                /> */}
+
+                <MemoizedLexicalEditor
                   initialEditorState={null}
                   onChange={(editorData) => {
                     editorContentRef.current = {

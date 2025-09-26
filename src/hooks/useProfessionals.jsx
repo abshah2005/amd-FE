@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import useDebouncedValue from "./useDebouncedValue";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ;
+
 function getAuthHeaders() {
   const token = localStorage.getItem("accessToken");
   return token ? { Authorization: `Bearer ${token}` } : {};
