@@ -230,7 +230,7 @@ export function useClose() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ questionId,body }) => {
+    mutationFn: async ({ questionId, body }) => {
       const endpoint = `${API_BASE_URL}/questions/${questionId}/close`;
 
       const { data } = await axios.post(

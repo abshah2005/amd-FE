@@ -291,7 +291,7 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
     setMessage(modalMessage);
     console.log("Message received in handleThreadClosure:", modalMessage);
     useCloseHook.mutate(
-      { questionId, body: message },
+      { questionId,body:modalMessage},
       {
         onSuccess: () => {
           console.log("Thread closed successfully");

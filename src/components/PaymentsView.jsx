@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import AddIcon from "../icons/AddIcon";
 import { useOnboardToStripe, useStripeOnboardingStatus } from "../hooks/userhooks";
+
+import { STRIPE_COUNTRIES } from "../utils/Constant";
 
 const FakeCard = ({ last4 = "3321", brand = "Mastercard" }) => (
   <div className="bg-white border border-gray-100 rounded-xl p-3">
@@ -38,6 +40,7 @@ const FakeCard = ({ last4 = "3321", brand = "Mastercard" }) => (
 );
 
 const PaymentsView = ({ user }) => {
+  const [selectedCountry, setSelectedCountry] = useState("US");
   const onboardToStripe = useOnboardToStripe();
   const { data: stripeStatus, isLoading: isLoadingStatus } = useStripeOnboardingStatus(
     user?.professional?._id
@@ -45,7 +48,10 @@ const PaymentsView = ({ user }) => {
 
   const handleOnboardToStripe = () => {
     if (!user?.professional) return;
-    onboardToStripe.mutate(user.professional, {
+    onboardToStripe.mutate({
+      professionalId: user.professional._id,
+      country: selectedCountry,
+    }, {
       onSuccess: (data) => {
         if (data?.accountLink) {
           window.open(data.accountLink, "_blank");
@@ -70,13 +76,33 @@ const PaymentsView = ({ user }) => {
               <p className="text-xs text-gray-500 mb-4">
                 To receive payments, you need to complete the Stripe onboarding process.
               </p>
-              <button
-                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition disabled:opacity-60"
-                onClick={handleOnboardToStripe}
-                disabled={onboardToStripe.isPending}
-              >
-                {onboardToStripe.isPending ? "Redirecting..." : "Onboard to Stripe"}
-              </button>
+              
+              <div className="flex gap-3 items-end mb-4">
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Country
+                  </label>
+                  <select
+                    value={selectedCountry}
+                    onChange={(e) => setSelectedCountry(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    {STRIPE_COUNTRIES.map((country) => (
+                      <option key={country.code} value={country.code}>
+                        {country.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                
+                <button
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition disabled:opacity-60"
+                  onClick={handleOnboardToStripe}
+                  disabled={onboardToStripe.isPending}
+                >
+                  {onboardToStripe.isPending ? "Redirecting..." : "Onboard to Stripe"}
+                </button>
+              </div>
             </>
           ) : !stripeStatus?.payoutsEnabled ? (
             <>
@@ -91,7 +117,7 @@ const PaymentsView = ({ user }) => {
               </div>
               <button
                 className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-                onClick={handleOnboardToStripe}
+                onClick={() => handleOnboardToStripe()}
               >
                 Complete Onboarding
               </button>

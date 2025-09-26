@@ -140,16 +140,17 @@ export const useStripeOnboardingStatus = (professionalId) => {
       return data;
     },
     enabled: !!professionalId,
-    refetchInterval: 5000, // Refresh every 5 seconds while onboarding
+     // Refresh every 5 seconds while onboarding
   });
 };
 
 // Hook to initiate Stripe onboarding
 export const useOnboardToStripe = () => {
   return useMutation({
-    mutationFn: async (professionalId) => {
+    mutationFn: async ({professionalId, country = "US"}) => {
       const { data } = await axios.post(`${API_BASE_URL}/onboarding/stripe`, {
         professionalId,
+        country,
       });
       return data;
     },
