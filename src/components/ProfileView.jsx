@@ -9,6 +9,7 @@ import useSpecializations from "../hooks/useSpecializations";
 import { allLanguages, allLocations, currencies } from "../utils/Constant";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import ScheduledDeletionModal from "./ScheduleDeleteModal";
+import { Tooltip, IconButton } from '@mui/material';
 
 const DefaultView = memo(
   ({
@@ -1835,7 +1836,7 @@ const ProfileView = () => {
 
   return role === "professional" ? (
     <>
-      {!user?.professional?.verified && (
+      {/* {!user?.professional?.verified && (
         <div className="mb-4">
           <button
             onClick={handleLinkLinkedIn}
@@ -1843,8 +1844,32 @@ const ProfileView = () => {
           >
             Link LinkedIn to Verify
           </button>
+          
         </div>
-      )}
+      )} */}
+
+      {!user?.professional?.verified && (
+  <div className="mb-4 flex items-center gap-2">
+    <button
+      onClick={handleLinkLinkedIn}
+      className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+    >
+      Link LinkedIn to Verify
+    </button>
+    <Tooltip 
+      title="LinkedIn verification helps build trust with clients and prevents fake accounts. Verified professionals receive higher visibility and credibility on our platform." 
+      placement="top" 
+      arrow
+    >
+      <IconButton size="small" className="text-gray-500">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+        </svg>
+      </IconButton>
+    </Tooltip>
+  </div>
+)}
+      
       <ProfessionalView
         formData={formData}
         handleInputChange={handleInputChange}

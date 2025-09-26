@@ -47,7 +47,10 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
   const [showMessage, setShowMessage] = useState(true);
   const [threadClosureOpen, setThreadClosureOpen] = useState(false);
   const [message, setMessage] = useState(""); // For final message input
-  const [editorContent, setEditorContent] = useState(null);
+  const [editorContent, setEditorContent] = useState({
+    html: "",
+    plainText: "",
+  });
   const [previewImg, setPreviewImg] = useState(null);
   const [deliveryTimes, setDeliveryTimes] = useState({
     answerByNormal: null,
@@ -747,7 +750,10 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
                 </svg>
 
                 {showGuidelinesMenu && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10">
+                  <div
+                    className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <div className="py-1">
                       <button
                         onClick={(e) => {
@@ -1096,38 +1102,9 @@ const QuestionThreadModal = ({ open, onClose, questionId, questionLabel }) => {
                   autoFocus={false}
                   readOnly={false}
                 />
-                {/* <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  className="hidden"
-                  onChange={handleFiles}
-                /> */}
-                {/* {previewUrls.length > 0 && (
-                  <div className="flex gap-2 mt-3">
-                    {previewUrls.map((url, i) => (
-                      <div key={i} className="relative">
-                        <img
-                          src={url}
-                          alt={`preview-${i}`}
-                          className="w-16 h-16 object-cover rounded"
-                        />
-                        <button
-                          className="absolute -top-1 -right-1 bg-white rounded-full p-0.5 text-xs"
-                          onClick={() =>
-                            setAnswerFiles((prev) =>
-                              prev.filter((_, idx) => idx !== i)
-                            )
-                          }
-                          aria-label="remove image"
-                        >
-                          ×
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )} */}
+
+                
+
                 <div className="flex justify-end gap-2 mt-4">
                   {/* <button
                     className="px-4 py-2 bg-white border rounded text-gray-700 hover:bg-gray-50"
