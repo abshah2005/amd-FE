@@ -382,7 +382,7 @@ function HtmlLoggerPlugin({ onHtml }) {
 
 // Main Editor Component - ensure proper initial value handling
 export default function LexicalEditor({
-  showDescription = true,
+  showDescription = false,
   value = "",
   initialValue = "",
   onInfoClick,
@@ -400,7 +400,7 @@ export default function LexicalEditor({
   showWordCount = false,
   submitButtonText = "Done",
   hideSubmitButton = false,
-  showInfo=true,
+  showInfo=false,
   className,
   style,
   height = 150,

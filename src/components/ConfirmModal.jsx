@@ -55,7 +55,7 @@ export const ConfirmModal = ({
           Confirm if you are ready to proceed.
         </p>
 
-        {rememberAgreement ? null : (
+        {/* {rememberAgreement ? null : (
           <div className="mb-4 flex flex-col p-2">
             <div>
               <input
@@ -73,8 +73,25 @@ export const ConfirmModal = ({
               (You won't be asked to review them again unless they change.)
             </p>
           </div>
-        )}
+        )} */}
 
+        <div className="mb-4 flex flex-col p-2">
+          <div>
+            <input
+              type="checkbox"
+              checked={rememberAgreement}
+              onChange={handleRememberChange}
+              id="remember-agreement"
+            />
+            <label htmlFor="remember-agreement" className="ml-2 text-sm ">
+              Save my agreement to the Terms of Use for future questions.
+            </label>
+          </div>
+
+          <p className="text-xs text-gray-500 ">
+            (You won't be asked to review them again unless they change.)
+          </p>
+        </div>
         <div className="mt-4 flex justify-end gap-2">
           <button
             className="px-4 py-2 bg-gray-200 rounded-md"

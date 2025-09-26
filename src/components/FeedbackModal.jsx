@@ -59,7 +59,7 @@ const FeedbackModal = ({
   return (
     <Dialog open={open} onClose={handleAskLater} maxWidth="xs" fullWidth>
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        Share your experience with this Answer
+        Share your experience about this Answer
         <IconButton onClick={handleAskLater} size="small">
           <CloseIcon />
         </IconButton>
@@ -93,7 +93,7 @@ const FeedbackModal = ({
           onChange={e => setComment(e.target.value)}
         />
         <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 1 }}>
-          Note: Your rating and comment will be publicly visible with the answer.
+          Note: Your rating and comment will be publicly visible.
         </Typography>
       </DialogContent>
       <DialogActions sx={{ justifyContent: "space-between", px: 2, pb: 2 }}>

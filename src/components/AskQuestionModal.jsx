@@ -108,42 +108,16 @@ const AskQuestionModal = ({
   };
 
 
-
-//   const handleDoneClick = () => {
-//   const savedAgreement = localStorage.getItem('termsAgreement') === 'true';
-  
-//   if (state.agreed && !savedAgreement) {
-//     localStorage.setItem('termsAgreement', 'true');
-//   }
-  
-//   if (savedAgreement) {
-//     dispatch({ type: "SET_AGREED", value: true });
-//     handleConfirm();
-//   } else {
-//     dispatch({ type: "SET_SHOW_CONFIRM", value: true });
-//   }
-// }
-
-// const handleAgreementChange = (e) => {
-//   const isChecked = e.target.checked;
-//   dispatch({ type: "SET_AGREED", value: isChecked });
-  
-//   if (isChecked) {
-//     localStorage.setItem('termsAgreement', 'true');
-//   }
-// }
 const handleDoneClick = () => {
   const savedAgreement = localStorage.getItem('termsAgreement') === 'true';
   
-  // Only update localStorage if specifically checked to remember
-  // Don't modify localStorage here, let ConfirmModal handle it
-  
+  // If there's a saved agreement, set agreed state to true
   if (savedAgreement) {
     dispatch({ type: "SET_AGREED", value: true });
-    handleConfirm();
-  } else {
-    dispatch({ type: "SET_SHOW_CONFIRM", value: true });
   }
+  
+  // Always show confirmation modal regardless of previous agreement
+  dispatch({ type: "SET_SHOW_CONFIRM", value: true });
 }
 
 const handleAgreementChange = (e) => {
