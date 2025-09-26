@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 export const ConfirmModal = ({
   open,
@@ -9,25 +9,31 @@ export const ConfirmModal = ({
   setAgreed,
   isLoading,
 }) => {
+  // Add a separate state for remembering agreement
+  const [rememberAgreement, setRememberAgreement] = useState(false);
+
   // Check local storage for saved agreement when modal opens
   useEffect(() => {
     if (open) {
       const savedAgreement = localStorage.getItem("termsAgreement") === "true";
       if (savedAgreement) {
         setAgreed(true);
+        setRememberAgreement(true);
       }
     }
   }, [open, setAgreed]);
 
-  // Save agreement to local storage when checkbox is checked
-  const handleAgreementChange = (e) => {
-  const isChecked = e.target.checked;
-  dispatch({ type: "SET_AGREED", value: isChecked });
-  
-  if (isChecked) {
-    localStorage.setItem('termsAgreement', 'true');
-  }
-}
+  // Save agreement to local storage based on remember checkbox
+  const handleRememberChange = (e) => {
+    const isChecked = e.target.checked;
+    setRememberAgreement(isChecked);
+
+    if (isChecked) {
+      localStorage.setItem("termsAgreement", "true");
+    } else {
+      localStorage.removeItem("termsAgreement");
+    }
+  };
 
   if (!open) return null;
   return (
@@ -46,32 +52,28 @@ export const ConfirmModal = ({
           Your question and info will be shared privately with the selected
           professional.
           <br />
-          Please review everything before continuing.
+          Confirm if you are ready to proceed.
         </p>
 
-        <div className="mb-4 flex flex-col p-2">
-          <div>
-            {/* <input
-              type="checkbox"
-              checked={agreed}
-              onChange={handleAgreementChange}
-              id="confirm-agree"
-            /> */}
-            <input
-              type="checkbox"
-              checked={state.agreed}
-              onChange={handleAgreementChange}
-              id="agree"
-            />
-            <label htmlFor="confirm-agree" className="ml-2 text-sm ">
-              Save my agreement to the Terms of Use for future questions.
-            </label>
-          </div>
+        {rememberAgreement ? null : (
+          <div className="mb-4 flex flex-col p-2">
+            <div>
+              <input
+                type="checkbox"
+                checked={rememberAgreement}
+                onChange={handleRememberChange}
+                id="remember-agreement"
+              />
+              <label htmlFor="remember-agreement" className="ml-2 text-sm ">
+                Save my agreement to the Terms of Use for future questions.
+              </label>
+            </div>
 
-          <p className="text-xs text-gray-500 ">
-            (You won't be asked to review them again unless they change.)
-          </p>
-        </div>
+            <p className="text-xs text-gray-500 ">
+              (You won't be asked to review them again unless they change.)
+            </p>
+          </div>
+        )}
 
         <div className="mt-4 flex justify-end gap-2">
           <button

@@ -107,16 +107,36 @@ const AskQuestionModal = ({
     return firstLine;
   };
 
-  // const handleDoneClick = () =>
-  //   dispatch({ type: "SET_SHOW_CONFIRM", value: true });
 
 
-  const handleDoneClick = () => {
+//   const handleDoneClick = () => {
+//   const savedAgreement = localStorage.getItem('termsAgreement') === 'true';
+  
+//   if (state.agreed && !savedAgreement) {
+//     localStorage.setItem('termsAgreement', 'true');
+//   }
+  
+//   if (savedAgreement) {
+//     dispatch({ type: "SET_AGREED", value: true });
+//     handleConfirm();
+//   } else {
+//     dispatch({ type: "SET_SHOW_CONFIRM", value: true });
+//   }
+// }
+
+// const handleAgreementChange = (e) => {
+//   const isChecked = e.target.checked;
+//   dispatch({ type: "SET_AGREED", value: isChecked });
+  
+//   if (isChecked) {
+//     localStorage.setItem('termsAgreement', 'true');
+//   }
+// }
+const handleDoneClick = () => {
   const savedAgreement = localStorage.getItem('termsAgreement') === 'true';
   
-  if (state.agreed && !savedAgreement) {
-    localStorage.setItem('termsAgreement', 'true');
-  }
+  // Only update localStorage if specifically checked to remember
+  // Don't modify localStorage here, let ConfirmModal handle it
   
   if (savedAgreement) {
     dispatch({ type: "SET_AGREED", value: true });
@@ -130,10 +150,10 @@ const handleAgreementChange = (e) => {
   const isChecked = e.target.checked;
   dispatch({ type: "SET_AGREED", value: isChecked });
   
-  if (isChecked) {
-    localStorage.setItem('termsAgreement', 'true');
-  }
+  // Remove localStorage update from here
+  // Let ConfirmModal handle the "remember for future" option
 }
+
 
   const handleConfirm = () => {
     if (!state.agreed) return;
