@@ -107,8 +107,33 @@ const AskQuestionModal = ({
     return firstLine;
   };
 
-  const handleDoneClick = () =>
+  // const handleDoneClick = () =>
+  //   dispatch({ type: "SET_SHOW_CONFIRM", value: true });
+
+
+  const handleDoneClick = () => {
+  const savedAgreement = localStorage.getItem('termsAgreement') === 'true';
+  
+  if (state.agreed && !savedAgreement) {
+    localStorage.setItem('termsAgreement', 'true');
+  }
+  
+  if (savedAgreement) {
+    dispatch({ type: "SET_AGREED", value: true });
+    handleConfirm();
+  } else {
     dispatch({ type: "SET_SHOW_CONFIRM", value: true });
+  }
+}
+
+const handleAgreementChange = (e) => {
+  const isChecked = e.target.checked;
+  dispatch({ type: "SET_AGREED", value: isChecked });
+  
+  if (isChecked) {
+    localStorage.setItem('termsAgreement', 'true');
+  }
+}
 
   const handleConfirm = () => {
     if (!state.agreed) return;
@@ -149,6 +174,9 @@ const AskQuestionModal = ({
       },
     });
   };
+
+
+  
 
   // Handle actual image upload
   const handleImageUpload = (e) => {
@@ -296,8 +324,8 @@ const AskQuestionModal = ({
 }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
-      <div className="bg-white rounded-xl shadow-lg w-[90%] md:w-full max-w-2xl p-0 relative">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 overflow-y-auto">
+      <div className="bg-white rounded-xl shadow-lg w-[90%] md:w-full max-w-2xl p-0 relative my-6 max-h-[90vh] overflow-y-auto">
         {state.feedbackMsg && (
           <div className="p-3 text-center text-sm text-blue-700 bg-blue-50 rounded">
             {state.feedbackMsg}
@@ -323,7 +351,7 @@ const AskQuestionModal = ({
                 initialEditorState={state.editorState}
                 onChange={handleDescriptionChange}
                 placeholder="Type your question..."
-                height={50}
+                height={150}
                 hideSubmitButton={false}
                 autoFocus={false}
                 maxLength={2500}
@@ -596,7 +624,7 @@ const AskQuestionModal = ({
                 onClick={handleDoneClick}
                 disabled={!state.agreed}
               >
-                Done
+                {createQuestion.isPending ? "Submitting..." : "Done"}
               </button>
             </div>
           </div>
@@ -608,6 +636,7 @@ const AskQuestionModal = ({
       />
       <ConfirmModal
         open={state.showConfirm}
+        state={state}
         onClose={() => dispatch({ type: "SET_SHOW_CONFIRM", value: false })}
         onConfirm={handleConfirm}
         agreed={state.agreed}

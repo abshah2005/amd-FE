@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
@@ -385,7 +385,7 @@ export default function LexicalEditor({
   showDescription = true,
   value = "",
   initialValue = "",
-   onInfoClick,
+  onInfoClick,
   initialEditorState = null, // Add this new prop
   onChange,
   onSubmit,
@@ -404,6 +404,8 @@ export default function LexicalEditor({
   className,
   style,
   height = 150,
+  autoExpand = true, // New prop to control auto-expanding behavior
+  maxHeight = 500, 
   ...props
 }) {
   const [editorContent, setEditorContent] = useState(value || initialValue);
@@ -416,6 +418,8 @@ export default function LexicalEditor({
   const [characterCount, setCharacterCount] = useState(0);
   const [isEmpty, setIsEmpty] = useState(!(value || initialValue));
   const [isFocused, setIsFocused] = useState(false);
+  const [editorHeight, setEditorHeight] = useState(height);
+  const editorRef = useRef(null);
 
   // Update local state when value prop changes
   useEffect(() => {
@@ -423,6 +427,22 @@ export default function LexicalEditor({
       setPlainTextContent(value);
     }
   }, [value, plainTextContent]);
+
+  const updateEditorHeight = useCallback(() => {
+    if (!autoExpand || !editorRef.current) return;
+    
+    const scrollHeight = editorRef.current.scrollHeight;
+    const newHeight = Math.min(Math.max(scrollHeight, height), maxHeight);
+    setEditorHeight(newHeight);
+  }, [autoExpand, height, maxHeight]);
+
+  // Update height when content changes
+  useEffect(() => {
+    if (autoExpand) {
+      updateEditorHeight();
+    }
+  }, [plainTextContent, updateEditorHeight, autoExpand]);
+
 
   const handleEditorChange = useCallback(
     (editorState, editor) => {
@@ -548,8 +568,8 @@ export default function LexicalEditor({
       <style>{`
         .editor-container {
           background-color: #f5f5f5;
-          height: ${height}px;
-          max-height: ${height}px;
+          height: ${autoExpand ? editorHeight : height}px;
+          max-height: ${autoExpand ? maxHeight : height}px;
           overflow-y: auto;
           overflow-x: hidden;
           padding: 16px;
@@ -562,6 +582,7 @@ export default function LexicalEditor({
           box-sizing: border-box;
           opacity: ${disabled ? 0.6 : 1};
           pointer-events: ${disabled ? "none" : "auto"};
+          transition: height 0.1s ease-out;
         }
 
         .editor-container::-webkit-scrollbar {
@@ -731,7 +752,7 @@ export default function LexicalEditor({
             sx={{
               backgroundColor: "#f5f5f5",
               position: "relative",
-              height: `${height}px`,
+              height: `${autoExpand ? editorHeight : height}px`,
               overflow: "hidden",
             }}
           >
@@ -778,8 +799,8 @@ export default function LexicalEditor({
                   className="editor-container"
                   style={{
                     resize: "none",
-                    height: `${height}px`,
-                    maxHeight: `${height}px`,
+                    height: `${autoExpand ? editorHeight : height}px`,
+                    maxHeight: `${autoExpand ? maxHeight : height}px`,
                     overflowY: "auto",
                     overflowX: "hidden",
                   }}

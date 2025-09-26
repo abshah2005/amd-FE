@@ -1,13 +1,34 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 export const ConfirmModal = ({
   open,
   onClose,
   onConfirm,
   agreed,
+  state,
   setAgreed,
   isLoading,
 }) => {
+  // Check local storage for saved agreement when modal opens
+  useEffect(() => {
+    if (open) {
+      const savedAgreement = localStorage.getItem("termsAgreement") === "true";
+      if (savedAgreement) {
+        setAgreed(true);
+      }
+    }
+  }, [open, setAgreed]);
+
+  // Save agreement to local storage when checkbox is checked
+  const handleAgreementChange = (e) => {
+  const isChecked = e.target.checked;
+  dispatch({ type: "SET_AGREED", value: isChecked });
+  
+  if (isChecked) {
+    localStorage.setItem('termsAgreement', 'true');
+  }
+}
+
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
@@ -30,11 +51,17 @@ export const ConfirmModal = ({
 
         <div className="mb-4 flex flex-col p-2">
           <div>
-            <input
+            {/* <input
               type="checkbox"
               checked={agreed}
-              onChange={(e) => setAgreed(e.target.checked)}
+              onChange={handleAgreementChange}
               id="confirm-agree"
+            /> */}
+            <input
+              type="checkbox"
+              checked={state.agreed}
+              onChange={handleAgreementChange}
+              id="agree"
             />
             <label htmlFor="confirm-agree" className="ml-2 text-sm ">
               Save my agreement to the Terms of Use for future questions.
