@@ -42,7 +42,6 @@ const LandingPage = () => {
     });
   };
 
-  
   useEffect(() => {
     const handleRouteChange = () => {
       const section = searchParams.get("section");
@@ -90,16 +89,31 @@ const LandingPage = () => {
           </div>
         );
       default:
+        const hash = (location.hash || "").toLowerCase();
+        const showAskers = hash === "#askers";
+        const showProfessionals = hash === "#professionals" || !showAskers;
         return (
           <>
             <Grid />
-            <div className="w-full bg-[#F1F4F9]" id="how-it-works" ref={howItWorksRef}>
+            <div
+              className="w-full bg-[#F1F4F9]"
+              id="how-it-works"
+              ref={howItWorksRef}
+            >
               <HowItWorksComponent />
             </div>
-            
-            <div id="professionals" ref={professionalsRef}>
-              <InfoSection selectedTab="professionals"/>
-            </div>
+
+            {showProfessionals && (
+              <div id="professionals" ref={professionalsRef}>
+                <InfoSection selectedTab="professionals" />
+              </div>
+            )}
+
+            {showAskers && (
+              <div id="askers" ref={askerRef}>
+                <InfoSection selectedTab="askers" />
+              </div>
+            )}
             <MapComponent />
             <div id="faqs" ref={faqsRef}>
               <FAQs />
@@ -126,5 +140,3 @@ const LandingPage = () => {
 };
 
 export default LandingPage;
-
-

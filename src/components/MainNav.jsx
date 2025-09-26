@@ -254,7 +254,7 @@ const MainNav = ({ tailwindclass = "bg-white border-b border-gray-200" }) => {
                   Professionals
                 </a>
                 <a
-                  href="/#professionals"
+                  href="/#askers"
                   className="cursor-pointer hover:text-blue-600"
                 >
                   Askers

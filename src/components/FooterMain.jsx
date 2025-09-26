@@ -1,35 +1,10 @@
 import React from "react";
 import { Link } from "react-router-dom"; // Add this import
 import iconSvg from "../assets/icon.svg";
+import { footerData } from "../utils/Constant";
 
 const FooterMain = () => {
-  const footerData = {
-    links: [
-      { name: "Home", href: "/?section=prof-list" },
-      { name: "How it works", href: "/#how-it-works" },
-      { name: "Professional", href: "/#professionals" },
-      { name: "Asker", href: "/#asker" },
-      { name: "FAQs", href: "/#faqs" },
-      { name: "Find a Professional", href: "/" },
-    ],
-    legal: [
-      { name: "Terms of service", href: "/?section=terms" },
-      { name: "Privacy Policy", href: "/?section=privacy" },
-      { name: "Cookie Policy", href: "/?section=cookie" },
-    ],
-    socials: [
-      {
-        name: "LinkedIn",
-        href: "#",
-        icon: <div className="w-6 h-6 bg-gray-300 rounded"></div>,
-      },
-      {
-        name: "Instagram",
-        href: "#",
-        icon: <div className="w-6 h-6 bg-gray-300 rounded"></div>,
-      },
-    ],
-  };
+  
 
   // Helper function to determine if a link should use React Router
   const isInternalLink = (href) => {
@@ -53,13 +28,20 @@ const FooterMain = () => {
               {footerData.links.map((link) => (
                 <li key={link.name}>
                   {isInternalLink(link.href) ? (
-                    <Link
-                      to={link.href}
+                    // <Link
+                    //   to={link.href}
+                    //   className="text-base text-gray-600 hover:text-gray-900 relative group"
+                    // >
+                    //   {link.name}
+                    //   <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-blue-700 transition-all group-hover:w-full"></span>
+                    // </Link>
+                    <a
+                      href={link.href}
                       className="text-base text-gray-600 hover:text-gray-900 relative group"
                     >
                       {link.name}
                       <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-blue-700 transition-all group-hover:w-full"></span>
-                    </Link>
+                    </a>
                   ) : (
                     <a
                       href={link.href}

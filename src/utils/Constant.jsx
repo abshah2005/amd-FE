@@ -625,6 +625,30 @@ export const standardCurrency={ sign: "$", name: "USD", description: "United Sta
 
 export const officialMail="admin@askmedirect.com"
 
+export const footerData = {
+    links: [
+      { name: "General Information page", href: "/?section=prof-list" },
+      { name: "How it works", href: "/#how-it-works" },
+      { name: "Professional", href: "/#professionals" },
+      { name: "Asker", href: "/#askers" },
+      { name: "FAQs", href: "/#faqs" },
+      { name: "Find a Professional", href: "/" },
+    ], 
+    legal: [
+      { name: "Terms of service", href: "/?section=terms" },
+      { name: "Privacy Policy", href: "/?section=privacy" },
+      { name: "Cookie Policy", href: "/?section=cookie" },
+    ],
+    socials: [
+      {
+        name: "LinkedIn",
+        href: "#",
+        icon: <div className="w-6 h-6 bg-gray-300 rounded"></div>,
+      },
+      
+    ],
+  };
+
 export const currencies = [
   { sign: "$", name: "USD", description: "United States Dollar" },
   { sign: "C$", name: "CAD", description: "Canadian Dollar" },

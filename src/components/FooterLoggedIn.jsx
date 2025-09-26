@@ -20,11 +20,6 @@ const FooterLoggedIn = () => {
         href: "https://linkedin.com/company/askmedirect", // Replace with actual URLs
         icon: <div className="w-6 h-6 bg-gray-300 rounded"></div>,
       },
-      {
-        name: "Instagram",
-        href: "https://instagram.com/askmedirect", // Replace with actual URLs
-        icon: <div className="w-6 h-6 bg-gray-300 rounded"></div>,
-      },
     ],
   };
 
@@ -75,7 +70,7 @@ const FooterLoggedIn = () => {
                     className="text-base text-gray-600 hover:text-gray-900 relative group"
                   >
                     {link.name}
-                    <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-gray-900 transition-all group-hover:w-full"></span>
+                    <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-blue-700 transition-all group-hover:w-full"></span>
                   </Link>
                 </li>
               ))}
@@ -98,7 +93,7 @@ const FooterLoggedIn = () => {
                 >
                   <span className="text-base relative">
                     {social.name}
-                    <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-gray-900 transition-all group-hover:w-full"></span>
+                    <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-blue-700 transition-all group-hover:w-full"></span>
                   </span>
                 </a>
               ))}
